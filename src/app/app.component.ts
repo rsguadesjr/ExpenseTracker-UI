@@ -1,42 +1,49 @@
-import { Component } from '@angular/core';
+import { AuthService } from './shared/data-access/auth.service';
+import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { Router } from '@angular/router';
 import { GoogleAuthProvider } from 'firebase/auth';
+import { MenuItem } from 'primeng/api/menuitem';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'ExpenseTracker';
+  sidebarVisible: boolean = false;
 
-  constructor(private afAuth: AngularFireAuth) {
+  accountMenuItems: MenuItem[] = [];
 
-    this.afAuth.authState.subscribe(v => {
-      console.log('[DEBUG] authState', {
-        result: v,
-        token: v?.getIdToken()
-      });
-      v?.getIdToken
-      v?.getIdToken().then(x => {
-        console.log('[DEBUG] x', x)
-      })
-    })
+  constructor(private afAuth: AngularFireAuth, private router: Router, private authService: AuthService) {
+    // this.afAuth.authState.subscribe((v) => {
+    //   if (!v) {
+    //     localStorage.removeItem('token');
+    //     this.router.navigate(['login']);
+    //   }
+    //   console.log('[DEBUG] authState', {
+    //     result: v,
+    //     token: v?.getIdToken(),
+    //   });
+    //   v?.getIdToken;
+    //   v?.getIdToken().then((x) => {
+    //     console.log('[DEBUG] authState x', x);
+    //     localStorage.setItem('token', 'sample value');
+    //   });
+    // });
   }
-
-  signIn() {
-    this.afAuth.signInWithRedirect(new GoogleAuthProvider())
-    .then((result) => {
-      console.log('[DEBUG] signInWithRedirect', result)
-    })
-    .catch((error) => {
-      console.log('[DEBUG] signInWithRedirect', error)
-    });
+  ngOnInit(): void {
+    this.accountMenuItems = [
+      { label: 'Logout', command: () => this.signOut() },
+    ];
   }
 
   signOut() {
-    this.afAuth.signOut().then(() => {
-      console.log('[DEBUG] signout');
-    })
+    this.authService.signOut();
+  }
+
+  showSideBar() {
+    this.sidebarVisible = true;
   }
 }

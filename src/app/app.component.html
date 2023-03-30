@@ -1,2 +1,29 @@
-<button (click)="signIn()">Sign In</button>
-<button (click)="signOut()">Sign Out</button>
+<!-- <p-button (click)="signIn()" styleClass="p-button-sm">Sign In</p-button>
+<p-button (click)="signOut()">Sign Out</p-button> -->
+<p-toolbar>
+  <div class="p-toolbar-group-start">
+    <!-- <p-button label="New" icon="pi pi-plus" class="mr-2"></p-button>
+      <p-button label="Upload" icon="pi pi-upload" styleClass="p-button-success"></p-button>
+      <i class="p-toolbar-separator pi pi-bars mr-2" style="vertical-align: middle"></i> -->
+    <p-button (click)="showSideBar()" icon="pi pi-bars" styleClass="p-button-rounded p-button-text "></p-button>
+  </div>
+  <div class="p-toolbar-group-end">
+    <p-button icon="pi pi-user" styleClass="p-button-rounded p-button-info" (click)="menu.toggle($event)"></p-button>
+    <!-- <button type="button" pButton icon="pi pi-bars" label="Show" (click)="menu.toggle($event)"></button> -->
+    <!-- <p-slideMenu #menu [model]="accountMenuItems" [popup]="true" [menuWidth]="175"></p-slideMenu> -->
+    <p-menu #menu [model]="accountMenuItems" [popup]="true"></p-menu>
+  </div>
+</p-toolbar>
+<router-outlet></router-outlet>
+
+<p-sidebar [(visible)]="sidebarVisible">
+  <ng-template pTemplate="header">Header Content</ng-template>
+  <ng-template pTemplate="content">
+    <div class="flex flex-column pt-4">
+      <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['']">Home</a>
+      <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['summary']">Summary</a>
+      <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['account']">Account</a>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">Footer Content</ng-template>
+</p-sidebar>
