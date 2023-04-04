@@ -9,7 +9,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { ExpenseService } from './../../data-access/expense.service';
+import { ExpenseService } from '../../data-access/expense.service';
 import { Router } from '@angular/router';
 import {
   FormsModule,
@@ -25,12 +25,13 @@ import { TagModule } from 'primeng/tag';
 import { Expense } from '../../model/expense.model';
 import { ToolbarModule } from 'primeng/toolbar';
 import { CalendarModule } from 'primeng/calendar';
-import { Paginator, PaginatorModule } from 'primeng/paginator';
+import { PaginatorModule } from 'primeng/paginator';
 import { PaginatedList } from 'src/app/shared/model/paginated-list';
+import { ExpenseListComponent } from '../../ui/expense-list/expense-list.component';
 // import { ExpenseListRoutingModule } from './expense-list-routing.module';
 
 @Component({
-  selector: 'app-expense-list',
+  selector: 'app-expense-list-page',
   standalone: true,
   imports: [
     CommonModule,
@@ -42,11 +43,12 @@ import { PaginatedList } from 'src/app/shared/model/paginated-list';
     ToolbarModule,
     CalendarModule,
     PaginatorModule,
+    ExpenseListComponent
   ],
-  templateUrl: './expense-list.component.html',
-  styleUrls: ['./expense-list.component.scss'],
+  templateUrl: './expense-list.page.component.html',
+  styleUrls: ['./expense-list.page.component.scss'],
 })
-export class ExpenseListComponent implements OnInit {
+export class ExpenseListPageComponent implements OnInit {
   products = [
     {
       id: '1000',
@@ -90,7 +92,7 @@ export class ExpenseListComponent implements OnInit {
   data$!: Observable<PaginatedList<Expense>>;
   filterInProgress$ = new BehaviorSubject<boolean>(false);
 
-  totalRows: number = 10;
+  rowsPerPage: number = 10;
   currentPage: number = 0;
 
   constructor(private router: Router, private expenseService: ExpenseService) {
@@ -105,7 +107,7 @@ export class ExpenseListComponent implements OnInit {
         return of<PaginatedList<Expense>>({ totalRows: 0, currentPage: 0, data: []})
       })
     );
-    
+
 
     this.filterForm = new FormGroup({
       dateFrom: new FormControl(),
@@ -150,7 +152,7 @@ export class ExpenseListComponent implements OnInit {
       dateTo: this.filterForm.get('dateTo')?.value,
       categoryId: this.filterForm.get('category')?.value?.id,
       pageNumber: this.currentPage,
-      totalRows: this.totalRows
+      totalRows: this.rowsPerPage
     });
   }
 
@@ -162,7 +164,7 @@ export class ExpenseListComponent implements OnInit {
   onPageChange(event: any) {
     console.log('[DEBUG] onPageChange', event);
     this.currentPage = event.page;
-    this.totalRows = event.rows;
+    this.rowsPerPage = event.rows;
 
     this.applyFilter();
   }

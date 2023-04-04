@@ -5,8 +5,8 @@ const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('../expense-list/expense-list.component').then(
-        (m) => m.ExpenseListComponent
+      import('../expense-list/expense-list.page.component').then(
+        (m) => m.ExpenseListPageComponent
       ),
   },
   {

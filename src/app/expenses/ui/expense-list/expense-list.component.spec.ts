@@ -8,12 +8,10 @@ describe('ExpenseListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ExpenseListComponent ]
+      imports: [ ExpenseListComponent ]
     })
     .compileComponents();
-  });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(ExpenseListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

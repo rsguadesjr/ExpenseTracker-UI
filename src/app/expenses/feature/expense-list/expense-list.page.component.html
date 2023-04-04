@@ -1,0 +1,36 @@
+<div [formGroup]="filterForm">
+  <p-toolbar>
+    <div class="p-toolbar-group-start gap-2">
+      <div class="p-float-label">
+        <p-calendar id="dateFrom" formControlName="dateFrom" dateFormat="dd-M-yy"></p-calendar>
+        <label htmlFor="dateFrom">Date From</label>
+      </div>
+      <div class="p-float-label">
+        <p-calendar id="dateTo" formControlName="dateTo" dateFormat="dd-M-yy"></p-calendar>
+        <label htmlFor="dateTo">Date To</label>
+      </div>
+      <div class="p-float-label">
+        <p-dropdown formControlName="category" [options]="categories" optionLabel="name" id="category"></p-dropdown>
+        <label htmlFor="category">Category</label>
+      </div>
+      <p-button icon="pi {{  (filterInProgress$ | async) ? 'pi-spin pi-spinner' : 'pi-search' }}"
+        styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
+      <p-button icon="pi pi-filter-slash" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
+    </div>
+    <div class="p-toolbar-group-end">
+      <p-button icon="pi pi-plus" styleClass="p-button-rounded " (click)="addEntry()"></p-button>
+    </div>
+  </p-toolbar>
+</div>
+<ng-container *ngIf="data$ | async as data; else noResult">
+  <div class="card mt-4" *ngIf="data.data.length > 0; else noResult">
+    <app-expense-list [items]="data.data" [totalRows]="data.totalRows" [rowsPerPage]="rowsPerPage"
+      (selected)="editEntry($event)" (onPageChange)="onPageChange($event)"></app-expense-list>
+  </div>
+</ng-container>
+
+<ng-template #noResult>
+  <div class="mt-4 card flex justify-content-center">
+    <span>No result</span>
+  </div>
+</ng-template>
