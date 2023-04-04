@@ -11,6 +11,8 @@ import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { PrimeNgModule } from './prime-ng.module';
 import { JwtHelperService, JwtModule, JWT_OPTIONS } from '@auth0/angular-jwt';
 import { AuthGuard } from './shared/data-access/auth-guard.service';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { AuthInterceptor } from './shared/utils/auth-interceptor';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -21,11 +23,13 @@ import { AuthGuard } from './shared/data-access/auth-guard.service';
     PrimeNgModule,
     BrowserAnimationsModule,
     JwtModule,
+    HttpClientModule
   ],
   providers: [
     { provide: JWT_OPTIONS, useValue: JWT_OPTIONS },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     JwtHelperService,
-    AuthGuard
+    AuthGuard,
   ],
   bootstrap: [AppComponent],
 })

@@ -10,7 +10,14 @@ const routes: Routes = [
       ),
   },
   {
-    path: ':id',
+    path: 'new',
+    loadComponent: () =>
+      import('../expense-detail/expense-detail.component').then(
+        (m) => m.ExpenseDetailComponent
+      ),
+  },
+  {
+    path: 'edit/:id',
     loadComponent: () =>
       import('../expense-detail/expense-detail.component').then(
         (m) => m.ExpenseDetailComponent

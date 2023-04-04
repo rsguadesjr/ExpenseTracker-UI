@@ -1,1 +1,30 @@
-<p>expense-detail works!</p>
+<div>{{ isEdit ? 'Update' : 'Create' }} Entry</div>
+<form [formGroup]="expenseForm">
+  [{{ expenseForm.value | json }}] [{{ expenseForm.valid }}] [{{isEdit}}] [{{expenseId}}]
+  <div class="flex flex-column gap-2">
+    <div class="flex flex-column gap-2">
+      <label htmlFor="username">Category</label>
+      <p-dropdown formControlName="category" [options]="categories" optionLabel="name"></p-dropdown>
+    </div>
+    <div class="flex flex-column gap-2">
+      <label htmlFor="username">Amount</label>
+      <input pInputText id="username" aria-describedby="username-help" formControlName="amount"/>
+    </div>
+    <div class="flex flex-column gap-2">
+      <label htmlFor="username">Date</label>
+      <p-calendar formControlName="date" dateFormat="dd-M-yy"></p-calendar>
+    </div>
+    <div class="flex flex-column gap-2">
+      <label htmlFor="username">Description</label>
+      <input pInputText id="username" aria-describedby="username-help" formControlName="description"/>
+    </div>
+    <div class="flex flex-column gap-2">
+      <label htmlFor="username">Source</label>
+      <p-dropdown formControlName="source" [options]="fundSources" optionLabel="name"></p-dropdown>
+    </div>
+    <div class="flex flex-row justify-content-end gap-2 mt-4">
+      <button pButton pRipple label="Cancel" (click)="cancel()"></button>
+      <button pButton pRipple label="Submit" class="p-button-success" (click)="submit()"></button>
+    </div>
+  </div>
+</form>
