@@ -16,6 +16,7 @@ import { Expense } from '../../model/expense.model';
 import { map, take, BehaviorSubject, switchMap, of } from 'rxjs';
 import { CalendarModule } from 'primeng/calendar';
 import { ExpenseDto } from '../../model/expense-dto.model';
+import { AlertService } from 'src/app/shared/utils/alert-service';
 
 @Component({
   selector: 'app-expense-detail',
@@ -61,7 +62,8 @@ export class ExpenseDetailComponent implements OnInit {
     private location: Location,
     private route: ActivatedRoute,
     private router: Router,
-    private expenseService: ExpenseService
+    private expenseService: ExpenseService,
+    private alertService: AlertService
   ) {
     this.expenseForm = new FormGroup({
       category: new FormControl(null, [Validators.required]),
@@ -132,13 +134,27 @@ export class ExpenseDetailComponent implements OnInit {
       this.expenseService
         .updateExpense(this.expenseId!.toString(), expense)
         .pipe(take(1))
-        .subscribe();
+        .subscribe({
+          next: (v) => {
+            this.alertService.showSuccess('Updated expense');
+            this.location.back();
+          },
+          error: (v) => {
+            this.alertService.showError('An error occured while adding updating expense')
+          }
+        });
     } else {
       this.expenseService
         .createExpense(expense)
         .pipe(take(1))
-        .subscribe((v) => {
-          console.log('[DEBUg] createExpense', v);
+        .subscribe({
+          next: (v) => {
+            this.alertService.showSuccess('Added new expense');
+            this.location.back();
+          },
+          error: (v) => {
+            this.alertService.showError('An error occured while adding new expense')
+          }
         });
     }
 

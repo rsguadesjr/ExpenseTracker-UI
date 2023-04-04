@@ -4,6 +4,8 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Router } from '@angular/router';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { MenuItem } from 'primeng/api/menuitem';
+import { AlertService } from './shared/utils/alert-service';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +18,7 @@ export class AppComponent implements OnInit {
 
   accountMenuItems: MenuItem[] = [];
 
-  constructor(private afAuth: AngularFireAuth, private router: Router, private authService: AuthService) {
+  constructor(private afAuth: AngularFireAuth, private router: Router, private authService: AuthService, private alertService: AlertService, private messageService: MessageService) {
     // this.afAuth.authState.subscribe((v) => {
     //   if (!v) {
     //     localStorage.removeItem('token');
@@ -32,6 +34,12 @@ export class AppComponent implements OnInit {
     //     localStorage.setItem('token', 'sample value');
     //   });
     // });
+    this.alertService.alert$.subscribe(v => {
+      console.log('[DEBUG] alertSErvice' ,v);
+      if (v) {
+        this.messageService.add({ severity: v.severity, summary: v.summary, detail: v.detail });
+      }
+    })
   }
   ngOnInit(): void {
     this.accountMenuItems = [

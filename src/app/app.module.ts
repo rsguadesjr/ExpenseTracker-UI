@@ -13,6 +13,8 @@ import { JwtHelperService, JwtModule, JWT_OPTIONS } from '@auth0/angular-jwt';
 import { AuthGuard } from './shared/data-access/auth-guard.service';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './shared/utils/auth-interceptor';
+import { AlertService } from './shared/utils/alert-service';
+import { MessageService } from 'primeng/api';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -30,6 +32,8 @@ import { AuthInterceptor } from './shared/utils/auth-interceptor';
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     JwtHelperService,
     AuthGuard,
+    MessageService,
+    AlertService
   ],
   bootstrap: [AppComponent],
 })

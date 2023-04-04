@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { Expense } from '../model/expense.model';
 import { HttpClient } from '@angular/common/http';
 import { ExpenseDto } from '../model/expense-dto.model';
+import { PaginatedList } from 'src/app/shared/model/paginated-list';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class ExpenseService {
   }
 
   getExpenses(params: any) {
-    return this.http.post<Expense[]>(`${this.baseUrl}api/expenses/GetExpenses`, params);
+    return this.http.post<PaginatedList<Expense>>(`${this.baseUrl}api/expenses/GetExpenses`, params);
   }
 
   getExpense(id: string): Observable<ExpenseDto> {
