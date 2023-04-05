@@ -1,3 +1,8 @@
+:host {
+  height: calc(100vh - 2rem);
+  display: flex;
+}
+
 .login-container {
   width: 400px;
   max-width: 100%;
@@ -6,5 +11,4 @@
   flex-direction: column;
   padding: 1rem;
   justify-content: center;
-  border: 1px solid red;
 }

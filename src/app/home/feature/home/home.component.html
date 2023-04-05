@@ -1,1 +1,44 @@
-<p>home works!</p>
+<div class="flex p-2">
+  <span class="text-xl flex-grow-1">Total Expenses</span>
+  <span class="text-4xl">1,111</span>
+</div>
+<div class="flex flex-column p-2 mt-2 mb-2">
+  <div class="flex">
+    <!-- <span class="text-3xl flex-grow-1">My Expenses</span> -->
+    <span class="text-xs font-italic">Apr-3 - Apr-8</span>
+  </div>
+  <div>
+    <div class="flex gap-2 justify-content-center" *ngIf="selectedView$ | async as view">
+
+    <div class="card">
+      <p-chart type="bar" [data]="basicData" [options]="basicOptions"></p-chart>
+    </div>
+      <!-- <p-button label="Day" styleClass="p-button-text text-500 {{ view === 'day' ? 'text-primary' : '' }}" (click)="updateView('day')"></p-button>
+      <p-button label="Week" styleClass="p-button-text text-500 {{ view === 'week' ? 'text-primary' : '' }}"  (click)="updateView('week')"></p-button>
+      <p-button label="Month" styleClass="p-button-text text-500 {{ view === 'month' ? 'text-primary' : '' }}"  (click)="updateView('month')"></p-button>
+      <p-button label="Year" styleClass="p-button-text text-500 {{ view === 'year' ? 'text-primary' : '' }}"   (click)="updateView('year')"></p-button> -->
+      <!-- <a href="" [routerLink]="['/']" [queryParams]="{ view: 'Day'}" class="no-underline text-500" [ngClass]="{'text-primary': view == 'day' }">Day</a>
+      <a href="" [routerLink]="['/']" [queryParams]="{ view: 'Week'}" class="no-underline text-500" [ngClass]="{'text-primary': view == 'week' }">Week</a>
+      <a href="" [routerLink]="['/']" [queryParams]="{ view: 'Month'}" class="no-underline text-500" [ngClass]="{'text-primary': view == 'month' }">Month</a>
+      <a href="" [routerLink]="['/']" [queryParams]="{ view: 'Year'}" class="no-underline text-500" [ngClass]="{'text-primary': view == 'year' }">Year</a> -->
+    </div>
+  </div>
+</div>
+<div class="p-2">
+  <div class="text">Recent Transactions</div>
+  <ng-container *ngIf="data$ | async as data; else noResult">
+    <div class="card mt-4" *ngIf="data.data.length > 0; else noResult">
+      <app-expense-list [items]="data.data" (selected)="editEntry($event)" [hidePagination]="true"></app-expense-list>
+    </div>
+  </ng-container>
+</div>
+
+<ng-template #noResult>
+  <div class="mt-4 card flex justify-content-center">
+    <span>No result</span>
+  </div>
+</ng-template>
+
+<div class="text-center  my-4">
+  <a href="#" [routerLink]="['/expenses']" [queryParams]="{ type: 'week' }" class="no-underline p-4 text-primary">View All Expenses</a>
+</div>

@@ -14,11 +14,11 @@ const routes: Routes = [
       ),
   },
   {
-    path: '', pathMatch: 'full', redirectTo: 'expenses',
-    // loadComponent: () =>
-    //   import('./home/feature/home/home.component').then(
-    //     (m) => m.HomeComponent
-    //   ),
+    path: '',
+    loadComponent: () =>
+      import('./home/feature/home/home.component').then(
+        (m) => m.HomeComponent
+      ),
   },
   {
     path: 'login',

@@ -5,6 +5,7 @@ import { SidebarModule } from 'primeng/sidebar';
 import { SlideMenuModule } from 'primeng/slidemenu';
 import { MenuModule } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
+import { MessagesModule } from 'primeng/messages';
 @NgModule({
   imports: [
     ButtonModule,
@@ -12,7 +13,8 @@ import { ToastModule } from 'primeng/toast';
     SidebarModule,
     SlideMenuModule,
     MenuModule,
-    ToastModule
+    ToastModule,
+    MessagesModule
   ],
   exports: [
     ButtonModule,
@@ -20,7 +22,8 @@ import { ToastModule } from 'primeng/toast';
     SidebarModule,
     SlideMenuModule,
     MenuModule,
-    ToastModule
+    ToastModule,
+    MessagesModule
   ],
 })
 export class PrimeNgModule { }

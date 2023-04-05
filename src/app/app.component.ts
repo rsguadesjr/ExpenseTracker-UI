@@ -4,8 +4,11 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { Router } from '@angular/router';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { MenuItem } from 'primeng/api/menuitem';
-import { AlertService } from './shared/utils/alert-service';
-import { MessageService } from 'primeng/api';
+import { ToastService } from './shared/utils/toast.service';
+import { Message, MessageService } from 'primeng/api';
+import { ValidationMessageService } from './shared/utils/validation-message.service';
+import { Alert } from './shared/model/alert';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -17,8 +20,16 @@ export class AppComponent implements OnInit {
   sidebarVisible: boolean = false;
 
   accountMenuItems: MenuItem[] = [];
+  validationMessages: Message[] = [];
 
-  constructor(private afAuth: AngularFireAuth, private router: Router, private authService: AuthService, private alertService: AlertService, private messageService: MessageService) {
+  constructor(
+    private afAuth: AngularFireAuth,
+    private router: Router,
+    public authService: AuthService,
+    private alertService: ToastService,
+    private messageService: MessageService,
+    private validationMessagService: ValidationMessageService
+  ) {
     // this.afAuth.authState.subscribe((v) => {
     //   if (!v) {
     //     localStorage.removeItem('token');
@@ -34,17 +45,43 @@ export class AppComponent implements OnInit {
     //     localStorage.setItem('token', 'sample value');
     //   });
     // });
-    this.alertService.alert$.subscribe(v => {
-      console.log('[DEBUG] alertSErvice' ,v);
+    // this.alertService.toast$.subscribe((v) => {
+    //   console.log('[DEBUG] alertSErvice', v);
+    //   if (v) {
+    //     this.messageService.add({
+    //       severity: v.severity,
+    //       summary: v.summary,
+    //       detail: v.detail,
+    //       key: v.key
+    //     });
+    //   }
+    // });
+
+    this.validationMessagService.message$.subscribe((v) => {
+      console.log('[DEBUG] validationMessagService', v);
       if (v) {
-        this.messageService.add({ severity: v.severity, summary: v.summary, detail: v.detail });
+        this.validationMessages = [v,...this.validationMessages];
+
+        // this.messageService.add({
+        //   severity: v.severity,
+        //   summary: v.summary,
+        //   detail: v.detail,
+        //   key: v.key
+        // });
       }
     })
+
+    this.validationMessagService.clear$.subscribe((v) => {
+      this.validationMessages = [];
+    })
   }
+
   ngOnInit(): void {
     this.accountMenuItems = [
       { label: 'Logout', command: () => this.signOut() },
     ];
+
+
   }
 
   signOut() {

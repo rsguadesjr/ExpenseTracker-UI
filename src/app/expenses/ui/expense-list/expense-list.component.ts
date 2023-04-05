@@ -31,11 +31,12 @@ export class ExpenseListComponent {
   }
 
   @Input() hidePagination = false;
-  @Output() selectedChange = new EventEmitter<Expense>();
+  @Output() selected = new EventEmitter<Expense>();
   @Output('onPageChange') pageChange = new EventEmitter<any>();
 
   editEntry(expense: any) {
-    this.selectedChange.emit(expense);
+    console.log('editEntry 1', expense)
+    this.selected.emit(expense);
   }
 
   onPageChange(event: any) {

@@ -12,14 +12,14 @@ const routes: Routes = [
   {
     path: 'new',
     loadComponent: () =>
-      import('../expense-detail/expense-detail.component').then(
+      import('../expense-detail/expense-detail.page.component').then(
         (m) => m.ExpenseDetailComponent
       ),
   },
   {
     path: 'edit/:id',
     loadComponent: () =>
-      import('../expense-detail/expense-detail.component').then(
+      import('../expense-detail/expense-detail.page.component').then(
         (m) => m.ExpenseDetailComponent
       ),
   },

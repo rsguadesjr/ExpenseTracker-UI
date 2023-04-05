@@ -1,4 +1,4 @@
-import { ExpenseService } from './../../data-access/expense.service';
+import { ExpenseService } from '../../data-access/expense.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
@@ -16,7 +16,8 @@ import { Expense } from '../../model/expense.model';
 import { map, take, BehaviorSubject, switchMap, of } from 'rxjs';
 import { CalendarModule } from 'primeng/calendar';
 import { ExpenseDto } from '../../model/expense-dto.model';
-import { AlertService } from 'src/app/shared/utils/alert-service';
+import { ToastService } from 'src/app/shared/utils/toast.service';
+import { ValidationMessageService } from 'src/app/shared/utils/validation-message.service';
 
 @Component({
   selector: 'app-expense-detail',
@@ -30,8 +31,8 @@ import { AlertService } from 'src/app/shared/utils/alert-service';
     ButtonModule,
     CalendarModule,
   ],
-  templateUrl: './expense-detail.component.html',
-  styleUrls: ['./expense-detail.component.scss'],
+  templateUrl: './expense-detail.page.component.html',
+  styleUrls: ['./expense-detail.page.component.scss'],
   providers: [ExpenseService],
 })
 export class ExpenseDetailComponent implements OnInit {
@@ -63,7 +64,8 @@ export class ExpenseDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private expenseService: ExpenseService,
-    private alertService: AlertService
+    private alertService: ToastService,
+    private validationMessageService: ValidationMessageService
   ) {
     this.expenseForm = new FormGroup({
       category: new FormControl(null, [Validators.required]),
@@ -107,17 +109,22 @@ export class ExpenseDetailComponent implements OnInit {
           },
         });
     }
+
   }
 
   ngOnInit(): void {}
 
   submit() {
+    // clear first any visible validation message
+    this.validationMessageService.clear();
+
     console.log('test');
     this.expenseForm.markAsDirty();
     this.expenseForm.updateValueAndValidity();
 
     // if invalid, show an error message
     if (this.expenseForm.invalid) {
+      this.validationMessageService.showWarning('Please check incomplete details');
       return;
     }
 
