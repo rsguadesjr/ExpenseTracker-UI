@@ -3,6 +3,7 @@ import {
   catchError,
   debounceTime,
   finalize,
+  map,
   Observable,
   of,
   Subject,
@@ -10,7 +11,7 @@ import {
   tap,
 } from 'rxjs';
 import { ExpenseService } from '../../data-access/expense.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   FormsModule,
   FormGroup,
@@ -26,7 +27,7 @@ import { Expense } from '../../model/expense.model';
 import { ToolbarModule } from 'primeng/toolbar';
 import { CalendarModule } from 'primeng/calendar';
 import { PaginatorModule } from 'primeng/paginator';
-import { PaginatedList } from 'src/app/shared/model/paginated-list';
+import { PaginatedList } from 'src/app/shared/model/paginated-list.model';
 import { ExpenseListComponent } from '../../ui/expense-list/expense-list.component';
 // import { ExpenseListRoutingModule } from './expense-list-routing.module';
 
@@ -95,7 +96,7 @@ export class ExpenseListPageComponent implements OnInit {
   rowsPerPage: number = 10;
   currentPage: number = 0;
 
-  constructor(private router: Router, private expenseService: ExpenseService) {
+  constructor(private router: Router, private expenseService: ExpenseService, private route: ActivatedRoute) {
     this.data$ = this.filter$.pipe(
       tap(() => this.filterInProgress$.next(true)),
       debounceTime(500),
@@ -116,7 +117,24 @@ export class ExpenseListPageComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+
+    // TODO: check this approach and remove settimeout
+    this.route.queryParamMap
+    .pipe( ).subscribe(x => {
+      const dateFrom = x.get('dateFrom') ? new Date(Number(x.get('dateFrom'))) : null;
+      const dateTo = x.get('dateTo') ? new Date(Number(x.get('dateTo'))) : null;
+      console.log('[DEBUG]', { dateFrom, dateTo });
+      if (!!dateFrom && !!dateTo) {
+        this.filterForm.get('dateFrom')?.patchValue(dateFrom),
+        this.filterForm.get('dateTo')?.patchValue(dateTo)
+
+        setTimeout(() => {
+          this.applyFilter();
+        },500 )
+      }
+    });
+  }
 
   getSeverity(status: string): string {
     switch (status) {

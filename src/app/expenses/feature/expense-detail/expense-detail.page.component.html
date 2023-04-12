@@ -1,10 +1,9 @@
-<div>{{ isEdit ? 'Update' : 'Create' }} Entry</div>
+<div class="text-2xl mb-4">{{ isEdit ? 'Update' : 'Create' }} Entry</div>
 <form [formGroup]="expenseForm">
-  [{{ expenseForm.value | json }}] [{{ expenseForm.valid }}] [{{isEdit}}] [{{expenseId}}]
   <div class="flex flex-column gap-2">
     <div class="flex flex-column gap-2">
       <label htmlFor="username">Category</label>
-      <p-dropdown formControlName="category" [options]="categories" optionLabel="name"></p-dropdown>
+      <p-dropdown formControlName="category" [options]="(categories$ | async) ?? []" optionLabel="name"></p-dropdown>
     </div>
     <div class="flex flex-column gap-2">
       <label htmlFor="username">Amount</label>
@@ -20,7 +19,7 @@
     </div>
     <div class="flex flex-column gap-2">
       <label htmlFor="username">Source</label>
-      <p-dropdown formControlName="source" [options]="fundSources" optionLabel="name"></p-dropdown>
+      <p-dropdown formControlName="source" [options]="(sources$ | async) ?? []" optionLabel="name"></p-dropdown>
     </div>
     <div class="flex flex-row justify-content-end gap-2 mt-4">
       <button pButton pRipple label="Cancel" (click)="cancel()"></button>

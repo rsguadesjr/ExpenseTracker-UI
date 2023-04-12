@@ -8,16 +8,32 @@ import {
   Subject,
   catchError,
   debounceTime,
+  filter,
   map,
+  mergeMap,
   of,
   switchMap,
+  take,
   tap,
 } from 'rxjs';
-import { PaginatedList } from 'src/app/shared/model/paginated-list';
+import { PaginatedList } from 'src/app/shared/model/paginated-list.model';
 import { Expense } from 'src/app/expenses/model/expense.model';
 import { ExpenseListComponent } from 'src/app/expenses/ui/expense-list/expense-list.component';
 import { ButtonModule } from 'primeng/button';
 import { ChartModule } from 'primeng/chart';
+import {
+  startOfWeek,
+  endOfWeek,
+  format,
+  add,
+  startOfDay,
+  endOfDay,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+} from 'date-fns';
+import { SummaryService } from 'src/app/shared/data-access/summary.service';
 
 @Component({
   selector: 'app-home',
@@ -33,39 +49,24 @@ import { ChartModule } from 'primeng/chart';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent {
-  filter$ = new BehaviorSubject<any>({
-    dateFrom: new Date(2022, 1, 1),
-    dateTo: new Date(2024, 1, 1),
-  });
+  filter$ = new BehaviorSubject<any>(null);
   data$!: Observable<PaginatedList<Expense>>;
   filterInProgress$ = new BehaviorSubject<boolean>(false);
   selectedView$: Observable<string>;
+  totalExpenses$: Observable<number>;
+
+  view: string = 'week';
+  dateRangeLabel = '';
 
   basicData: any;
-
   basicOptions: any;
 
   constructor(
     private expenseService: ExpenseService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private summaryService: SummaryService
   ) {
-    this.data$ = this.filter$.pipe(
-      tap(() => this.filterInProgress$.next(true)),
-      debounceTime(500),
-      switchMap((filter) => expenseService.getExpenses(filter)),
-      tap(() => this.filterInProgress$.next(false)),
-      catchError((err) => {
-        this.filterInProgress$.next(false);
-        // call alert service
-        return of<PaginatedList<Expense>>({
-          totalRows: 0,
-          currentPage: 0,
-          data: [],
-        });
-      })
-    );
-
     this.selectedView$ = this.route.queryParamMap.pipe(
       map((v) => {
         const view = v.get('view')?.toLowerCase();
@@ -75,87 +76,94 @@ export class HomeComponent {
       })
     );
 
+    const filter$ = this.selectedView$.pipe(
+      map((view) => {
+        let startDate;
+        let endDate;
+        let date = new Date();
+        switch (view) {
+          case 'week':
+            date =
+              new Date().getDay() == 0
+                ? add(new Date(), { days: -1 })
+                : new Date();
+            startDate = add(startOfWeek(date), { days: 1 });
+            endDate = add(endOfWeek(date), { days: 1 });
+            this.dateRangeLabel = `${format(startDate, 'MMMM dd')} - ${format(
+              endDate,
+              'MMMM dd'
+            )}`;
+            break;
+          case 'month':
+            startDate = startOfMonth(date);
+            endDate = endOfMonth(date);
+            this.dateRangeLabel = `Month of ${format(date, 'MMMM')}`;
+            break;
+          case 'year':
+            startDate = startOfYear(date);
+            endDate = endOfYear(date);
+            this.dateRangeLabel = `Year ${format(date, 'yyyy')}`;
+            break;
+          case 'day':
+          default:
+            startDate = startOfDay(date);
+            endDate = endOfDay(date);
+            this.dateRangeLabel = `${format(date, 'MMMM dd')}`;
+            break;
+        }
 
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
-    const textColorSecondary = documentStyle.getPropertyValue(
-      '--text-color-secondary'
+        return {
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+        };
+      }),
+      tap((value) => {
+        this.filter$.next({
+          startDate: value.startDate,
+          endDate: value.endDate,
+        });
+      })
     );
-    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
-    this.basicData = {
-      labels: ['M', 'T', 'W', 'Th', 'F', 'S', 'Su'],
-      datasets: [
-        {
-          label: 'Sales',
-          data: [540, 325, 702, 620, 300, 500, 300],
-          backgroundColor: [
-            'rgba(255, 159, 64, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(153, 202, 255, 0.2)',
-            'rgba(103, 102, 255, 0.2)',
-            'rgba(153, 102, 155, 0.2)',
-          ],
-          borderColor: [
-            'rgb(255, 159, 64)',
-            'rgb(75, 192, 192)',
-            'rgb(54, 162, 235)',
-            'rgb(153, 102, 255)',
-            'rgba(153, 202, 255)',
-            'rgba(103, 102, 255)',
-            'rgba(153, 102, 155)',
-          ],
-          borderWidth: 1,
-        },
-      ],
-    };
+    this.totalExpenses$ = filter$.pipe(
+      switchMap((value) =>
+        this.summaryService.getTotalAmountPerCategory(
+          value.startDate,
+          value.endDate
+        )
+      ),
+      map((v) => {
+        return v
+          .map((r) => r.total)
+          .reduce((total, current) => total + current, 0);
+      })
+    );
 
-    this.basicOptions = {
-      plugins: {
-        legend: {
-          display: false,
-          labels: {
-            color: textColor,
-            display: false
-          },
-        },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            color: textColorSecondary,
-            display: false
-          },
-          grid: {
-            color: surfaceBorder,
-            drawBorder: false,
-            display: false
-          },
-        },
-        x: {
-          ticks: {
-            color: textColorSecondary,
-          },
-          grid: {
-            color: surfaceBorder,
-            drawBorder: false,
-            display: false
-          },
-        },
-      },
-    };
+    this.data$ = filter$.pipe(
+      take(1),
+      switchMap((value) => expenseService.getExpenses(value))
+    );
+
   }
 
   editEntry(expense: any) {
-    console.log('editEntry', expense);
     this.router.navigate(['expenses', 'edit', expense.id]);
   }
 
   updateView(view: string) {
-    console.log('[DEBUG] updateView', view);
     this.router.navigate(['/'], { queryParams: { view } });
+  }
+
+  viewExpenses() {
+    this.router.navigate(['/expenses'], {
+      queryParams: {
+        startDate: this.filter$.value?.startDate,
+        endDate: this.filter$.value?.endDate,
+      },
+    });
+  }
+
+  newEntry() {
+    this.router.navigate(['/expenses', 'new']);
   }
 }

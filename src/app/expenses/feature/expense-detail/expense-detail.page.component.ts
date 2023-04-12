@@ -13,11 +13,14 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { Expense } from '../../model/expense.model';
-import { map, take, BehaviorSubject, switchMap, of } from 'rxjs';
+import { map, take, BehaviorSubject, switchMap, of, forkJoin, Observable } from 'rxjs';
 import { CalendarModule } from 'primeng/calendar';
 import { ExpenseDto } from '../../model/expense-dto.model';
 import { ToastService } from 'src/app/shared/utils/toast.service';
 import { ValidationMessageService } from 'src/app/shared/utils/validation-message.service';
+import { CategoryService } from 'src/app/shared/data-access/category.service';
+import { SourceService } from 'src/app/shared/data-access/source.service';
+import { Option } from 'src/app/shared/model/option.model';
 
 @Component({
   selector: 'app-expense-detail',
@@ -58,6 +61,8 @@ export class ExpenseDetailComponent implements OnInit {
   expenseId?: string;
 
   loadingDetails$ = new BehaviorSubject<boolean>(false);
+  categories$: Observable<Option[]>;
+  sources$: Observable<Option[]>;
 
   constructor(
     private location: Location,
@@ -65,7 +70,9 @@ export class ExpenseDetailComponent implements OnInit {
     private router: Router,
     private expenseService: ExpenseService,
     private alertService: ToastService,
-    private validationMessageService: ValidationMessageService
+    private validationMessageService: ValidationMessageService,
+    private categoryService: CategoryService,
+    private sourceService: SourceService
   ) {
     this.expenseForm = new FormGroup({
       category: new FormControl(null, [Validators.required]),
@@ -110,9 +117,19 @@ export class ExpenseDetailComponent implements OnInit {
         });
     }
 
+    this.categories$ = this.categoryService.getCategories().pipe(map(opt => [{ id: undefined, name: '' }, ...opt]));
+    this.sources$ = this.sourceService.getSources().pipe(map(opt => [{ id: undefined, name: '' }, ...opt]));
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // forkJoin([
+    //   this.categoryService.getCategories(),
+    //   this.sourceService.getSources()
+    // ])
+    // .pipe(
+
+    // )
+  }
 
   submit() {
     // clear first any visible validation message

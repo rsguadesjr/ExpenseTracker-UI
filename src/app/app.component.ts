@@ -7,8 +7,6 @@ import { MenuItem } from 'primeng/api/menuitem';
 import { ToastService } from './shared/utils/toast.service';
 import { Message, MessageService } from 'primeng/api';
 import { ValidationMessageService } from './shared/utils/validation-message.service';
-import { Alert } from './shared/model/alert';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',

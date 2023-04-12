@@ -10,11 +10,11 @@
 
 <p-toast key="global-toast"></p-toast>
 <p-messages key="route-level-validation-message"></p-messages>
+<p-messages [(value)]="validationMessages" [enableService]="false"></p-messages>
 
-<div class="card">
-  <p-messages [(value)]="validationMessages" [enableService]="false"></p-messages>
+<div class="px-2 py-4">
+  <router-outlet></router-outlet>
 </div>
-<router-outlet></router-outlet>
 
 
 <p-sidebar [(visible)]="sidebarVisible">

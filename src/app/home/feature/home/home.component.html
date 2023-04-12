@@ -1,26 +1,22 @@
-<div class="flex p-2">
-  <span class="text-xl flex-grow-1">Total Expenses</span>
-  <span class="text-4xl">1,111</span>
-</div>
 <div class="flex flex-column p-2 mt-2 mb-2">
-  <div class="flex">
-    <!-- <span class="text-3xl flex-grow-1">My Expenses</span> -->
-    <span class="text-xs font-italic">Apr-3 - Apr-8</span>
-  </div>
-  <div>
-    <div class="flex gap-2 justify-content-center" *ngIf="selectedView$ | async as view">
-
-    <div class="card">
-      <p-chart type="bar" [data]="basicData" [options]="basicOptions"></p-chart>
+  <div class="m-auto">
+    <div class="flex bg-primary align-items-center justify-content-center gap-2 font-bold border-round" style="min-width: 200px; min-height: 100px">
+      <div class="text-2xl">&#x20B1;</div>
+      <div class="text-6xl">{{ totalExpenses$ | async }}</div>
     </div>
-      <!-- <p-button label="Day" styleClass="p-button-text text-500 {{ view === 'day' ? 'text-primary' : '' }}" (click)="updateView('day')"></p-button>
-      <p-button label="Week" styleClass="p-button-text text-500 {{ view === 'week' ? 'text-primary' : '' }}"  (click)="updateView('week')"></p-button>
-      <p-button label="Month" styleClass="p-button-text text-500 {{ view === 'month' ? 'text-primary' : '' }}"  (click)="updateView('month')"></p-button>
-      <p-button label="Year" styleClass="p-button-text text-500 {{ view === 'year' ? 'text-primary' : '' }}"   (click)="updateView('year')"></p-button> -->
-      <!-- <a href="" [routerLink]="['/']" [queryParams]="{ view: 'Day'}" class="no-underline text-500" [ngClass]="{'text-primary': view == 'day' }">Day</a>
-      <a href="" [routerLink]="['/']" [queryParams]="{ view: 'Week'}" class="no-underline text-500" [ngClass]="{'text-primary': view == 'week' }">Week</a>
-      <a href="" [routerLink]="['/']" [queryParams]="{ view: 'Month'}" class="no-underline text-500" [ngClass]="{'text-primary': view == 'month' }">Month</a>
-      <a href="" [routerLink]="['/']" [queryParams]="{ view: 'Year'}" class="no-underline text-500" [ngClass]="{'text-primary': view == 'year' }">Year</a> -->
+    <div class="text-sm text-center mt-2 p-2">{{ dateRangeLabel }}</div>
+  </div>
+
+  <div class="flex flex-column align-items-center" *ngIf="selectedView$ | async as view">
+    <div class="flex gap-2 justify-content-center mt-4">
+      <p-button label="Day" styleClass="p-button-text text-500 {{ view?.toLowerCase() === 'day' ? 'text-primary' : '' }}"
+        (click)="updateView('day')"></p-button>
+      <p-button label="Week" styleClass="p-button-text text-500 {{ view?.toLowerCase() === 'week' ? 'text-primary' : '' }}"
+        (click)="updateView('week')"></p-button>
+      <p-button label="Month" styleClass="p-button-text text-500 {{ view?.toLowerCase() === 'month' ? 'text-primary' : '' }}"
+        (click)="updateView('month')"></p-button>
+      <p-button label="Year" styleClass="p-button-text text-500 {{ view?.toLowerCase() === 'year' ? 'text-primary' : '' }}"
+        (click)="updateView('year')"></p-button>
     </div>
   </div>
 </div>
@@ -39,6 +35,8 @@
   </div>
 </ng-template>
 
-<div class="text-center  my-4">
-  <a href="#" [routerLink]="['/expenses']" [queryParams]="{ type: 'week' }" class="no-underline p-4 text-primary">View All Expenses</a>
+<div class="flex justify-content-center gap-2 my-4">
+  <p-button icon="pi pi-search" label="View All Expenses" styleClass="p-button-secondary"
+    (click)="viewExpenses()"></p-button>
+  <p-button icon="pi pi-plus" label="New Entry" styleClass="p-button-primary" (click)="newEntry()"></p-button>
 </div>
