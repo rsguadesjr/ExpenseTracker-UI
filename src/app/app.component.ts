@@ -1,12 +1,13 @@
 import { AuthService } from './shared/data-access/auth.service';
 import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { MenuItem } from 'primeng/api/menuitem';
 import { ToastService } from './shared/utils/toast.service';
 import { Message, MessageService } from 'primeng/api';
 import { ValidationMessageService } from './shared/utils/validation-message.service';
+import { Observable, combineLatest, filter, map, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -20,54 +21,45 @@ export class AppComponent implements OnInit {
   accountMenuItems: MenuItem[] = [];
   validationMessages: Message[] = [];
 
+  showActionButtons$: Observable<boolean>;
+  showViewAllExpensesButton$: Observable<boolean>;
+  showNewButton$: Observable<boolean>;
+
   constructor(
     private afAuth: AngularFireAuth,
     private router: Router,
     public authService: AuthService,
     private alertService: ToastService,
     private messageService: MessageService,
-    private validationMessagService: ValidationMessageService
+    private validationMessagService: ValidationMessageService,
+    private route: ActivatedRoute
   ) {
-    // this.afAuth.authState.subscribe((v) => {
-    //   if (!v) {
-    //     localStorage.removeItem('token');
-    //     this.router.navigate(['login']);
-    //   }
-    //   console.log('[DEBUG] authState', {
-    //     result: v,
-    //     token: v?.getIdToken(),
-    //   });
-    //   v?.getIdToken;
-    //   v?.getIdToken().then((x) => {
-    //     console.log('[DEBUG] authState x', x);
-    //     localStorage.setItem('token', 'sample value');
-    //   });
-    // });
-    // this.alertService.toast$.subscribe((v) => {
-    //   console.log('[DEBUG] alertSErvice', v);
-    //   if (v) {
-    //     this.messageService.add({
-    //       severity: v.severity,
-    //       summary: v.summary,
-    //       detail: v.detail,
-    //       key: v.key
-    //     });
-    //   }
-    // });
-
     this.validationMessagService.message$.subscribe((v) => {
-      console.log('[DEBUG] validationMessagService', v);
       if (v) {
         this.validationMessages = [v,...this.validationMessages];
-
-        // this.messageService.add({
-        //   severity: v.severity,
-        //   summary: v.summary,
-        //   detail: v.detail,
-        //   key: v.key
-        // });
       }
     })
+
+    const url$ = this.router.events.pipe(
+      filter(event => {
+        return event instanceof NavigationEnd
+      }),
+      map((event: any) => router.url.split('?')[0])
+    );
+    this.showNewButton$ = url$.pipe(
+      map(url => ['/', '/expenses'].includes(url))
+    )
+
+    this.showViewAllExpensesButton$ = url$.pipe(
+      map(url => ['/'].includes(url))
+    )
+
+    this.showActionButtons$ = combineLatest([
+      this.showViewAllExpensesButton$,
+      this.showNewButton$
+    ]).pipe(
+      map(v => v[0] || v[1])
+    )
 
     this.validationMessagService.clear$.subscribe((v) => {
       this.validationMessages = [];
@@ -88,5 +80,18 @@ export class AppComponent implements OnInit {
 
   showSideBar() {
     this.sidebarVisible = true;
+  }
+
+  viewExpenses() {
+    this.router.navigate(['/expenses'], {
+      queryParams: {
+        // startDate: '2022',
+        // endDate: this.filter$.value?.endDate,
+      },
+    });
+  }
+
+  newEntry() {
+    this.router.navigate(['/expenses', 'new']);
   }
 }

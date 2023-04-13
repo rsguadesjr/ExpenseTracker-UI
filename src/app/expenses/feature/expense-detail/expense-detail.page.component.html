@@ -1,4 +1,38 @@
-<div class="text-2xl mb-4">{{ isEdit ? 'Update' : 'Create' }} Entry</div>
+
+<div class="xl:w-4 lg:w-5 md:w-7 m-auto">
+  <p-card [header]="isEdit ? 'Update' : 'Create'" styleClass="bg-black-alpha-40">
+    <form [formGroup]="expenseForm">
+      <div class="flex flex-column gap-2">
+        <div class="flex flex-column gap-2 p-fluid">
+          <label htmlFor="username">Category</label>
+          <p-dropdown formControlName="category" [options]="(categories$ | async) ?? []" optionLabel="name" class="w-100"></p-dropdown>
+        </div>
+        <div class="flex flex-column gap-2">
+          <label htmlFor="username">Amount</label>
+          <input pInputText id="username" aria-describedby="username-help" formControlName="amount"/>
+        </div>
+        <div class="flex flex-column gap-2 p-fluid">
+          <label htmlFor="username">Date</label>
+          <p-calendar formControlName="date" dateFormat="dd-M-yy"></p-calendar>
+        </div>
+        <div class="flex flex-column gap-2">
+          <label htmlFor="username">Description</label>
+          <input pInputText id="username" aria-describedby="username-help" formControlName="description"/>
+        </div>
+        <div class="flex flex-column gap-2 p-fluid">
+          <label htmlFor="username">Source</label>
+          <p-dropdown formControlName="source" [options]="(sources$ | async) ?? []" optionLabel="name"></p-dropdown>
+        </div>
+      </div>
+    </form>
+    <div class="flex flex-row justify-content-end gap-2 mt-4">
+      <button pButton pRipple label="Cancel" (click)="cancel()"></button>
+      <button pButton pRipple label="Submit" class="p-button-success" (click)="submit()"></button>
+    </div>
+  </p-card>
+</div>
+
+<!-- <div class="text-2xl mb-4">{{ isEdit ? 'Update' : 'Create' }} Entry</div>
 <form [formGroup]="expenseForm">
   <div class="flex flex-column gap-2">
     <div class="flex flex-column gap-2">
@@ -26,4 +60,4 @@
       <button pButton pRipple label="Submit" class="p-button-success" (click)="submit()"></button>
     </div>
   </div>
-</form>
+</form> -->

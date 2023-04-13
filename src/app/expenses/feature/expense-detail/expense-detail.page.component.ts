@@ -21,6 +21,8 @@ import { ValidationMessageService } from 'src/app/shared/utils/validation-messag
 import { CategoryService } from 'src/app/shared/data-access/category.service';
 import { SourceService } from 'src/app/shared/data-access/source.service';
 import { Option } from 'src/app/shared/model/option.model';
+import { startOfDay } from 'date-fns';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-expense-detail',
@@ -33,6 +35,7 @@ import { Option } from 'src/app/shared/model/option.model';
     InputTextModule,
     ButtonModule,
     CalendarModule,
+    CardModule
   ],
   templateUrl: './expense-detail.page.component.html',
   styleUrls: ['./expense-detail.page.component.scss'],
@@ -76,13 +79,13 @@ export class ExpenseDetailComponent implements OnInit {
   ) {
     this.expenseForm = new FormGroup({
       category: new FormControl(null, [Validators.required]),
-      amount: new FormControl<Number>(0, [
+      amount: new FormControl<Number | null>(null, [
         Validators.required,
         Validators.min(1),
       ]),
-      date: new FormControl(null, Validators.required),
+      date: new FormControl(startOfDay(new Date()), Validators.required),
       description: new FormControl(null, [Validators.required]),
-      source: new FormControl(),
+      source: new FormControl(null, [Validators.required]),
     });
 
     this.isEdit =
@@ -114,6 +117,9 @@ export class ExpenseDetailComponent implements OnInit {
               source: { id: value.sourceId, name: value.source },
             });
           },
+          error: (error) => {
+            console.log('[DEBUG] error', error)
+          }
         });
     }
 
@@ -121,15 +127,7 @@ export class ExpenseDetailComponent implements OnInit {
     this.sources$ = this.sourceService.getSources().pipe(map(opt => [{ id: undefined, name: '' }, ...opt]));
   }
 
-  ngOnInit(): void {
-    // forkJoin([
-    //   this.categoryService.getCategories(),
-    //   this.sourceService.getSources()
-    // ])
-    // .pipe(
-
-    // )
-  }
+  ngOnInit() {}
 
   submit() {
     // clear first any visible validation message

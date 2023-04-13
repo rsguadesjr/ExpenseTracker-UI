@@ -1,31 +1,46 @@
-<p-toolbar *ngIf="authService.user$ | async">
-  <div class="p-toolbar-group-start">
-    <p-button (click)="showSideBar()" icon="pi pi-bars" styleClass="p-button-rounded p-button-text "></p-button>
+<div class="main-container">
+  <div>
+    <p-toolbar *ngIf="authService.user$ | async">
+      <div class="p-toolbar-group-start">
+        <p-button (click)="showSideBar()" icon="pi pi-bars" styleClass="p-button-rounded p-button-text "></p-button>
+      </div>
+      <div class="p-toolbar-group-end">
+        <p-button icon="pi pi-user" styleClass="p-button-rounded p-button-info" (click)="menu.toggle($event)"></p-button>
+        <p-menu #menu [model]="accountMenuItems" [popup]="true"></p-menu>
+      </div>
+    </p-toolbar>
   </div>
-  <div class="p-toolbar-group-end">
-    <p-button icon="pi pi-user" styleClass="p-button-rounded p-button-info" (click)="menu.toggle($event)"></p-button>
-    <p-menu #menu [model]="accountMenuItems" [popup]="true"></p-menu>
+
+  <div class="container relative p-2">
+
+    <p-toast key="global-toast"></p-toast>
+    <p-messages key="route-level-validation-message"></p-messages>
+    <p-messages [(value)]="validationMessages" [enableService]="false"></p-messages>
+
+
+    <router-outlet></router-outlet>
   </div>
-</p-toolbar>
 
-<p-toast key="global-toast"></p-toast>
-<p-messages key="route-level-validation-message"></p-messages>
-<p-messages [(value)]="validationMessages" [enableService]="false"></p-messages>
 
-<div class="px-2 py-4">
-  <router-outlet></router-outlet>
+  <div class="flex justify-content-center gap-2 p-2">
+    <p-button *ngIf="showViewAllExpensesButton$ | async" icon="pi pi-search" label="View All Expenses" styleClass="p-button-secondary"
+      (click)="viewExpenses()"></p-button>
+      <div  *ngIf="(showNewButton$ | async)">
+        <p-button icon="pi pi-plus" label="New Entry" styleClass="p-button-primary" (click)="newEntry()"></p-button>
+      </div>
+  </div>
+
+  <p-sidebar [(visible)]="sidebarVisible">
+    <ng-template pTemplate="header">Header Content</ng-template>
+    <ng-template pTemplate="content">
+      <div class="flex flex-column pt-4">
+        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['']" (click)="sidebarVisible = false">Home</a>
+        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['/expenses']"  (click)="sidebarVisible = false">Expenses</a>
+        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['summary']"  (click)="sidebarVisible = false">Summary</a>
+        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['account']"  (click)="sidebarVisible = false">Account</a>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="footer">Footer Content</ng-template>
+  </p-sidebar>
+
 </div>
-
-
-<p-sidebar [(visible)]="sidebarVisible">
-  <ng-template pTemplate="header">Header Content</ng-template>
-  <ng-template pTemplate="content">
-    <div class="flex flex-column pt-4">
-      <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['']" (click)="sidebarVisible = false">Home</a>
-      <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['/expenses']"  (click)="sidebarVisible = false">Expenses</a>
-      <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['summary']"  (click)="sidebarVisible = false">Summary</a>
-      <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['account']"  (click)="sidebarVisible = false">Account</a>
-    </div>
-  </ng-template>
-  <ng-template pTemplate="footer">Footer Content</ng-template>
-</p-sidebar>

@@ -115,6 +115,23 @@ export class ExpenseListPageComponent implements OnInit {
       dateTo: new FormControl(),
       category: new FormControl()
     });
+
+    this.route.queryParamMap.pipe(
+      debounceTime(500)
+    ).subscribe(v => {
+      const startDate = v.get('startDate')?.toLowerCase();
+      if (startDate) {
+        this.filterForm.get('dateFrom')?.patchValue(new Date(startDate));
+      }
+
+
+      const endDate = v.get('endDate')?.toLowerCase();
+      if (endDate) {
+        this.filterForm.get('dateTo')?.patchValue(new Date(endDate));
+      }
+
+      this.applyFilter();
+    })
   }
 
   ngOnInit(): void {

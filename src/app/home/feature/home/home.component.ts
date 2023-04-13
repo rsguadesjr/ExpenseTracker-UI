@@ -34,6 +34,7 @@ import {
   endOfYear,
 } from 'date-fns';
 import { SummaryService } from 'src/app/shared/data-access/summary.service';
+import { SpeedDialModule } from 'primeng/speeddial';
 
 @Component({
   selector: 'app-home',
@@ -44,6 +45,7 @@ import { SummaryService } from 'src/app/shared/data-access/summary.service';
     ButtonModule,
     RouterModule,
     ChartModule,
+    SpeedDialModule
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
@@ -126,6 +128,7 @@ export class HomeComponent {
     );
 
     this.totalExpenses$ = filter$.pipe(
+      debounceTime(500),
       switchMap((value) =>
         this.summaryService.getTotalAmountPerCategory(
           value.startDate,
