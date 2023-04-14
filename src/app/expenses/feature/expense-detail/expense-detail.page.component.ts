@@ -133,7 +133,6 @@ export class ExpenseDetailComponent implements OnInit {
     // clear first any visible validation message
     this.validationMessageService.clear();
 
-    console.log('test');
     this.expenseForm.markAsDirty();
     this.expenseForm.updateValueAndValidity();
 

@@ -24,7 +24,6 @@ export class ExpenseService {
   }
 
   createExpense(data: ExpenseDto) {
-    console.log('[DEBUG] createExpense', data);
     return this.http.post<Expense>(`${this.baseUrl}`, data);
   }
 

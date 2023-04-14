@@ -15,6 +15,7 @@ const routes: Routes = [
   },
   {
     path: '',
+    canActivate: [AuthGuard],
     loadComponent: () =>
       import('./home/feature/home/home.component').then(
         (m) => m.HomeComponent
@@ -30,6 +31,7 @@ const routes: Routes = [
   },
   {
     path: 'sign-up',
+    canActivate: [AuthGuardLoggedIn],
     loadComponent: () =>
       import('./register/feature/sign-up/sign-up.component').then(
         (m) => m.SignUpComponent

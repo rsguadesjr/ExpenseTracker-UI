@@ -35,7 +35,6 @@ export class ExpenseListComponent {
   @Output('onPageChange') pageChange = new EventEmitter<any>();
 
   editEntry(expense: any) {
-    console.log('editEntry 1', expense)
     this.selected.emit(expense);
   }
 

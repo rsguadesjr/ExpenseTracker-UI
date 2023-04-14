@@ -141,7 +141,6 @@ export class ExpenseListPageComponent implements OnInit {
     .pipe( ).subscribe(x => {
       const dateFrom = x.get('dateFrom') ? new Date(Number(x.get('dateFrom'))) : null;
       const dateTo = x.get('dateTo') ? new Date(Number(x.get('dateTo'))) : null;
-      console.log('[DEBUG]', { dateFrom, dateTo });
       if (!!dateFrom && !!dateTo) {
         this.filterForm.get('dateFrom')?.patchValue(dateFrom),
         this.filterForm.get('dateTo')?.patchValue(dateTo)
@@ -181,7 +180,6 @@ export class ExpenseListPageComponent implements OnInit {
       return;
     }
 
-    console.log('[DEBUG] applyFilter', this.filterForm.value);
     this.filter$.next({
       dateFrom: this.filterForm.get('dateFrom')?.value,
       dateTo: this.filterForm.get('dateTo')?.value,
@@ -197,7 +195,6 @@ export class ExpenseListPageComponent implements OnInit {
   }
 
   onPageChange(event: any) {
-    console.log('[DEBUG] onPageChange', event);
     this.currentPage = event.page;
     this.rowsPerPage = event.rows;
 

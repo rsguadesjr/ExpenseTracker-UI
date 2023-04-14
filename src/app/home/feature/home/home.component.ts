@@ -144,7 +144,7 @@ export class HomeComponent {
 
     this.data$ = filter$.pipe(
       take(1),
-      switchMap((value) => expenseService.getExpenses(value))
+      switchMap((value) => expenseService.getExpenses({...value, totalRows: 10, pageNumber: 0}))
     );
 
   }

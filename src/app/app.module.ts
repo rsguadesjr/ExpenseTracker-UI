@@ -15,6 +15,12 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './shared/utils/auth-interceptor';
 import { ToastService } from './shared/utils/toast.service';
 import { MessageService } from 'primeng/api';
+
+export function tokenGetter() {
+  return localStorage.getItem("accessToken");
+}
+
+
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -24,7 +30,13 @@ import { MessageService } from 'primeng/api';
     AngularFireAuthModule,
     PrimeNgModule,
     BrowserAnimationsModule,
-    JwtModule,
+    JwtModule.forRoot({
+      config: {
+        tokenGetter: tokenGetter,
+        allowedDomains: [],
+        disallowedRoutes: [],
+      },
+    }),
     HttpClientModule
   ],
   providers: [
