@@ -22,7 +22,7 @@
   </div>
 
 
-  <div class="flex justify-content-center gap-2 p-2">
+  <div class="flex justify-content-center gap-2 py-4 sm:py-8">
     <p-button *ngIf="showViewAllExpensesButton$ | async" icon="pi pi-search" label="View All Expenses" styleClass="p-button-secondary"
       (click)="viewExpenses()"></p-button>
       <div  *ngIf="(showNewButton$ | async)">

@@ -46,8 +46,8 @@ export class AuthInterceptor implements HttpInterceptor {
 
     if (accessToken) {
       if (this.jwtHelper.isTokenExpired(accessToken)) {
-        accessToken = await this.authService.firebaseUser$.value.getIdToken(true);
-        localStorage.setItem('accessToken', accessToken);
+        accessToken = await this.authService.firebaseUser$?.value?.getIdToken(true);
+        localStorage.setItem('accessToken', accessToken ?? '');
       }
       console.log('[DEBUG] AuthInterceptor 2', {
         decodedToken:  this.jwtHelper.decodeToken(accessToken),

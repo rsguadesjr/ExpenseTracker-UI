@@ -37,6 +37,22 @@ const routes: Routes = [
         (m) => m.SignUpComponent
       ),
   },
+  {
+    path: 'summary',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./summary/feature/summary-shell/summary-shell-routing.module').then(
+        (m) => m.SummaryShellRoutingModule
+      ),
+  },
+  {
+    path: 'account',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./account/feature/account-shell/account-shell-routing.module').then(
+        (m) => m.AccountShellRoutingModule
+      ),
+  },
 ];
 
 @NgModule({

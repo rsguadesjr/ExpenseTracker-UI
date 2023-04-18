@@ -1,0 +1,29 @@
+
+<p-table [value]="items" [tableStyle]="{ 'min-width': '50rem' }">
+  <ng-template pTemplate="header">
+      <tr>
+          <th pSortableColumn="category" style="width: 15%">Category <p-sortIcon field="category"></p-sortIcon></th>
+          <th pSortableColumn="amount" style="width: 20%">Amount <p-sortIcon field="amount"></p-sortIcon></th>
+          <th pSortableColumn="expenseDate" style="width: 15%">Date <p-sortIcon field="expenseDate"></p-sortIcon></th>
+          <th pSortableColumn="description" style="width: 20%">Description <p-sortIcon field="description"></p-sortIcon></th>
+          <th pSortableColumn="source" style="width: 10%">Source <p-sortIcon field="source"></p-sortIcon></th>
+          <th style="width: 5%"></th>
+      </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-item>
+      <tr>
+          <td>{{ item.category }}</td>
+          <td>{{ item.amount }}</td>
+          <td>{{ item.expenseDate | date:'MM/dd/yy'}}</td>
+          <td>{{ item.description }}</td>
+          <td>{{ item.source }}</td>
+          <td>
+            <p-button icon="pi pi-eye" styleClass="p-button-text" (click)="editEntry(item)"></p-button>
+          </td>
+      </tr>
+  </ng-template>
+</p-table>
+<div class="mt-4 flex justify-content-center" *ngIf="!hidePagination">
+  <p-paginator (onPageChange)="onPageChange($event)" [rows]="rowsPerPage" [totalRecords]="totalRows"
+    [rowsPerPageOptions]="[10, 20, 50]"></p-paginator>
+</div>

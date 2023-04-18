@@ -29,6 +29,8 @@ import { CalendarModule } from 'primeng/calendar';
 import { PaginatorModule } from 'primeng/paginator';
 import { PaginatedList } from 'src/app/shared/model/paginated-list.model';
 import { ExpenseListComponent } from '../../ui/expense-list/expense-list.component';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { ExpenseTableViewComponent } from '../../ui/expense-table-view/expense-table-view.component';import { TabViewModule } from 'primeng/tabview';
 // import { ExpenseListRoutingModule } from './expense-list-routing.module';
 
 @Component({
@@ -44,38 +46,18 @@ import { ExpenseListComponent } from '../../ui/expense-list/expense-list.compone
     ToolbarModule,
     CalendarModule,
     PaginatorModule,
-    ExpenseListComponent
+    ExpenseListComponent,
+    SelectButtonModule,
+    ExpenseTableViewComponent,
+    TabViewModule
   ],
   templateUrl: './expense-list.page.component.html',
   styleUrls: ['./expense-list.page.component.scss'],
 })
 export class ExpenseListPageComponent implements OnInit {
-  products = [
-    {
-      id: '1000',
-      code: 'f230fh0g3',
-      name: 'Bamboo Watch',
-      description: 'Product Description',
-      image: 'bamboo-watch.jpg',
-      price: 65,
-      category: 'Accessories',
-      quantity: 24,
-      inventoryStatus: 'INSTOCK',
-      rating: 5,
-    },
-    {
-      id: '1000',
-      code: 'f230fh0g3',
-      name: 'Bamboo Watch',
-      description: 'Product Description',
-      image: 'bamboo-watch.jpg',
-      price: 65,
-      category: 'Accessories',
-      quantity: 24,
-      inventoryStatus: 'INSTOCK',
-      rating: 5,
-    },
-  ];
+
+  toggleViewStateOptions = [{label: 'Compact', value: 'compact'}, {label: 'Table', value: 'table'}];
+  toggleViewValue = 'table';
 
   categories = [
     null,
