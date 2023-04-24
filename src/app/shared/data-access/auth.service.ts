@@ -69,7 +69,6 @@ export class AuthService {
    */
   public signOut() {
     this.afAuth.signOut().then(() => {
-      console.log('[DEBUG] signout');
       this.googleLoginStatus(false);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
@@ -91,7 +90,6 @@ export class AuthService {
   }
 
   public googleLoginStatus(status: boolean) {
-    console.log('[DEBUG] googleLoginStatus', status);
     sessionStorage.setItem('googleLoginStatus', status?.toString());
     this.googleLoginInProgress$.next(status);
   }

@@ -1,44 +1,93 @@
-<div [formGroup]="filterForm">
-  <p-toolbar>
-    <div class="p-toolbar-group-start gap-2">
-      <div class="p-float-label">
-        <p-calendar id="dateFrom" formControlName="dateFrom" dateFormat="dd-M-yy"></p-calendar>
-        <label htmlFor="dateFrom">Date From</label>
+
+<div class="flex ">
+  <!-- col -->
+  <div class="w-8 p-4 border-solid border-1 surface-border border-round-md bg-black-alpha-40 table-wrapper">
+    <div [formGroup]="filterForm" class="flex mb-4  align-items-end">
+      <div class="flex gap-2 flex-grow-1  align-items-end">
+        <div class="flex flex-column gap-2 p-fluid">
+          <label htmlFor="view">View</label>
+          <p-dropdown formControlName="view" [options]="dateViewOptions" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
+        </div>
+        <div class="flex flex-column gap-2 p-fluid">
+          <label htmlFor="dateFrom">Date From</label>
+          <p-calendar id="dateFrom" formControlName="dateFrom" dateFormat="dd-M-yy"></p-calendar>
+        </div>
+        <div class="flex flex-column gap-2 p-fluid">
+          <label htmlFor="dateTo">Date To</label>
+          <p-calendar id="dateTo" formControlName="dateTo" dateFormat="dd-M-yy"></p-calendar>
+        </div>
+        <div class="flex flex-column gap-2 p-fluid">
+          <label htmlFor="category">Category</label>
+          <p-dropdown formControlName="category" [options]="categories" optionLabel="name" id="category"></p-dropdown>
+        </div>
+        <p-button icon="pi {{  (filterInProgress$ | async) ? 'pi-spin pi-spinner' : 'pi-search' }}"
+          styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
+        <p-button icon="pi pi-filter-slash" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
       </div>
-      <div class="p-float-label">
-        <p-calendar id="dateTo" formControlName="dateTo" dateFormat="dd-M-yy"></p-calendar>
-        <label htmlFor="dateTo">Date To</label>
-      </div>
-      <div class="p-float-label">
-        <p-dropdown formControlName="category" [options]="categories" optionLabel="name" id="category"></p-dropdown>
-        <label htmlFor="category">Category</label>
-      </div>
-      <p-button icon="pi {{  (filterInProgress$ | async) ? 'pi-spin pi-spinner' : 'pi-search' }}"
-        styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
-      <p-button icon="pi pi-filter-slash" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
-    </div>
-    <div class="p-toolbar-group-end">
       <p-button icon="pi pi-plus" styleClass="p-button-rounded " (click)="addEntry()"></p-button>
     </div>
-  </p-toolbar>
-</div>
-<div class="flex justify-content-end gap-2 p-2">
-  <p-selectButton [options]="toggleViewStateOptions" [(ngModel)]="toggleViewValue" optionLabel="label"
-    optionValue="value"></p-selectButton>
-</div>
-<ng-container *ngIf="data$ | async as data; else noResult">
-  <div class="card mt-4" *ngIf="data.data.length > 0; else noResult">
-    <app-expense-list *ngIf="toggleViewValue === 'compact'" [items]="data.data" [totalRows]="data.totalRows"
-      [rowsPerPage]="rowsPerPage" (selected)="editEntry($event)"
-      (onPageChange)="onPageChange($event)"></app-expense-list>
-    <app-expense-table-view *ngIf="toggleViewValue === 'table'" [items]="data.data" [totalRows]="data.totalRows"
-      [rowsPerPage]="rowsPerPage" (selected)="editEntry($event)"
-      (onPageChange)="onPageChange($event)"></app-expense-table-view>
-  </div>
-</ng-container>
+    <!-- <div class="flex justify-content-end gap-2 ">
+      <p-selectButton [options]="toggleViewStateOptions" [(ngModel)]="toggleViewValue" optionLabel="name"
+        optionValue="id"></p-selectButton>
+    </div> -->
+    <ng-container *ngIf="data$ | async as data; else noResult">
+      <div class="card mt-4" *ngIf="data.data.length > 0; else noResult">
+        <app-expense-list *ngIf="toggleViewValue === 'compact'" [items]="data.data" [totalRows]="data.totalRows"
+          [rowsPerPage]="rowsPerPage" (selected)="editEntry($event)"
+          (onPageChange)="onPageChange($event)"></app-expense-list>
+        <app-expense-table-view *ngIf="toggleViewValue === 'table'" [items]="data.data" (selected)="editEntry($event)"
+          (onPageChange)="onPageChange($event)"></app-expense-table-view>
+      </div>
+    </ng-container>
 
-<ng-template #noResult>
-  <div class="mt-4 card flex justify-content-center">
-    <span>No result</span>
+    <ng-template #noResult>
+      <div class="mt-4 card flex justify-content-center">
+        <span>No result</span>
+      </div>
+    </ng-template>
   </div>
+  <!-- /col -->
+
+  <!-- col -->
+  <div class="w-4 px-4 flex flex-column gap-4" *ngIf="dailyTotal$ | async; let obj">
+    <div class="p-fluid">
+      <p-calendar class="max-w-full" [(ngModel)]="calendarDate" [inline]="true" (onMonthChange)="onMonthChange($event)" (onSelect)="onSelectedDate($event)">
+        <ng-template pTemplate="date" let-date>
+          <div class="flex flex-column align-items-center justify-content-end">
+            <span class="p-1 text-xl">{{ date.day }}</span>
+            <span *ngIf="obj[date.year + '-' + (date.month + 1) + '-' + date.day]; else defaultDay; let day" class="p-1 text-xs surface-100 border-round">
+              {{ day | number: '0.0' }}
+            </span>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+          <div class="p-2 flex justify-content-between gap-2 align-items-center">
+            <div class="p-2 flex justify-content-start gap-2 align-items-center flex-grow-1">
+              <ng-container *ngIf="calendarDate; else noSelectedDate">
+                <span>Selected Date: </span>
+                <span class="font-bold">{{ calendarDate | date: 'dd-MMM-yyy'}}</span>
+              </ng-container>
+              <ng-template #noSelectedDate>
+                <span >No date selected</span>
+              </ng-template>
+            </div>
+            <p-button *ngIf="calendarDate" icon="pi pi-search" label="Apply Date Filter" styleClass="p-button-rounded" (click)="applyDateFilter()"></p-button>
+          </div>
+        </ng-template>
+      </p-calendar>
+    </div>
+    <div class="border-solid border-1 surface-border border-round-md p-4 bg-black-alpha-40">
+      <div class="flex gap-2 align-items-center justify-content-between">
+        <span class="text-2xl">Categories</span>
+        <div class="font-italic text-sm" *ngIf="filter$ | async as filter">(filtered data from {{ filter.dateFrom | date: 'MMM-dd-yyy'}} to {{ filter.dateTo | date: 'MMM-dd-yyy'}})</div>
+      </div>
+      <app-expense-per-category *ngIf="totalPerCategory$ | async as items" [items]="items"></app-expense-per-category>
+    </div>
+  </div>
+  <!-- /col -->
+</div>
+
+<ng-template #defaultDay>
+  <span class="py-2 text-xs">&nbsp;</span>
 </ng-template>

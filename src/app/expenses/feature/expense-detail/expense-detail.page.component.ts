@@ -45,18 +45,8 @@ export class ExpenseDetailComponent implements OnInit {
   expenseForm!: FormGroup;
 
   categories = [
-    {
-      id: null,
-      name: '',
-    },
-    {
-      id: 1,
-      name: 'Bills',
-    },
-    {
-      id: 2,
-      name: 'Foods',
-    },
+    { id: 1, name: 'Bills' },
+    { id: 2, name: 'Foods' },
   ];
   fundSources = [{ id: 1, name: 'Cash' }];
 

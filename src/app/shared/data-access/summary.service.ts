@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { SummaryResult } from '../model/summary-result.model';
 import { TotalPerCategory } from '../model/total-per-category.mode';
+import { TotalPerDate } from '../model/total-per-date';
 
 
 @Injectable({
@@ -37,6 +38,15 @@ export class SummaryService {
   getMonthlySummaryByYear(year: number) {
     return this.http.get<SummaryResult[]>(`${this.baseUrl}/GetSummaryByRange`, {
       params: { year }
+    });
+  }
+
+  getDailyTotalByDateRange(startDate: string, endDate: string) {
+    return this.http.get<TotalPerDate[]>(`${this.baseUrl}/GetDailyTotalByDateRange`, {
+      params: {
+        startDate,
+        endDate
+      }
     });
   }
 

@@ -1,13 +1,26 @@
 import { AuthService } from './shared/data-access/auth.service';
 import { Component, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { ActivatedRoute, NavigationEnd, NavigationStart, Router } from '@angular/router';
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  NavigationStart,
+  ParamMap,
+  Router,
+} from '@angular/router';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { MenuItem } from 'primeng/api/menuitem';
 import { ToastService } from './shared/utils/toast.service';
 import { Message, MessageService } from 'primeng/api';
 import { ValidationMessageService } from './shared/utils/validation-message.service';
-import { Observable, combineLatest, filter, map, startWith } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  filter,
+  map,
+  startWith,
+} from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +38,12 @@ export class AppComponent implements OnInit {
   showViewAllExpensesButton$: Observable<boolean>;
   showNewButton$: Observable<boolean>;
 
+  showActionButtons = false;
+  showViewAllExpensesButton = false;
+  showNewButton = false;
+
+  queryParams$ = new BehaviorSubject<ParamMap | null>(null);
+
   constructor(
     private afAuth: AngularFireAuth,
     private router: Router,
@@ -36,45 +55,51 @@ export class AppComponent implements OnInit {
   ) {
     this.validationMessagService.message$.subscribe((v) => {
       if (v) {
-        this.validationMessages = [v,...this.validationMessages];
+        this.validationMessages = [v, ...this.validationMessages];
       }
-    })
+    });
+
+    this.route.queryParamMap.subscribe((v) => {
+      this.queryParams$.next(v);
+    });
 
     const url$ = this.router.events.pipe(
-      filter(event => {
-        return event instanceof NavigationEnd
+      filter((event) => {
+        return event instanceof NavigationEnd;
       }),
       map((event: any) => router.url.split('?')[0])
     );
-    this.showNewButton$ = url$.pipe(
-      map(url => ['/', '/expenses'].includes(url))
-    )
+
+    url$.subscribe((url) => {
+      this.showNewButton = ['/'].includes(url);
+      this.showViewAllExpensesButton = ['/'].includes(url);
+      this.showActionButtons =
+        this.showNewButton && this.showViewAllExpensesButton;
+    });
+    this.showNewButton$ = url$.pipe(map((url) => ['/'].includes(url)));
 
     this.showViewAllExpensesButton$ = url$.pipe(
-      map(url => ['/'].includes(url))
-    )
+      map((url) => ['/'].includes(url))
+    );
 
     this.showActionButtons$ = combineLatest([
       this.showViewAllExpensesButton$,
-      this.showNewButton$
-    ]).pipe(
-      map(v => v[0] || v[1])
-    )
+      this.showNewButton$,
+    ]).pipe(map((v) => v[0] || v[1]));
 
     this.validationMessagService.clear$.subscribe((v) => {
       this.validationMessages = [];
-    })
+    });
   }
 
   ngOnInit(): void {
     this.accountMenuItems = [
       { label: 'Logout', command: () => this.signOut() },
     ];
-
-
   }
 
   signOut() {
+    console.log('[DEBUG] signOut');
     this.authService.signOut();
   }
 
@@ -83,10 +108,10 @@ export class AppComponent implements OnInit {
   }
 
   viewExpenses() {
+    const view = this.queryParams$.value?.get('view');
     this.router.navigate(['/expenses'], {
       queryParams: {
-        // startDate: '2022',
-        // endDate: this.filter$.value?.endDate,
+        view,
       },
     });
   }

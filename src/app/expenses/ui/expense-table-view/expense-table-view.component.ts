@@ -15,33 +15,10 @@ import { PaginatorModule } from 'primeng/paginator';
 export class ExpenseTableViewComponent {
 
   @Input() items: Expense[] = [];
-  _totalRows!: number;
-  @Input() set totalRows(value: number) {
-    this._totalRows = value ?? this.items.length;
-  }
-  get totalRows() {
-    return this._totalRows;
-  }
-
-  _rowsPerPage!: number;
-  @Input() set rowsPerPage(value: number) {
-    this._rowsPerPage = value ?? 10;
-  }
-  get rowsPerPage() {
-    return this._rowsPerPage;
-  }
-
-  @Input() hidePagination = false;
-  @Output('onPageChange') pageChange = new EventEmitter<any>();
   @Output() selected = new EventEmitter<Expense>();
 
 
   editEntry(item: Expense) {
     this.selected.emit(item);
-  }
-
-
-  onPageChange(event: any) {
-    this.pageChange.emit(event);
   }
 }

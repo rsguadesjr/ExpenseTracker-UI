@@ -35,6 +35,7 @@ import {
 } from 'date-fns';
 import { SummaryService } from 'src/app/shared/data-access/summary.service';
 import { SpeedDialModule } from 'primeng/speeddial';
+import { DateParamService } from 'src/app/shared/utils/date-param.service';
 
 @Component({
   selector: 'app-home',
@@ -67,7 +68,8 @@ export class HomeComponent {
     private expenseService: ExpenseService,
     private router: Router,
     private route: ActivatedRoute,
-    private summaryService: SummaryService
+    private summaryService: SummaryService,
+    private dateParamService: DateParamService
   ) {
     this.selectedView$ = this.route.queryParamMap.pipe(
       map((v) => {
@@ -79,47 +81,49 @@ export class HomeComponent {
     );
 
     const filter$ = this.selectedView$.pipe(
-      map((view) => {
-        let startDate;
-        let endDate;
-        let date = new Date();
-        switch (view) {
-          case 'week':
-            date =
-              new Date().getDay() == 0
-                ? add(new Date(), { days: -1 })
-                : new Date();
-            startDate = add(startOfWeek(date), { days: 1 });
-            endDate = add(endOfWeek(date), { days: 1 });
-            this.dateRangeLabel = `${format(startDate, 'MMMM dd')} - ${format(
-              endDate,
-              'MMMM dd'
-            )}`;
-            break;
-          case 'month':
-            startDate = startOfMonth(date);
-            endDate = endOfMonth(date);
-            this.dateRangeLabel = `Month of ${format(date, 'MMMM')}`;
-            break;
-          case 'year':
-            startDate = startOfYear(date);
-            endDate = endOfYear(date);
-            this.dateRangeLabel = `Year ${format(date, 'yyyy')}`;
-            break;
-          case 'day':
-          default:
-            startDate = startOfDay(date);
-            endDate = endOfDay(date);
-            this.dateRangeLabel = `${format(date, 'MMMM dd')}`;
-            break;
-        }
+      map((view: any) => {
+        return this.dateParamService.getDateRange(view);
+        // let startDate;
+        // let endDate;
+        // let date = new Date();
+        // switch (view) {
+        //   case 'week':
+        //     date =
+        //       new Date().getDay() == 0
+        //         ? add(new Date(), { days: -1 })
+        //         : new Date();
+        //     startDate = add(startOfWeek(date), { days: 1 });
+        //     endDate = add(endOfWeek(date), { days: 1 });
+        //     this.dateRangeLabel = `${format(startDate, 'MMMM dd')} - ${format(
+        //       endDate,
+        //       'MMMM dd'
+        //     )}`;
+        //     break;
+        //   case 'month':
+        //     startDate = startOfMonth(date);
+        //     endDate = endOfMonth(date);
+        //     this.dateRangeLabel = `Month of ${format(date, 'MMMM')}`;
+        //     break;
+        //   case 'year':
+        //     startDate = startOfYear(date);
+        //     endDate = endOfYear(date);
+        //     this.dateRangeLabel = `Year ${format(date, 'yyyy')}`;
+        //     break;
+        //   case 'day':
+        //   default:
+        //     startDate = startOfDay(date);
+        //     endDate = endOfDay(date);
+        //     this.dateRangeLabel = `${format(date, 'MMMM dd')}`;
+        //     break;
+        // }
 
-        return {
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
-        };
+        // return {
+        //   startDate: startDate.toISOString(),
+        //   endDate: endDate.toISOString(),
+        // };
       }),
       tap((value) => {
+        this.dateRangeLabel = value.displayText;
         this.filter$.next({
           startDate: value.startDate,
           endDate: value.endDate,
