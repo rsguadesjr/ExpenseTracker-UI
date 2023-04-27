@@ -57,6 +57,7 @@ import {
   startOfMonth,
 } from 'date-fns';
 import { isSameDay } from 'date-fns';
+import { SumPipe } from 'src/app/shared/utils/sum.pipe';
 // import { ExpenseListRoutingModule } from './expense-list-routing.module';
 
 @Component({
@@ -79,6 +80,7 @@ import { isSameDay } from 'date-fns';
     ExpensePerCategoryComponent,
     CardModule,
     BadgeModule,
+    SumPipe
   ],
   templateUrl: './expense-list.page.component.html',
   styleUrls: ['./expense-list.page.component.scss'],
@@ -244,15 +246,12 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
         this.filterForm.get('view')?.setValue(null, { emitEvent: false });
       });
 
-    setTimeout(() => {
-      const date = new Date();
-      this.calendarDateRange$.next({
-        dateFrom: startOfMonth(date),
-        dateTo: endOfMonth(date),
-      });
-    }, 500);
+
     const date = new Date();
-    const isoString = formatISO(date);
+    this.calendarDateRange$.next({
+      dateFrom: startOfMonth(date),
+      dateTo: endOfMonth(date),
+    });
   }
 
   ngOnDestroy(): void {

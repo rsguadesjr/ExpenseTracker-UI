@@ -4,7 +4,7 @@
       <div class="mb-4 text-2xl">
         Sign in
       </div>
-      <ng-container *ngIf="authService.googleLoginInProgress$ | async else googleSignIn">
+      <ng-container *ngIf="googleLoginInProgress else googleSignIn">
         <button pButton pRipple label="Login in progress..." icon="pi pi-spin pi-spinner"></button>
       </ng-container>
       <ng-template #googleSignIn>

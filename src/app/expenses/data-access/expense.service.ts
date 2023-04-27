@@ -1,5 +1,5 @@
 import { environment } from './../../../environments/environment';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Expense } from '../model/expense.model';
 import { HttpClient } from '@angular/common/http';
@@ -10,7 +10,11 @@ import { PaginatedList } from 'src/app/shared/model/paginated-list.model';
   providedIn: 'root'
 })
 export class ExpenseService {
+
   baseUrl: string;
+
+  expenses$ = new BehaviorSubject<Expense[] | undefined>(undefined);
+
   constructor(private http: HttpClient) {
     this.baseUrl = environment.API_BASE_URL + 'api/expenses';
   }

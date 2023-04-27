@@ -32,17 +32,10 @@ export class AuthService {
 
     afAuth.authState.subscribe((user) => {
       this.firebaseUser$.next(user);
-      if (user) {
-        user.getIdToken(true).then((token) => {
-          this.firebaseToken$.next({...user, token});
-        });
-      } else {
-        this.firebaseToken$.next(null);
-      }
     });
 
-    const googleLoginStatus = sessionStorage.getItem('googleLoginStatus');
-    this.googleLoginStatus(googleLoginStatus?.toLowerCase() === 'true');
+    // const googleLoginStatus = sessionStorage.getItem('googleLoginStatus');
+    // this.googleLoginStatus(googleLoginStatus?.toLowerCase() === 'true');
 
     const user = JSON.parse((localStorage.getItem('user') || null ) as any);
     this.user$.next(user);

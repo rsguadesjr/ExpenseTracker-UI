@@ -1,12 +1,13 @@
 <div class="card mt-4">
   <div *ngFor="let item of items; let i = index" class="flex flex-row border-50"
     [ngClass]="{ 'border-bottom-1': i < items.length - 1}">
-    <div class="flex p-2">
+    <!-- <div class="flex p-2">
       icon here
-    </div>
-    <div class="flex flex-column flex-grow-1 p-2 gap-2">
-      <div class="text-2xl font-bold text-primary">{{ item.category }}</div>
-      <div class="text-sm text-300">{{ item.total | number: '0.0' }}</div>
+    </div> -->
+    <div class="flex flex-grow-1 p-1 gap-2 align-items-center">
+      <div class="text-xl font-bold text-primary">{{ item.category }}</div>
+      <div class="text-sm text-300">({{ item.total | number: '0.0' }})</div>
+      <div class="text-sm text-300">({{ item.total / totalAmount | percent }})</div>
     </div>
   </div>
   <div class="p-2 mt-4">
