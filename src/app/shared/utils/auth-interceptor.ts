@@ -23,6 +23,8 @@ import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+  retry = true;
+
   constructor(
     private jwtHelper: JwtHelperService,
     private authService: AuthService
@@ -60,8 +62,32 @@ export class AuthInterceptor implements HttpInterceptor {
           httpErrorResponse: HttpErrorResponse,
           _: Observable<HttpEvent<any>>
         ) => {
+          console.log('[DEBUG] httpErrorResponse', {
+            httpErrorResponse,
+            retry: this.retry,
+          })
           if (httpErrorResponse.status === HttpStatusCode.Unauthorized) {
-            this.authService.signOut();
+            console.log('[DEBUG] retry', {
+              httpErrorResponse,
+              retry: this.retry,
+            })
+            if (this.retry) {
+              this.retry = !this.retry;
+              return from(this.handle(req, next, true))
+                      .pipe(
+                        catchError((
+                          httpErrorResponse: HttpErrorResponse,
+                          _: Observable<HttpEvent<any>>
+                        )  => {
+                          console.log('[DEBUG] Logout 2');
+                          return throwError(() => httpErrorResponse);
+                        })
+                      )
+            } else {
+              this.retry = !this.retry;
+              console.log('[DEBUG] Logout');
+              // this.authService.signOut();
+            }
           }
           return throwError(() => httpErrorResponse);
         }
@@ -69,25 +95,19 @@ export class AuthInterceptor implements HttpInterceptor {
     );
   }
 
-  private async handle(req: HttpRequest<any>, next: HttpHandler) {
+
+  private async handle(req: HttpRequest<any>, next: HttpHandler, forceRetry?: boolean) {
+    console.log('[DEBUG] handle', {
+      req,
+      next,
+      forceRetry
+    })
     // Get the auth token from the service.
     let accessToken: string = localStorage.getItem('accessToken') || '';
 
-    if (accessToken && this.jwtHelper.isTokenExpired(accessToken)) {
-      accessToken = await this.authService.firebaseUser$?.value?.getIdToken(
-        true
-      );
+    if (accessToken && (this.jwtHelper.isTokenExpired(accessToken) || forceRetry)) {
+      accessToken = await this.authService.firebaseUser$?.value?.getIdToken(true);
       localStorage.setItem('accessToken', accessToken ?? '');
-      // if (this.jwtHelper.isTokenExpired(accessToken)) {
-      //   accessToken = await this.authService.firebaseUser$?.value?.getIdToken(true);
-      //   localStorage.setItem('accessToken', accessToken ?? '');
-      // }
-      // console.log('[DEBUG] AuthInterceptor 2', {
-      //   decodedToken:  this.jwtHelper.decodeToken(accessToken),
-      //   isTokenExpired: this.jwtHelper.isTokenExpired(accessToken)
-      // })
-    } else {
-      // redirect to login
     }
 
     // Clone the request and replace the original headers with

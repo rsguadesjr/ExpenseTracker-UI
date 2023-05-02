@@ -1,7 +1,7 @@
 import { ExpenseService } from '../../data-access/expense.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Optional } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -23,6 +23,7 @@ import { SourceService } from 'src/app/shared/data-access/source.service';
 import { Option } from 'src/app/shared/model/option.model';
 import { startOfDay } from 'date-fns';
 import { CardModule } from 'primeng/card';
+import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-expense-detail',
@@ -39,16 +40,10 @@ import { CardModule } from 'primeng/card';
   ],
   templateUrl: './expense-detail.page.component.html',
   styleUrls: ['./expense-detail.page.component.scss'],
-  providers: [ExpenseService],
+  providers: [],
 })
 export class ExpenseDetailComponent implements OnInit {
   expenseForm!: FormGroup;
-
-  categories = [
-    { id: 1, name: 'Bills' },
-    { id: 2, name: 'Foods' },
-  ];
-  fundSources = [{ id: 1, name: 'Cash' }];
 
   isEdit = false;
   expenseId?: string;
@@ -65,7 +60,9 @@ export class ExpenseDetailComponent implements OnInit {
     private alertService: ToastService,
     private validationMessageService: ValidationMessageService,
     private categoryService: CategoryService,
-    private sourceService: SourceService
+    private sourceService: SourceService,
+    @Optional() public dialogConfig: DynamicDialogConfig,
+    @Optional() private dialogRef: DynamicDialogRef
   ) {
     this.expenseForm = new FormGroup({
       category: new FormControl(null, [Validators.required]),
@@ -75,22 +72,36 @@ export class ExpenseDetailComponent implements OnInit {
       ]),
       date: new FormControl(startOfDay(new Date()), Validators.required),
       description: new FormControl(null, [Validators.required]),
-      source: new FormControl(null, [Validators.required]),
+      source: new FormControl({ id: 1, name: 'Cash' }, [Validators.required]),
     });
 
-    this.isEdit =
-      route.snapshot.url.length > 0 && route.snapshot.url[0]?.path == 'edit';
+    console.log('[DEBUG] dialogConfig', dialogConfig)
+    let expenseId$: Observable<string>;
+    if (dialogConfig) {
+      this.isEdit = dialogConfig.data.isEdit;
+      expenseId$ = of(dialogConfig.data.id);
+    } else {
+      this.isEdit = (route.snapshot.url.length > 0 && route.snapshot.url[0]?.path == 'edit');
+      expenseId$ = route.params.pipe(
+        map(x => x['id'])
+      );
+    }
+
+
     if (this.isEdit) {
-      this.isEdit = true;
-      route.params
+      expenseId$
         .pipe(take(1))
         .pipe(
-          switchMap((v) => {
-            this.expenseId = v['id'];
+          switchMap((id) => {
+            console.log('[DEBUG] dialogConfig 2', id)
+            this.expenseId = id;
 
-            // TODO: navigate to home and show an error
             if (!this.expenseId) {
-              this.router.navigate(['/']);
+              if (dialogRef)
+                dialogRef.close();
+              else
+                this.router.navigate(['/']);
+
               return of();
             }
 
@@ -99,13 +110,15 @@ export class ExpenseDetailComponent implements OnInit {
         )
         .subscribe({
           next: (value) => {
-            this.expenseForm.patchValue({
-              category: { id: value.categoryId, name: value.category },
-              date: new Date(value.expenseDate),
-              description: value.description,
-              amount: value.amount,
-              source: { id: value.sourceId, name: value.source },
-            });
+            if (value) {
+              this.expenseForm.patchValue({
+                category: { id: value.categoryId, name: value.category },
+                date: new Date(value.expenseDate),
+                description: value.description,
+                amount: value.amount,
+                source: { id: value.sourceId, name: value.source },
+              });
+            }
           },
           error: (error) => {
             console.log('[DEBUG] error', error)
@@ -148,7 +161,11 @@ export class ExpenseDetailComponent implements OnInit {
         .subscribe({
           next: (v) => {
             this.alertService.showSuccess('Updated expense');
-            this.location.back();
+            if (this.dialogRef) {
+              this.dialogRef.close();
+            } else {
+              this.location.back();
+            }
           },
           error: (v) => {
             this.alertService.showError('An error occured while adding updating expense')
@@ -161,7 +178,11 @@ export class ExpenseDetailComponent implements OnInit {
         .subscribe({
           next: (v) => {
             this.alertService.showSuccess('Added new expense');
-            this.location.back();
+            if (this.dialogRef) {
+              this.dialogRef.close();
+            } else {
+              this.location.back();
+            }
           },
           error: (v) => {
             this.alertService.showError('An error occured while adding new expense')
@@ -174,6 +195,10 @@ export class ExpenseDetailComponent implements OnInit {
 
   cancel() {
     this.expenseForm.reset();
-    this.location.back();
+
+    if (this.dialogRef)
+      this.dialogRef.close();
+    else
+      this.location.back();
   }
 }

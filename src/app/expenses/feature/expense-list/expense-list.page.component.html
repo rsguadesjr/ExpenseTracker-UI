@@ -16,10 +16,10 @@
           <label htmlFor="dateTo">Date To</label>
           <p-calendar id="dateTo" formControlName="dateTo" dateFormat="dd-M-yy"></p-calendar>
         </div>
-        <div class="flex flex-column gap-2 p-fluid">
+        <!-- <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="category">Category</label>
           <p-dropdown formControlName="category" [options]="categories" optionLabel="name" id="category"></p-dropdown>
-        </div>
+        </div> -->
         <p-button icon="pi {{  (filterInProgress$ | async) ? 'pi-spin pi-spinner' : 'pi-search' }}"
           styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
         <p-button icon="pi pi-filter-slash" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
@@ -33,13 +33,13 @@
     <ng-container *ngIf="data$ | async as data; else noResult">
       <div class="flex gap-2 align-items-center py-2">
         <span>Total spent for this period:</span>
-        <span class="text-xl">{{ data.data | sum: 'amount' | number: '0.0'}}</span>
+        <span class="text-xl">{{ data | sum: 'amount' | number: '0.0'}}</span>
       </div>
-      <div class="card" *ngIf="data.data.length > 0; else noResult">
-        <app-expense-list *ngIf="toggleViewValue === 'compact'" [items]="data.data" [totalRows]="data.totalRows"
+      <div class="card" *ngIf="data.length > 0; else noResult">
+        <!-- <app-expense-list *ngIf="toggleViewValue === 'compact'" [items]="data.data" [totalRows]="data.totalRows"
           [rowsPerPage]="rowsPerPage" (selected)="editEntry($event)"
-          (onPageChange)="onPageChange($event)"></app-expense-list>
-        <app-expense-table-view *ngIf="toggleViewValue === 'table'" [items]="data.data" (selected)="editEntry($event)"
+          (onPageChange)="onPageChange($event)"></app-expense-list> -->
+        <app-expense-table-view *ngIf="toggleViewValue === 'table'" [items]="data" (selected)="editEntry($event)"
           (onPageChange)="onPageChange($event)"></app-expense-table-view>
       </div>
     </ng-container>

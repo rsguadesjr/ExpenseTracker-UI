@@ -15,6 +15,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './shared/utils/auth-interceptor';
 import { ToastService } from './shared/utils/toast.service';
 import { MessageService } from 'primeng/api';
+import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
 
 export function tokenGetter() {
   return localStorage.getItem("accessToken");
@@ -37,7 +38,8 @@ export function tokenGetter() {
         disallowedRoutes: [],
       },
     }),
-    HttpClientModule
+    HttpClientModule,
+    DynamicDialogModule
   ],
   providers: [
     { provide: JWT_OPTIONS, useValue: JWT_OPTIONS },
@@ -45,7 +47,8 @@ export function tokenGetter() {
     JwtHelperService,
     AuthGuard,
     MessageService,
-    ToastService
+    ToastService,
+    DialogService
   ],
   bootstrap: [AppComponent],
 })

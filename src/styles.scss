@@ -64,3 +64,14 @@ body {
     }
   }
 }
+
+
+.component-dialog {
+  .p-dialog-content {
+    padding: 0;
+    .form {
+      width: 100% !important;
+      height: 100% !important;
+    }
+  }
+}

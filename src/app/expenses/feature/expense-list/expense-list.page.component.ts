@@ -58,7 +58,9 @@ import {
 } from 'date-fns';
 import { isSameDay } from 'date-fns';
 import { SumPipe } from 'src/app/shared/utils/sum.pipe';
-// import { ExpenseListRoutingModule } from './expense-list-routing.module';
+import { ExpenseDto } from '../../model/expense-dto.model';
+import { DialogService } from 'primeng/dynamicdialog';
+import { ExpenseDetailComponent } from '../expense-detail/expense-detail.page.component';
 
 @Component({
   selector: 'app-expense-list-page',
@@ -80,8 +82,9 @@ import { SumPipe } from 'src/app/shared/utils/sum.pipe';
     ExpensePerCategoryComponent,
     CardModule,
     BadgeModule,
-    SumPipe
+    SumPipe,
   ],
+  providers: [SumPipe],
   templateUrl: './expense-list.page.component.html',
   styleUrls: ['./expense-list.page.component.scss'],
 })
@@ -94,7 +97,6 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   ];
   toggleViewValue = 'table';
 
-
   categories: Option[] = [
     { id: null, name: '' },
     { id: 1, name: 'Bills' },
@@ -102,7 +104,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   ];
   filterForm!: FormGroup;
   filter$ = new BehaviorSubject<any>(undefined);
-  data$!: Observable<PaginatedList<Expense>>;
+  data$!: Observable<ExpenseDto[]>;
   filterInProgress$ = new BehaviorSubject<boolean>(false);
   totalPerCategory$!: Observable<TotalPerCategory[]>;
 
@@ -128,48 +130,92 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private summaryService: SummaryService,
     private dateParamService: DateParamService,
-    private validationMessageService: ValidationMessageService
+    private validationMessageService: ValidationMessageService,
+    private sumPipe: SumPipe,
+    private dialogService: DialogService
   ) {
     this.createForm();
   }
 
-  ngOnInit(): void {
-    // this will contain the id or list of expenses
-    this.data$ = this.filter$.pipe(
-      filter((v) => !!v),
-      tap(() => this.filterInProgress$.next(true)),
-      debounceTime(500),
-      switchMap((filter) => this.expenseService.getExpenses(filter)),
-      tap(() => this.filterInProgress$.next(false)),
-      catchError((err) => {
-        this.filterInProgress$.next(false);
-        // call alert service
-        return of<PaginatedList<Expense>>({
-          totalRows: 0,
-          currentPage: 0,
-          data: [],
-        });
+  ngOnInit() {
+    // execture every time applyFilter/applyDateFilter is triggered
+    this.filter$
+      .pipe(
+        takeUntil(this.ngUnsubscribe$),
+        skip(1),
+        tap((x) => {
+          this.filterInProgress$.next(true);
+        })
+      )
+      .subscribe((filter) => {
+        this.expenseService.initExpenses(filter);
+      });
+
+    // data to be used for the table
+    this.data$ = this.expenseService.getExpenseData().pipe(
+      tap((result) => {
+        this.filterInProgress$.next(result.status === 'LOADING');
+      }),
+      map((result) => {
+        return result.data;
       })
     );
 
-    // TODO: remove seconds from date params
-    // this will contain the sum of expenses per category
-    this.totalPerCategory$ = this.filter$.pipe(
-      filter((v) => !!v),
-      // tap(() => this.filterInProgress$.next(true)),
-      debounceTime(500),
-      switchMap((filter) => {
-        const dateFrom = filter.dateFrom?.toISOString().slice(0, -5) + 'Z';
-        const dateTo = filter.dateTo?.toISOString().slice(0, -5) + 'Z';
-        return this.summaryService.getTotalAmountPerCategory(dateFrom, dateTo);
-      }),
-      // tap(() => this.filterInProgress$.next(false)),
-      catchError((err) => {
-        this.filterInProgress$.next(false);
-        // call alert service
-        return of<TotalPerCategory[]>([]);
+    // data to be used for category summarization
+    this.totalPerCategory$ = this.expenseService.getExpenseData().pipe(
+      map(({ data }) => {
+        const categoryIds = Array.from(new Set(data.map((d) => d.categoryId)));
+        const result = categoryIds.map((categoryId) => {
+          const category = data.find(
+            (x) => x.categoryId == categoryId
+          )?.category;
+          const dataPerCategory = data.filter((x) => x.category === category);
+          const total = this.sumPipe.transform(dataPerCategory, 'amount');
+          return <TotalPerCategory>{
+            total,
+            category,
+            categoryId: Number(categoryId),
+          };
+        });
+
+        return result.sort((a, b) => b.total - a.total);
       })
     );
+
+    // // auto populate date fields based on view value
+    // this will listen to route changes and filter change
+    combineLatest([
+      this.filterForm.get('view')!.valueChanges.pipe(startWith('')),
+      this.route.queryParamMap.pipe(map((v) => v.get('view'))),
+    ])
+      .pipe(takeUntil(this.ngUnsubscribe$))
+      .subscribe(([v1, v2]) => {
+        const view = v1 || v2 || 'month';
+        const dateParam = this.dateParamService.getDateRange(view);
+
+        this.filterForm
+          .get('dateFrom')
+          ?.setValue(new Date(dateParam.startDate), { emitEvent: false });
+        this.filterForm
+          .get('dateTo')
+          ?.setValue(new Date(dateParam.endDate), { emitEvent: false });
+        this.filterForm.get('view')?.setValue(view, { emitEvent: false });
+      });
+
+    // // will execute on initial load
+    // view$.pipe(startWith(''), debounceTime(1500), take(1)).subscribe((v) => {
+    //   this.applyFilter();
+    // });
+
+    // //
+    // combineLatest([
+    //   this.filterForm.get('dateFrom')!.valueChanges.pipe(startWith('')),
+    //   this.filterForm.get('dateTo')!.valueChanges.pipe(startWith('')),
+    // ])
+    //   .pipe(skip(1), takeUntil(this.ngUnsubscribe$))
+    //   .subscribe((v) => {
+    //     this.filterForm.get('view')?.setValue(null, { emitEvent: false });
+    //   });
 
     // this will contain the sum of expenses per category
     this.dailyTotal$ = this.calendarDateRange$.pipe(
@@ -178,7 +224,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
       tap(() => this.calendarLoadingInProgress$.next(true)),
       switchMap((filter) => {
         const dateFrom = filter.dateFrom?.toISOString();
-        const dateTo = filter.dateTo?.toISOString(); //?? new Date(2099, 1, 1).toISOString();
+        const dateTo = filter.dateTo?.toISOString();
         return this.summaryService.getDailyTotalByDateRange(dateFrom, dateTo);
       }),
       map((v) => {
@@ -208,50 +254,16 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
         return of({});
       })
     );
-
-
-    // auto populate date fields based on view value
-    const view$ = combineLatest([
-      this.filterForm.get('view')!.valueChanges,
-      this.route.queryParamMap.pipe(map((v) => v.get('view'))),
-    ]);
-
-    view$
-      .pipe(takeUntil(this.ngUnsubscribe$), startWith(''))
-      .subscribe(([v1, v2]) => {
-        const view = v1 || v2 || 'month';
-        const dateParam = this.dateParamService.getDateRange(view);
-
-        this.filterForm
-          .get('dateFrom')
-          ?.setValue(new Date(dateParam.startDate), { emitEvent: false });
-        this.filterForm
-          .get('dateTo')
-          ?.setValue(new Date(dateParam.endDate), { emitEvent: false });
-        this.filterForm.get('view')?.setValue(view, { emitEvent: false });
-      });
-
-    // will execute on initial load
-    view$.pipe(startWith(''), debounceTime(1500), take(1)).subscribe((v) => {
-      this.applyFilter();
-    });
-
-    //
-    combineLatest([
-      this.filterForm.get('dateFrom')!.valueChanges.pipe(startWith('')),
-      this.filterForm.get('dateTo')!.valueChanges.pipe(startWith('')),
-    ])
-      .pipe(skip(1), takeUntil(this.ngUnsubscribe$))
-      .subscribe((v) => {
-        this.filterForm.get('view')?.setValue(null, { emitEvent: false });
-      });
-
-
     const date = new Date();
     this.calendarDateRange$.next({
       dateFrom: startOfMonth(date),
       dateTo: endOfMonth(date),
     });
+
+    // TODO: UPDATE LOGIC HERE?????
+    setTimeout(() => {
+      this.applyFilter();
+    }, 500);
   }
 
   ngOnDestroy(): void {
@@ -268,27 +280,38 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  getSeverity(status: string): string {
-    switch (status) {
-      case 'INSTOCK':
-        return 'success';
-      case 'LOWSTOCK':
-        return 'warning';
-      case 'OUTOFSTOCK':
-        return 'danger';
-      default:
-        return '';
-    }
-  }
-
   // TODO: decide if this will be page navigation or will just open a modal
   addEntry() {
-    this.router.navigate(['expenses', 'new']);
+    // this.router.navigate(['expenses', 'new']);
+    this.dialogService.open(ExpenseDetailComponent, {
+      width: '70%',
+      header: 'Create',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      styleClass: 'component-dialog',
+      closeOnEscape: true,
+      data: {
+        isDialog: true
+      }
+    });
   }
 
   // TODO: udpate model
   editEntry(expense: any) {
-    this.router.navigate(['expenses', 'edit', expense.id]);
+    // this.router.navigate(['expenses', 'edit', expense.id]);
+    this.dialogService.open(ExpenseDetailComponent, {
+      width: '70%',
+      header: 'Update',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      styleClass: 'component-dialog',
+      closeOnEscape: true,
+      data: {
+        isDialog: true,
+        isEdit: true,
+        id: expense.id
+      }
+    });
   }
 
   applyFilter() {
@@ -337,12 +360,10 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  onSelectedDate(event: any) {
-  }
+  onSelectedDate(event: any) {}
 
   applyDateFilter() {
-    if (!this.calendarDate)
-      return
+    if (!this.calendarDate) return;
 
     this.validationMessageService.clear();
     this.filterForm.get('dateFrom')?.setValue(startOfDay(this.calendarDate));

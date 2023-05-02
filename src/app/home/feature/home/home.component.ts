@@ -146,10 +146,10 @@ export class HomeComponent {
       })
     );
 
-    this.data$ = filter$.pipe(
-      take(1),
-      switchMap((value) => expenseService.getExpenses({...value, totalRows: 10, pageNumber: 0}))
-    );
+    // this.data$ = filter$.pipe(
+    //   take(1),
+    //   switchMap((value) => expenseService.getExpenses({...value, totalRows: 10, pageNumber: 0}))
+    // );
 
   }
 
