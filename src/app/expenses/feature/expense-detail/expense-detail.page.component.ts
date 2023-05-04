@@ -75,7 +75,6 @@ export class ExpenseDetailComponent implements OnInit {
       source: new FormControl({ id: 1, name: 'Cash' }, [Validators.required]),
     });
 
-    console.log('[DEBUG] dialogConfig', dialogConfig)
     let expenseId$: Observable<string>;
     if (dialogConfig) {
       this.isEdit = dialogConfig.data.isEdit;
@@ -93,7 +92,6 @@ export class ExpenseDetailComponent implements OnInit {
         .pipe(take(1))
         .pipe(
           switchMap((id) => {
-            console.log('[DEBUG] dialogConfig 2', id)
             this.expenseId = id;
 
             if (!this.expenseId) {

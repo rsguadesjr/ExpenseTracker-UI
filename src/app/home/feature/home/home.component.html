@@ -28,8 +28,8 @@
 <div class="p-2">
   <div class="text">Recent Transactions</div>
   <ng-container *ngIf="data$ | async as data; else noResult">
-    <div class="card mt-4" *ngIf="data.data.length > 0; else noResult">
-      <app-expense-list [items]="data.data" (selected)="editEntry($event)" [hidePagination]="true"></app-expense-list>
+    <div class="card mt-4" *ngIf="data.length > 0; else noResult">
+      <app-expense-list [items]="data" (selected)="editEntry($event)" [hidePagination]="true"></app-expense-list>
     </div>
   </ng-container>
 </div>

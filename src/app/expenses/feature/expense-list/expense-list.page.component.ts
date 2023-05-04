@@ -61,6 +61,9 @@ import { SumPipe } from 'src/app/shared/utils/sum.pipe';
 import { ExpenseDto } from '../../model/expense-dto.model';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ExpenseDetailComponent } from '../expense-detail/expense-detail.page.component';
+import { ConfirmationService } from 'primeng/api';
+import { ToastService } from 'src/app/shared/utils/toast.service';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-expense-list-page',
@@ -83,8 +86,9 @@ import { ExpenseDetailComponent } from '../expense-detail/expense-detail.page.co
     CardModule,
     BadgeModule,
     SumPipe,
+    ConfirmDialogModule
   ],
-  providers: [SumPipe],
+  providers: [SumPipe, ConfirmationService],
   templateUrl: './expense-list.page.component.html',
   styleUrls: ['./expense-list.page.component.scss'],
 })
@@ -104,7 +108,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   ];
   filterForm!: FormGroup;
   filter$ = new BehaviorSubject<any>(undefined);
-  data$!: Observable<ExpenseDto[]>;
+  expenseEntries$!: Observable<ExpenseDto[]>;
   filterInProgress$ = new BehaviorSubject<boolean>(false);
   totalPerCategory$!: Observable<TotalPerCategory[]>;
 
@@ -119,7 +123,8 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     { id: 'year', name: 'Year' },
   ];
 
-  calendarDate?: any;
+
+  calendarDate? = new Date();
   calendarLoadingInProgress$ = new BehaviorSubject(false);
   calendarDateRange$ = new BehaviorSubject<any>(undefined);
   dailyTotal$!: Observable<any>;
@@ -132,13 +137,15 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     private dateParamService: DateParamService,
     private validationMessageService: ValidationMessageService,
     private sumPipe: SumPipe,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private confirmationService: ConfirmationService,
+    private toastService: ToastService
   ) {
     this.createForm();
   }
 
   ngOnInit() {
-    // execture every time applyFilter/applyDateFilter is triggered
+    // executes every time applyFilter/applyDateFilter is triggered
     this.filter$
       .pipe(
         takeUntil(this.ngUnsubscribe$),
@@ -152,9 +159,16 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
       });
 
     // data to be used for the table
-    this.data$ = this.expenseService.getExpenseData().pipe(
+    this.expenseEntries$ = this.expenseService.getExpenseData().pipe(
       tap((result) => {
         this.filterInProgress$.next(result.status === 'LOADING');
+        // every update on the expense entries, trigger the calendar to update the daily summary
+        if (!this.filterInProgress$.value) {
+          this.calendarDateRange$.next({
+            dateFrom: startOfMonth(this.calendarDate ?? new Date()),
+            dateTo: endOfMonth(this.calendarDate ?? new Date()),
+          });
+        }
       }),
       map((result) => {
         return result.data;
@@ -162,6 +176,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     );
 
     // data to be used for category summarization
+    // total per category will used the current expense entries
     this.totalPerCategory$ = this.expenseService.getExpenseData().pipe(
       map(({ data }) => {
         const categoryIds = Array.from(new Set(data.map((d) => d.categoryId)));
@@ -254,11 +269,8 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
         return of({});
       })
     );
-    const date = new Date();
-    this.calendarDateRange$.next({
-      dateFrom: startOfMonth(date),
-      dateTo: endOfMonth(date),
-    });
+
+
 
     // TODO: UPDATE LOGIC HERE?????
     setTimeout(() => {
@@ -284,7 +296,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   addEntry() {
     // this.router.navigate(['expenses', 'new']);
     this.dialogService.open(ExpenseDetailComponent, {
-      width: '70%',
+      width: '420px',
       header: 'Create',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
@@ -297,10 +309,10 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   }
 
   // TODO: udpate model
-  editEntry(expense: any) {
+  editEntry(expense: Expense) {
     // this.router.navigate(['expenses', 'edit', expense.id]);
     this.dialogService.open(ExpenseDetailComponent, {
-      width: '70%',
+      width: '420px',
       header: 'Update',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
@@ -311,6 +323,31 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
         isEdit: true,
         id: expense.id
       }
+    });
+  }
+
+  deleteEntry(expense: Expense) {
+    const message = ['Do you want to delete this entry?',
+                    `Amount: ${expense.amount}`,
+                    `Date: ${format(new Date(expense.expenseDate), 'MMM/dd/yyyy')}`,
+                    `Category: ${expense.category}`,
+                    `Description: ${expense.description}`,
+                    ]
+    this.confirmationService.confirm({
+        message: message.join('<br/>'),
+        header: 'Delete Confirmation',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+            this.expenseService.deleteExpense(expense.id!)
+              .pipe(
+                take(1)
+              ).subscribe(v => {
+                this.toastService.showSuccess('Delete successful');
+              })
+        },
+        reject: () => {
+
+        }
     });
   }
 
@@ -366,8 +403,9 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     if (!this.calendarDate) return;
 
     this.validationMessageService.clear();
-    this.filterForm.get('dateFrom')?.setValue(startOfDay(this.calendarDate));
-    this.filterForm.get('dateTo')?.setValue(endOfDay(this.calendarDate));
+    this.filterForm.get('dateFrom')?.setValue(startOfDay(this.calendarDate), { emitEvent: false });
+    this.filterForm.get('dateTo')?.setValue(endOfDay(this.calendarDate), { emitEvent: false });
+    this.filterForm.get('view')?.setValue(null, { emitEvent: false });
     this.filter$.next({
       dateFrom: this.filterForm.get('dateFrom')?.value,
       dateTo: this.filterForm.get('dateTo')?.value,

@@ -21,6 +21,8 @@ import {
   map,
   startWith,
 } from 'rxjs';
+import { CategoryService } from './shared/data-access/category.service';
+import { SourceService } from './shared/data-access/source.service';
 
 @Component({
   selector: 'app-root',
@@ -51,7 +53,9 @@ export class AppComponent implements OnInit {
     private alertService: ToastService,
     private messageService: MessageService,
     private validationMessagService: ValidationMessageService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private categoryService: CategoryService,
+    private sourceService: SourceService
   ) {
     this.validationMessagService.message$.subscribe((v) => {
       if (v) {
@@ -90,6 +94,10 @@ export class AppComponent implements OnInit {
     this.validationMessagService.clear$.subscribe((v) => {
       this.validationMessages = [];
     });
+
+
+    this.categoryService.initCategories();
+    this.sourceService.initSources();
   }
 
   ngOnInit(): void {
@@ -99,7 +107,6 @@ export class AppComponent implements OnInit {
   }
 
   signOut() {
-    console.log('[DEBUG] signOut');
     this.authService.signOut();
   }
 

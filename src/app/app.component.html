@@ -3,6 +3,7 @@
     <p-toolbar *ngIf="authService.user$ | async">
       <div class="p-toolbar-group-start">
         <p-button (click)="showSideBar()" icon="pi pi-bars" styleClass="p-button-rounded p-button-text "></p-button>
+        <a class="text-2xl no-underline" routerLink="/">Expense Tracker</a>
       </div>
       <div class="p-toolbar-group-end">
         <p-button icon="pi pi-user" styleClass="p-button-rounded p-button-info" (click)="menu.toggle($event)"></p-button>

@@ -33,9 +33,14 @@ export class ExpenseTableViewComponent {
   }
 
   @Output() selected = new EventEmitter<Expense>();
+  @Output() delete = new EventEmitter<Expense>();
 
 
   editEntry(item: Expense) {
     this.selected.emit(item);
+  }
+
+  deleteEntry(item: Expense) {
+    this.delete.emit(item);
   }
 }

@@ -18,7 +18,6 @@ export class AuthGuardLoggedIn implements CanActivate {
       take(1),
       map((user) => {
         if (user) {
-          console.log('[DEBUG] AuthGuardLoggedIn', { route, state });
           const urlRedirect = route.queryParams['returnUrl'] || '/';
           this.router.navigateByUrl(urlRedirect)
           return true;

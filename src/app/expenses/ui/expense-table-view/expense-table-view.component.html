@@ -68,7 +68,10 @@
           <td>{{ item.description }}</td>
           <td>{{ item.source }}</td>
           <td>
-            <p-button icon="pi pi-eye" styleClass="p-button-text" (click)="editEntry(item)"></p-button>
+            <div class="flex gap-1">
+              <p-button icon="pi pi-pencil" styleClass="p-button-text" (click)="editEntry(item)"></p-button>
+              <p-button icon="pi pi-trash" styleClass="p-button-text" (click)="deleteEntry(item)"></p-button>
+            </div>
           </td>
       </tr>
   </ng-template>

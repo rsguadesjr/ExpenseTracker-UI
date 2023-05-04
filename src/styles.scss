@@ -69,9 +69,10 @@ body {
 .component-dialog {
   .p-dialog-content {
     padding: 0;
+    overflow: unset !important;
     .form {
       width: 100% !important;
-      height: 100% !important;
+      height: 100%;
     }
   }
 }

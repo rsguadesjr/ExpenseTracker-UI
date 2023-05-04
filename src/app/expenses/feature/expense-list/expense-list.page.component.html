@@ -30,7 +30,7 @@
       <p-selectButton [options]="toggleViewStateOptions" [(ngModel)]="toggleViewValue" optionLabel="name"
         optionValue="id"></p-selectButton>
     </div> -->
-    <ng-container *ngIf="data$ | async as data; else noResult">
+    <ng-container *ngIf="expenseEntries$ | async as data; else noResult">
       <div class="flex gap-2 align-items-center py-2">
         <span>Total spent for this period:</span>
         <span class="text-xl">{{ data | sum: 'amount' | number: '0.0'}}</span>
@@ -39,7 +39,7 @@
         <!-- <app-expense-list *ngIf="toggleViewValue === 'compact'" [items]="data.data" [totalRows]="data.totalRows"
           [rowsPerPage]="rowsPerPage" (selected)="editEntry($event)"
           (onPageChange)="onPageChange($event)"></app-expense-list> -->
-        <app-expense-table-view *ngIf="toggleViewValue === 'table'" [items]="data" (selected)="editEntry($event)"
+        <app-expense-table-view *ngIf="toggleViewValue === 'table'" [items]="data" (selected)="editEntry($event)" (delete)="deleteEntry($event)"
           (onPageChange)="onPageChange($event)"></app-expense-table-view>
       </div>
     </ng-container>
@@ -95,3 +95,5 @@
 <ng-template #defaultDay>
   <span class="py-2 text-xs">&nbsp;</span>
 </ng-template>
+
+<p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>

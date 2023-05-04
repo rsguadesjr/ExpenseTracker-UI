@@ -1,5 +1,5 @@
 import { environment } from './../../../environments/environment';
-import { BehaviorSubject, Observable, Subject, map, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, catchError, map, tap, throwError } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Expense } from '../model/expense.model';
 import { HttpClient } from '@angular/common/http';
@@ -37,20 +37,17 @@ export class ExpenseService {
       this.http.post<PaginatedList<Expense>>(`${this.baseUrl}/GetExpenses`, params)
         .pipe(
           tap(x => {
-            console.log('[DEBUG] initExpenses 1', x);
             this.expenseData$.next({ status: 'LOADING', data: [] });
           })
         )
         .subscribe({
           next: (result) => {
-            console.log('[DEBUG] initExpenses 2', result);
             this.initialLoadedDone$.next(true);
             // this.expenses$.next(result.data);
 
             this.expenseData$.next({ status: 'SUCCESS', data: result.data });
           },
           error: (error) => {
-            console.log('[DEBUG] initExpenses 3', error);
             this.initialLoadedDone$.next(true);
             this.expenseData$.next({ status: 'ERROR', data: [] });
           }
@@ -74,20 +71,11 @@ export class ExpenseService {
   }
 
   createExpense(data: ExpenseDto) {
-    console.log('[DEBUG] createExpense', {
-      current: this.expenseData$.getValue(),
-    });
     this.expenseData$.next({ status: 'LOADING', data: this.expenseData$.value.data});
-
     return this.http.post<Expense>(`${this.baseUrl}`, data)
               .pipe(
                 tap(result => {
                   const updatedData =  [result, ...this.expenseData$.value.data];
-                  console.log('[DEBUG] createExpense', {
-                    result,
-                    current: this.expenseData$.value.data,
-                    updatedData
-                  });
                   this.expenseData$.next({ status: 'SUCCESS', data: updatedData });
                 })
               );
@@ -100,18 +88,34 @@ export class ExpenseService {
                 tap(result => {
 
                   const updatedData =  [result, ...this.expenseData$.value.data.filter(x => x.id !== id)];
-                  console.log('[DEBUG] updateExpense', {
-                    result,
-                    current: this.expenseData$.value.data,
-                    updatedData
-                  });
                   this.expenseData$.next({ status: 'SUCCESS', data: updatedData });
                 })
               );
   }
 
   deleteExpense(id: string) {
-    return this.http.delete(`${this.baseUrl}/${id}`);
+    // track deleted entry
+    const deleted = this.expenseData$.value.data.find(x => x.id === id);
+
+    // update current list
+    const updatedData =  [...this.expenseData$.value.data.filter(x => x.id !== id)];
+    this.expenseData$.next({ status: 'LOADING', data: updatedData});
+
+    return this.http.delete(`${this.baseUrl}/${id}`)
+                .pipe(
+                  tap(() => {
+                    // update status only
+                    this.expenseData$.next({ status: 'SUCCESS', data: updatedData });
+                  }),
+                  catchError((error) => {
+                    // if error, add back the deleted entry
+                    if (deleted) {
+                      this.expenseData$.next({ status: 'ERROR', data: [deleted, ...updatedData] });
+                    }
+
+                    return throwError(() => error);
+                  })
+                );
   }
 
 }

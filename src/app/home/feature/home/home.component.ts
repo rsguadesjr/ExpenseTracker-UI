@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExpenseService } from 'src/app/expenses/data-access/expense.service';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -51,9 +51,9 @@ import { DateParamService } from 'src/app/shared/utils/date-param.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent {
+export class HomeComponent implements AfterViewInit {
   filter$ = new BehaviorSubject<any>(null);
-  data$!: Observable<PaginatedList<Expense>>;
+  data$!: Observable<Expense[]>;
   filterInProgress$ = new BehaviorSubject<boolean>(false);
   selectedView$: Observable<string>;
   totalExpenses$: Observable<number>;
@@ -64,6 +64,8 @@ export class HomeComponent {
   basicData: any;
   basicOptions: any;
 
+  codeTest = 'Template <script>alert("Test")</script>';
+
   constructor(
     private expenseService: ExpenseService,
     private router: Router,
@@ -71,6 +73,19 @@ export class HomeComponent {
     private summaryService: SummaryService,
     private dateParamService: DateParamService
   ) {
+
+
+    // get the data
+    this.data$ = this.expenseService.getExpenseData()
+                                    .pipe(map(x => x.data));
+
+    // trigger api call, this will only trigger once since we are only displaying the top 10 latest transactions
+    this.expenseService.initExpenses({
+      totalRows: 10,
+      pageNumber: 0
+    })
+
+    // capture route query changes
     this.selectedView$ = this.route.queryParamMap.pipe(
       map((v) => {
         const view = v.get('view')?.toLowerCase();
@@ -80,77 +95,25 @@ export class HomeComponent {
       })
     );
 
-    const filter$ = this.selectedView$.pipe(
-      map((view: any) => {
-        return this.dateParamService.getDateRange(view);
-        // let startDate;
-        // let endDate;
-        // let date = new Date();
-        // switch (view) {
-        //   case 'week':
-        //     date =
-        //       new Date().getDay() == 0
-        //         ? add(new Date(), { days: -1 })
-        //         : new Date();
-        //     startDate = add(startOfWeek(date), { days: 1 });
-        //     endDate = add(endOfWeek(date), { days: 1 });
-        //     this.dateRangeLabel = `${format(startDate, 'MMMM dd')} - ${format(
-        //       endDate,
-        //       'MMMM dd'
-        //     )}`;
-        //     break;
-        //   case 'month':
-        //     startDate = startOfMonth(date);
-        //     endDate = endOfMonth(date);
-        //     this.dateRangeLabel = `Month of ${format(date, 'MMMM')}`;
-        //     break;
-        //   case 'year':
-        //     startDate = startOfYear(date);
-        //     endDate = endOfYear(date);
-        //     this.dateRangeLabel = `Year ${format(date, 'yyyy')}`;
-        //     break;
-        //   case 'day':
-        //   default:
-        //     startDate = startOfDay(date);
-        //     endDate = endOfDay(date);
-        //     this.dateRangeLabel = `${format(date, 'MMMM dd')}`;
-        //     break;
-        // }
-
-        // return {
-        //   startDate: startDate.toISOString(),
-        //   endDate: endDate.toISOString(),
-        // };
-      }),
-      tap((value) => {
-        this.dateRangeLabel = value.displayText;
-        this.filter$.next({
-          startDate: value.startDate,
-          endDate: value.endDate,
-        });
-      })
-    );
-
-    this.totalExpenses$ = filter$.pipe(
+    // each change of view or route changes will trigger the api call to get the total
+    this.totalExpenses$ = this.selectedView$.pipe(
       debounceTime(500),
-      switchMap((value) =>
-        this.summaryService.getTotalAmountPerCategory(
+      switchMap((view: any) => {
+        const value = this.dateParamService.getDateRange(view);
+        return this.summaryService.getTotalAmountPerCategory(
           value.startDate,
           value.endDate
         )
-      ),
+      }),
       map((v) => {
         return v
           .map((r) => r.total)
           .reduce((total, current) => total + current, 0);
       })
     );
-
-    // this.data$ = filter$.pipe(
-    //   take(1),
-    //   switchMap((value) => expenseService.getExpenses({...value, totalRows: 10, pageNumber: 0}))
-    // );
-
+  }
+  ngAfterViewInit(): void {
+    this.codeTest = 'haha';
   }
 
   editEntry(expense: any) {

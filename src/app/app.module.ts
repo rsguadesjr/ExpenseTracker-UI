@@ -16,6 +16,7 @@ import { AuthInterceptor } from './shared/utils/auth-interceptor';
 import { ToastService } from './shared/utils/toast.service';
 import { MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 export function tokenGetter() {
   return localStorage.getItem("accessToken");
