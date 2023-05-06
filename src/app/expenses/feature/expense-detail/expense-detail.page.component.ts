@@ -1,7 +1,7 @@
 import { ExpenseService } from '../../data-access/expense.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, Location } from '@angular/common';
-import { Component, OnInit, Optional } from '@angular/core';
+import { Component, OnDestroy, OnInit, Optional } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -13,7 +13,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { Expense } from '../../model/expense.model';
-import { map, take, BehaviorSubject, switchMap, of, forkJoin, Observable } from 'rxjs';
+import { map, take, BehaviorSubject, switchMap, of, forkJoin, Observable, takeUntil, Subject } from 'rxjs';
 import { CalendarModule } from 'primeng/calendar';
 import { ExpenseDto } from '../../model/expense-dto.model';
 import { ToastService } from 'src/app/shared/utils/toast.service';
@@ -24,6 +24,7 @@ import { Option } from 'src/app/shared/model/option.model';
 import { startOfDay } from 'date-fns';
 import { CardModule } from 'primeng/card';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { ChipsModule } from 'primeng/chips';
 
 @Component({
   selector: 'app-expense-detail',
@@ -36,13 +37,16 @@ import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
     InputTextModule,
     ButtonModule,
     CalendarModule,
-    CardModule
+    CardModule,
+    ChipsModule
   ],
   templateUrl: './expense-detail.page.component.html',
   styleUrls: ['./expense-detail.page.component.scss'],
   providers: [],
 })
-export class ExpenseDetailComponent implements OnInit {
+export class ExpenseDetailComponent implements OnInit, OnDestroy {
+  private ngUnsubscribe$ = new Subject<unknown>();
+
   expenseForm!: FormGroup;
 
   isEdit = false;
@@ -73,6 +77,7 @@ export class ExpenseDetailComponent implements OnInit {
       date: new FormControl(startOfDay(new Date()), Validators.required),
       description: new FormControl(null, [Validators.required]),
       source: new FormControl({ id: 1, name: 'Cash' }, [Validators.required]),
+      tags: new FormControl([])
     });
 
     let expenseId$: Observable<string>;
@@ -115,6 +120,7 @@ export class ExpenseDetailComponent implements OnInit {
                 description: value.description,
                 amount: value.amount,
                 source: { id: value.sourceId, name: value.source },
+                tags: value.tags
               });
             }
           },
@@ -126,9 +132,23 @@ export class ExpenseDetailComponent implements OnInit {
 
     this.categories$ = this.categoryService.getCategories().pipe(map(opt => [{ id: undefined, name: '' }, ...opt]));
     this.sources$ = this.sourceService.getSources().pipe(map(opt => [{ id: undefined, name: '' }, ...opt]));
+
+    // set only unique values
+    this.expenseForm.get('tags')?.valueChanges
+      .pipe(takeUntil(this.ngUnsubscribe$))
+      .subscribe(value => {
+        value = Array.from(new Set(value))
+        this.expenseForm.get('tags')?.setValue(value, { emitEvent: false });
+      })
   }
 
   ngOnInit() {}
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe$.next(null);
+    this.ngUnsubscribe$.complete();
+  }
+
 
   submit() {
     // clear first any visible validation message
@@ -150,43 +170,27 @@ export class ExpenseDetailComponent implements OnInit {
       expenseDate: this.expenseForm.get('date')?.value,
       description: this.expenseForm.get('description')?.value,
       sourceId: this.expenseForm.get('source')?.value?.id,
+      tags: this.expenseForm.get('tags')?.value || []
     };
 
-    if (this.isEdit) {
-      this.expenseService
-        .updateExpense(this.expenseId!.toString(), expense)
-        .pipe(take(1))
-        .subscribe({
-          next: (v) => {
-            this.alertService.showSuccess('Updated expense');
-            if (this.dialogRef) {
-              this.dialogRef.close();
-            } else {
-              this.location.back();
-            }
-          },
-          error: (v) => {
-            this.alertService.showError('An error occured while adding updating expense')
+    let submit$ = this.isEdit
+                  ? this.expenseService.updateExpense(this.expenseId!.toString(), expense)
+                  : this.expenseService.createExpense(expense);
+    submit$
+      .pipe(take(1))
+      .subscribe({
+        next: (v) => {
+          this.alertService.showSuccess(`${this.isEdit ? 'Updated entry' : 'Created new entry'}`);
+          if (this.dialogRef) {
+            this.dialogRef.close();
+          } else {
+            this.location.back();
           }
-        });
-    } else {
-      this.expenseService
-        .createExpense(expense)
-        .pipe(take(1))
-        .subscribe({
-          next: (v) => {
-            this.alertService.showSuccess('Added new expense');
-            if (this.dialogRef) {
-              this.dialogRef.close();
-            } else {
-              this.location.back();
-            }
-          },
-          error: (v) => {
-            this.alertService.showError('An error occured while adding new expense')
-          }
-        });
-    }
+        },
+        error: (v) => {
+          this.alertService.showError('An error occured while saving the entry')
+        }
+      });
 
     // call service here
   }

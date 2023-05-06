@@ -57,6 +57,9 @@
                 </ng-template>
             </p-columnFilter>
           </th>
+          <th pSortableColumn="description" style="width: 20%">
+            Tags
+          </th>
           <th style="width: 5%"></th>
       </tr>
   </ng-template>
@@ -67,6 +70,13 @@
           <td>{{ item.expenseDate | date:'MM/dd/yy'}}</td>
           <td>{{ item.description }}</td>
           <td>{{ item.source }}</td>
+          <td>
+            <div class="flex flex-wrap">
+              <ng-container *ngFor="let tag of item.tags">
+                <p-tag [value]="tag" styleClass="m-1"></p-tag>
+              </ng-container>
+            </div>
+          </td>
           <td>
             <div class="flex gap-1">
               <p-button icon="pi pi-pencil" styleClass="p-button-text" (click)="editEntry(item)"></p-button>

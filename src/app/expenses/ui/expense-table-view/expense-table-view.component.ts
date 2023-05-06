@@ -5,11 +5,12 @@ import { ButtonModule } from 'primeng/button';
 import { Expense } from '../../model/expense.model';
 import { PaginatorModule } from 'primeng/paginator';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { TagModule } from 'primeng/tag';
 
 @Component({
   selector: 'app-expense-table-view',
   standalone: true,
-  imports: [CommonModule,TableModule,ButtonModule,PaginatorModule,MultiSelectModule],
+  imports: [CommonModule,TableModule,ButtonModule,PaginatorModule,MultiSelectModule,TagModule],
   templateUrl: './expense-table-view.component.html',
   styleUrls: ['./expense-table-view.component.scss']
 })

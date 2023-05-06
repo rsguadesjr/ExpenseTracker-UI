@@ -7,24 +7,28 @@
     <form [formGroup]="expenseForm">
       <div class="flex flex-column gap-2">
         <div class="flex flex-column gap-2 p-fluid">
-          <label htmlFor="username">Category</label>
-          <p-dropdown formControlName="category" [options]="(categories$ | async) ?? []" optionLabel="name" class="w-100"></p-dropdown>
+          <label htmlFor="form-category">Category</label>
+          <p-dropdown id="form-category" formControlName="category" [options]="(categories$ | async) ?? []" optionLabel="name" class="w-100"></p-dropdown>
         </div>
         <div class="flex flex-column gap-2">
-          <label htmlFor="username">Amount</label>
-          <input pInputText id="username" aria-describedby="username-help" formControlName="amount"/>
+          <label htmlFor="form-amount">Amount</label>
+          <input pInputText id="form-amount" aria-describedby="username-help" formControlName="amount"/>
         </div>
         <div class="flex flex-column gap-2 p-fluid">
-          <label htmlFor="username">Date</label>
-          <p-calendar formControlName="date" dateFormat="dd-M-yy"></p-calendar>
+          <label htmlFor="form-date">Date</label>
+          <p-calendar id="form-date" formControlName="date" dateFormat="dd-M-yy"></p-calendar>
         </div>
         <div class="flex flex-column gap-2">
-          <label htmlFor="username">Description</label>
-          <input pInputText id="username" aria-describedby="username-help" formControlName="description"/>
+          <label htmlFor="form-description">Description</label>
+          <input pInputText id="form-description" aria-describedby="username-help" formControlName="description"/>
         </div>
         <div class="flex flex-column gap-2 p-fluid">
-          <label htmlFor="username">Source</label>
-          <p-dropdown formControlName="source" [options]="(sources$ | async) ?? []" optionLabel="name"></p-dropdown>
+          <label htmlFor="form-source">Source</label>
+          <p-dropdown id="form-source" formControlName="source" [options]="(sources$ | async) ?? []" optionLabel="name"></p-dropdown>
+        </div>
+        <div class="flex flex-column gap-2 p-fluid">
+          <label htmlFor="form-tags">Tags</label>
+          <p-chips id="form-tags" formControlName="tags"  separator=","></p-chips>
         </div>
       </div>
     </form>

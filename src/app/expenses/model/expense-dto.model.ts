@@ -7,4 +7,5 @@ export interface ExpenseDto {
   description: string;
   sourceId?: number;
   source?: string;
+  tags?: string[];
 }
