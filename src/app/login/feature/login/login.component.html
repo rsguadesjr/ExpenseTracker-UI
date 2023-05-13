@@ -1,41 +1,40 @@
-<div class="login-container">
-  <p-card styleClass="bg-black-alpha-40">
-    <form [formGroup]="form" class="flex flex-column">
-      <div class="mb-4 text-2xl">
-        Sign in
-      </div>
-      <ng-container *ngIf="googleLoginInProgress else googleSignIn">
-        <button pButton pRipple label="Login in progress..." icon="pi pi-spin pi-spinner"></button>
-      </ng-container>
-      <ng-template #googleSignIn>
-        <button pButton pRipple label="Sign in with Google" icon="pi pi-google"
-          (click)="signInGoogle()"></button>
-      </ng-template>
-
-      <div class="text-center my-4">
-        Or
+<div class="auth-container">
+  <p-card styleClass="bg-black-alpha-40 p-2" header="Login">
+    <p-messages [(value)]="messages" [enableService]="false" [closable]="true" ></p-messages>
+    <form (ngSubmit)="signInEmailAndPassword()" [formGroup]="form" class="flex flex-column gap-4">
+      <div class="flex flex-column gap-2">
+        <label htmlFor="login-email">Email</label>
+        <input pInputText id="login-email" aria-describedby="Login email" formControlName="email" />
+        <small class="text-red-400" *ngFor="let error of validationErrors['email']">{{ error }}</small>
       </div>
       <div class="flex flex-column gap-2">
-        <label htmlFor="username">Email</label>
-        <input pInputText id="username" aria-describedby="username-help" formControlName="email" />
-        <!-- <small id="username-help">Enter your username to reset your password.</small> -->
+        <label htmlFor="login-password">Password</label>
+        <input pInputText id="login-password" type="password" aria-describedby="login password"
+          formControlName="password" />
+        <small class="text-red-400" *ngFor="let error of validationErrors['password']">{{ error }}</small>
       </div>
-      <div class="flex flex-column gap-2">
-        <label htmlFor="username">Password</label>
-        <input pInputText id="username" aria-describedby="username-help" formControlName="password" />
-        <!-- <small id="username-help">Enter your username to reset your password.</small> -->
+      <div >
+        <p-button *ngIf="googleLoginInProgress || emailAndPasswordLoginInProgress; else emailPasswordLogin"
+          label="Signing in..." icon="pi pi-spin pi-spinner" styleClass="w-full"></p-button>
+        <ng-template #emailPasswordLogin>
+          <p-button type="submit" label="Sign In" styleClass="w-full" (click)="signInEmailAndPassword()"></p-button>
+        </ng-template>
       </div>
-      <div class="flex justify-content-between mt-4">
-        <div class="flex align-items-center gap-1">
-          <p-checkbox name="group1" value="New York" inputId="ny"></p-checkbox>
-          <label for="ny">New York</label>
-        </div>
-        <button pButton pRipple label="Sign In" (click)="signInEmailAndPassword()"></button>
-      </div>
-      <div class="mt-2">
-        <!-- <p-button label="Forgot your password?" styleClass="p-button-link"></p-button> -->
-        <a class="no-underline cursor-pointer" (click)="forgotPassword()">Forgot your password?</a>
+      <div class="mt-6 flex justify-content-between">
+        <a class="no-underline cursor-pointer" routerLink="/forgot-password">Forgot your password?</a>
+        <a class="no-underline cursor-pointer" routerLink="/sign-up">Sign Up</a>
       </div>
     </form>
+
+    <div class="flex flex-column align-items-center mt-8">
+      <span class="mb-4">or sign in with</span>
+      <ng-container *ngIf="googleLoginInProgress else googleSignIn">
+        <button pButton pRipple label="Login in progress..." icon="pi pi-spin pi-spinner" class="w-full"></button>
+      </ng-container>
+      <ng-template #googleSignIn>
+        <!-- <button pButton pRipple [label]="tabIndex === 0 ? 'Sign in with Google' : 'Sign up with Google'" icon="pi pi-google"  class="w-full" (click)="signInGoogle()"></button> -->
+        <p-button icon="pi pi-google" styleClass="p-button-rounded p-button-info" (click)="signInGoogle()"></p-button>
+      </ng-template>
+    </div>
   </p-card>
 </div>

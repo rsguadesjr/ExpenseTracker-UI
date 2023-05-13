@@ -7,6 +7,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { AuthRequestResult } from '../model/auth-request-result';
+import { EmailPasswordRegistration } from '../model/email-password-registration';
 
 // TODO: actual token will have to come from the API,
 // after google authentication, the token will be used to login to API and the API will then send the actual token
@@ -30,7 +31,14 @@ export class AuthService {
   ) {
     this.authUrl = environment.API_BASE_URL + 'api/Auth';
 
+    afAuth.onAuthStateChanged(user => {
+      console.log('[DEBUG] onAuthStateChanged', user)
+      user?.getIdTokenResult().then(idTokenResult => {
+        console.log('[DEBUG] onAuthStateChanged getIdTokenResult', idTokenResult)
+      })
+    })
     afAuth.authState.subscribe((user) => {
+      console.log('[DEBUG] afAuth user', user);
       this.firebaseUser$.next(user);
     });
 
@@ -57,6 +65,10 @@ export class AuthService {
       });
   }
 
+  public signInWithEmailAndPassword(email: string, password: string) {
+    return this.afAuth.signInWithEmailAndPassword(email, password)
+  }
+
   /**
    * Signout
    */
@@ -68,6 +80,16 @@ export class AuthService {
       this.firebaseToken$.next(null);
       this.user$.next(null);
       this.router.navigate(['login']);
+    });
+  }
+
+  public signUp(data: EmailPasswordRegistration) {
+    return this.http.post(`${this.authUrl}/RegisterWithEmailAndPassword`, data);
+  }
+
+  public resetPassword(email: string) {
+    return this.afAuth.sendPasswordResetEmail(email, {
+      url: `${location.origin}/login`
     });
   }
 

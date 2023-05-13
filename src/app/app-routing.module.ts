@@ -33,8 +33,16 @@ const routes: Routes = [
     path: 'sign-up',
     canActivate: [AuthGuardLoggedIn],
     loadComponent: () =>
-      import('./register/feature/sign-up/sign-up.component').then(
+      import('./login/feature/sign-up/sign-up.component').then(
         (m) => m.SignUpComponent
+      ),
+  },
+  {
+    path: 'forgot-password',
+    canActivate: [AuthGuardLoggedIn],
+    loadComponent: () =>
+      import('./login/feature/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent
       ),
   },
   {

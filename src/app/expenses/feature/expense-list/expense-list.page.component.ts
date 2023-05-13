@@ -25,7 +25,7 @@ import {
   FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -91,6 +91,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
   providers: [SumPipe, ConfirmationService],
   templateUrl: './expense-list.page.component.html',
   styleUrls: ['./expense-list.page.component.scss'],
+  encapsulation: ViewEncapsulation.Emulated
 })
 export class ExpenseListPageComponent implements OnInit, OnDestroy {
   private ngUnsubscribe$ = new Subject();

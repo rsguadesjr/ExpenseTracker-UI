@@ -1,0 +1,43 @@
+<div class="auth-container">
+  <p-card styleClass="bg-black-alpha-40 p-2" header="Sign up">
+    <form [formGroup]="form" class="flex flex-column gap-4">
+      <div class="flex flex-column gap-2">
+        <label htmlFor="email">Email</label>
+        <input pInputText id="email" aria-describedby="Email" formControlName="email" />
+        <small class="text-red-400" *ngFor="let error of validationErrors['email']">{{ error }}</small>
+      </div>
+      <div class="flex flex-column gap-2">
+        <label htmlFor="displayName">Display Name</label>
+        <input pInputText id="displayName" aria-describedby="Display Name" formControlName="displayName" />
+        <small class="text-red-400" *ngFor="let error of validationErrors['displayName']">{{ error }}</small>
+      </div>
+      <div class="flex flex-column gap-2">
+        <label htmlFor="password">Password</label>
+        <input pInputText type="password" id="password" aria-describedby="Password" formControlName="password" />
+        <small class="text-red-400" *ngFor="let error of validationErrors['password']">{{ error }}</small>
+      </div>
+      <div class="flex flex-column gap-2">
+        <label htmlFor="confirm-password">Re-enter Password</label>
+        <input pInputText type="password" id="confirm-password" aria-describedby="Confirm Password"
+          formControlName="password2" />
+        <ng-container
+          *ngIf="validationErrors['password2'] && validationErrors['password2'].length > 0; else compareFail">
+          <small class="text-red-400" *ngFor="let error of validationErrors['password2']">{{ error }}</small>
+        </ng-container>
+        <ng-template #compareFail>
+          <small class="text-red-400" *ngFor="let error of validationErrors['passwordCompare']">{{ error }}</small>
+        </ng-template>
+      </div>
+      <div >
+        <p-button label="Sign Up" styleClass="w-full" [disabled]="signUpInProgress" (click)="signUp()"></p-button>
+      </div>
+    </form>
+
+
+    <div class="flex mt-6">
+      <a class="no-underline cursor-pointer" routerLink="/login" >Need to login?</a>
+    </div>
+
+    <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+  </p-card>
+</div>
