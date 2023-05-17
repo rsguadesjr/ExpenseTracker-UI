@@ -5,30 +5,38 @@
         <span class="text-2xl p-4 pb-0 flex">{{ isEdit ? 'Update' : 'Create' }}</span>
     </ng-template>
     <form [formGroup]="expenseForm">
+
+    <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
       <div class="flex flex-column gap-2">
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-category">Category</label>
           <p-dropdown id="form-category" formControlName="category" [options]="(categories$ | async) ?? []" optionLabel="name" class="w-100"></p-dropdown>
+          <small class="text-red-400" *ngFor="let error of validationErrors['category']">{{ error }}</small>
         </div>
         <div class="flex flex-column gap-2">
           <label htmlFor="form-amount">Amount</label>
           <input pInputText id="form-amount" aria-describedby="username-help" formControlName="amount"/>
+          <small class="text-red-400" *ngFor="let error of validationErrors['amount']">{{ error }}</small>
         </div>
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-date">Date</label>
           <p-calendar id="form-date" formControlName="date" dateFormat="dd-M-yy"></p-calendar>
+          <small class="text-red-400" *ngFor="let error of validationErrors['date']">{{ error }}</small>
         </div>
         <div class="flex flex-column gap-2">
           <label htmlFor="form-description">Description</label>
           <input pInputText id="form-description" aria-describedby="username-help" formControlName="description"/>
+          <small class="text-red-400" *ngFor="let error of validationErrors['description']">{{ error }}</small>
         </div>
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-source">Source</label>
           <p-dropdown id="form-source" formControlName="source" [options]="(sources$ | async) ?? []" optionLabel="name"></p-dropdown>
+          <small class="text-red-400" *ngFor="let error of validationErrors['source']">{{ error }}</small>
         </div>
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-tags">Tags</label>
           <p-chips id="form-tags" formControlName="tags"  separator=","></p-chips>
+          <small class="text-red-400" *ngFor="let error of validationErrors['tags']">{{ error }}</small>
         </div>
       </div>
     </form>
@@ -38,33 +46,3 @@
     </div>
   </p-card>
 </div>
-
-<!-- <div class="text-2xl mb-4">{{ isEdit ? 'Update' : 'Create' }} Entry</div>
-<form [formGroup]="expenseForm">
-  <div class="flex flex-column gap-2">
-    <div class="flex flex-column gap-2">
-      <label htmlFor="username">Category</label>
-      <p-dropdown formControlName="category" [options]="(categories$ | async) ?? []" optionLabel="name"></p-dropdown>
-    </div>
-    <div class="flex flex-column gap-2">
-      <label htmlFor="username">Amount</label>
-      <input pInputText id="username" aria-describedby="username-help" formControlName="amount"/>
-    </div>
-    <div class="flex flex-column gap-2">
-      <label htmlFor="username">Date</label>
-      <p-calendar formControlName="date" dateFormat="dd-M-yy"></p-calendar>
-    </div>
-    <div class="flex flex-column gap-2">
-      <label htmlFor="username">Description</label>
-      <input pInputText id="username" aria-describedby="username-help" formControlName="description"/>
-    </div>
-    <div class="flex flex-column gap-2">
-      <label htmlFor="username">Source</label>
-      <p-dropdown formControlName="source" [options]="(sources$ | async) ?? []" optionLabel="name"></p-dropdown>
-    </div>
-    <div class="flex flex-row justify-content-end gap-2 mt-4">
-      <button pButton pRipple label="Cancel" (click)="cancel()"></button>
-      <button pButton pRipple label="Submit" class="p-button-success" (click)="submit()"></button>
-    </div>
-  </div>
-</form> -->

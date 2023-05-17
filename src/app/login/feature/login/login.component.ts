@@ -158,7 +158,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.afAuth.getRedirectResult().then((result) => {
-      console.log('[DEBUG]  getRedirectResult', result);
+      console.log('[DEBUG]  getRedirectResult', JSON.parse(JSON.stringify(result)));
     });
   }
 

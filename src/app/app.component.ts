@@ -20,6 +20,7 @@ import {
   filter,
   map,
   startWith,
+  takeUntil,
 } from 'rxjs';
 import { CategoryService } from './shared/data-access/category.service';
 import { SourceService } from './shared/data-access/source.service';
@@ -35,10 +36,6 @@ export class AppComponent implements OnInit {
 
   accountMenuItems: MenuItem[] = [];
   validationMessages: Message[] = [];
-
-  showActionButtons$: Observable<boolean>;
-  showViewAllExpensesButton$: Observable<boolean>;
-  showNewButton$: Observable<boolean>;
 
   showActionButtons = false;
   showViewAllExpensesButton = false;
@@ -57,6 +54,14 @@ export class AppComponent implements OnInit {
     private categoryService: CategoryService,
     private sourceService: SourceService
   ) {
+
+    console.log('[DEBUG] loading', {
+      t1: document.referrer,
+      t2: window.history,
+      t3: navigator
+    })
+
+
     this.validationMessagService.message$.subscribe((v) => {
       if (v) {
         this.validationMessages = [v, ...this.validationMessages];
@@ -80,24 +85,22 @@ export class AppComponent implements OnInit {
       this.showActionButtons =
         this.showNewButton && this.showViewAllExpensesButton;
     });
-    this.showNewButton$ = url$.pipe(map((url) => ['/'].includes(url)));
 
-    this.showViewAllExpensesButton$ = url$.pipe(
-      map((url) => ['/'].includes(url))
-    );
-
-    this.showActionButtons$ = combineLatest([
-      this.showViewAllExpensesButton$,
-      this.showNewButton$,
-    ]).pipe(map((v) => v[0] || v[1]));
 
     this.validationMessagService.clear$.subscribe((v) => {
       this.validationMessages = [];
     });
 
 
-    this.categoryService.initCategories();
-    this.sourceService.initSources();
+    this.afAuth.authState
+    .subscribe({
+      next: (user) => {
+        if (user) {
+          this.categoryService.initCategories();
+          this.sourceService.initSources();
+        }
+      }
+    })
   }
 
   ngOnInit(): void {

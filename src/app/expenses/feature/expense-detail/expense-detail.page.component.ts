@@ -25,6 +25,9 @@ import { startOfDay } from 'date-fns';
 import { CardModule } from 'primeng/card';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ChipsModule } from 'primeng/chips';
+import { MessagesModule } from 'primeng/messages';
+import { Message } from 'primeng/api';
+import { FormValidation } from 'src/app/shared/utils/form-validation';
 
 @Component({
   selector: 'app-expense-detail',
@@ -38,7 +41,8 @@ import { ChipsModule } from 'primeng/chips';
     ButtonModule,
     CalendarModule,
     CardModule,
-    ChipsModule
+    ChipsModule,
+    MessagesModule
   ],
   templateUrl: './expense-detail.page.component.html',
   styleUrls: ['./expense-detail.page.component.scss'],
@@ -55,6 +59,8 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
   loadingDetails$ = new BehaviorSubject<boolean>(false);
   categories$: Observable<Option[]>;
   sources$: Observable<Option[]>;
+  messages: Message[] = [];
+  validationErrors: { [key: string]: string[] } = {};
 
   constructor(
     private location: Location,
@@ -62,21 +68,20 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private expenseService: ExpenseService,
     private alertService: ToastService,
-    private validationMessageService: ValidationMessageService,
     private categoryService: CategoryService,
     private sourceService: SourceService,
     @Optional() public dialogConfig: DynamicDialogConfig,
     @Optional() private dialogRef: DynamicDialogRef
   ) {
     this.expenseForm = new FormGroup({
-      category: new FormControl(null, [Validators.required]),
+      category: new FormControl(null, FormValidation.requiredObjectValidator('id', 'Category is required')),
       amount: new FormControl<Number | null>(null, [
-        Validators.required,
-        Validators.min(1),
+        FormValidation.minNumberValidator(1, 'Amount must be greater than 0'),
+        FormValidation.requiredValidator('Amount is required')
       ]),
-      date: new FormControl(startOfDay(new Date()), Validators.required),
-      description: new FormControl(null, [Validators.required]),
-      source: new FormControl({ id: 1, name: 'Cash' }, [Validators.required]),
+      date: new FormControl(startOfDay(new Date()), FormValidation.requiredValidator('Date is required')),
+      description: new FormControl(null, FormValidation.requiredValidator('Description is required')),
+      source: new FormControl({ id: 1, name: 'Cash' }, FormValidation.requiredObjectValidator('id', 'Source is required')),
       tags: new FormControl([])
     });
 
@@ -151,15 +156,13 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
 
 
   submit() {
-    // clear first any visible validation message
-    this.validationMessageService.clear();
-
     this.expenseForm.markAsDirty();
     this.expenseForm.updateValueAndValidity();
+    this.validationErrors = FormValidation.getFormValidationErrors(this.expenseForm);
+    this.messages = [];
 
     // if invalid, show an error message
     if (this.expenseForm.invalid) {
-      this.validationMessageService.showWarning('Please check incomplete details');
       return;
     }
 
@@ -188,7 +191,7 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
           }
         },
         error: (v) => {
-          this.alertService.showError('An error occured while saving the entry')
+          this.messages = [{ severity: 'error', summary: 'Error', detail: 'An error occured while saving the entry' } ];
         }
       });
 

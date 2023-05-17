@@ -10,8 +10,14 @@ export class FormValidation {
 
   static requiredValidator(error: string): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
-      const value = control.value?.trim();
+      const value = control.value?.toString()?.trim();
       return !value ? { error } : null;
+    };
+  }
+
+  static requiredObjectValidator(key: string, error: string): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      return !control.value || !control.value[key] ? { error } : null;
     };
   }
 
@@ -26,6 +32,13 @@ export class FormValidation {
     return (control: AbstractControl): { [key: string]: any } | null => {
       const value = control.value ?? '';
       return value.length > maxLength ? { error } : null;
+    };
+  }
+
+  static minNumberValidator(min: number, error: string): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const value = control.value ?? '';
+      return value < min ? { error } : null;
     };
   }
 
