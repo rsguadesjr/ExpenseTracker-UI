@@ -1,5 +1,5 @@
 
-<div class="flex ">
+<div class="flex gap-4">
   <!-- col -->
   <div class="w-8 p-4 border-solid border-1 surface-border border-round-md bg-black-alpha-40 table-wrapper">
     <div [formGroup]="filterForm" class="flex mb-4  align-items-end">
@@ -53,13 +53,26 @@
   <!-- /col -->
 
   <!-- col -->
-  <div class="w-4 px-4 flex flex-column gap-4">
-    <div class="p-fluid"  *ngIf="dailyTotal$ | async; let obj">
+  <div class="w-4 flex flex-column gap-4">
+    <div class="p-fluid">
+      <app-calendar-data
+          [reminders]="(reminders$ | async) || []"
+          [dailyTotalSummary]="(dailyTotal$ | async) || []"
+          (applySelectedDate)="applyDateFilter($event)"
+          (monthChange)="onMonthChange($event)"
+          [startDate]="(calendarDateRange$ | async)?.dateFrom"
+          [endDate]="(calendarDateRange$ | async)?.dateTo">
+      </app-calendar-data>
+    </div>
+
+    <!-- <app-reminder-calendar [reminders]="(reminders$ | async) || []"
+                            ></app-reminder-calendar> -->
+    <!-- <div class="p-fluid"  *ngIf="dailyTotal$ | async; let obj">
       <p-calendar class="max-w-full" [(ngModel)]="calendarDate" [inline]="true" (onMonthChange)="onMonthChange($event)" (onSelect)="onSelectedDate($event)">
         <ng-template pTemplate="date" let-date>
           <div class="flex flex-column align-items-center justify-content-end">
             <span class="p-1 text-xl">{{ date.day }}</span>
-            <span *ngIf="obj[date.year + '-' + (date.month + 1) + '-' + date.day]; else defaultDay; let day" class="p-1 text-xs surface-100 border-round">
+            <span *ngIf="obj[date.year + '-' + decimalPipe.transform((date.month + 1), '2.0') + '-' + decimalPipe.transform(date.day, '2.0')]; else defaultDay; let day" class="p-1 text-xs surface-100 border-round">
               {{ day | number: '0.0' }}
             </span>
           </div>
@@ -80,7 +93,7 @@
           </div>
         </ng-template>
       </p-calendar>
-    </div>
+    </div> -->
     <div class="border-solid border-1 surface-border border-round-md p-4 bg-black-alpha-40">
       <div class="flex gap-2 align-items-center justify-content-between">
         <span class="text-2xl">Categories</span>

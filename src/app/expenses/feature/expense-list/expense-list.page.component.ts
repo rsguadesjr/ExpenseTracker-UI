@@ -3,6 +3,7 @@ import {
   catchError,
   combineLatest,
   debounceTime,
+  distinctUntilChanged,
   filter,
   finalize,
   map,
@@ -24,8 +25,8 @@ import {
   ReactiveFormsModule,
   FormControl,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -52,6 +53,7 @@ import {
   endOfMonth,
   format,
   formatISO,
+  isSameMonth,
   isWithinInterval,
   startOfDay,
   startOfMonth,
@@ -64,6 +66,11 @@ import { ExpenseDetailComponent } from '../expense-detail/expense-detail.page.co
 import { ConfirmationService } from 'primeng/api';
 import { ToastService } from 'src/app/shared/utils/toast.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ReminderService } from '../../data-access/reminder.service';
+import { ReminderCalendarComponent } from 'src/app/shared/ui/reminder-calendar/reminder-calendar.component';
+import { ReminderModel } from 'src/app/shared/model/reminder-model';
+import { CalendarDataComponent } from 'src/app/shared/ui/calendar-data/calendar-data.component';
+import { TotalPerDate } from 'src/app/shared/model/total-per-date';
 
 @Component({
   selector: 'app-expense-list-page',
@@ -86,12 +93,15 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     CardModule,
     BadgeModule,
     SumPipe,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    ReminderCalendarComponent,
+    DecimalPipe,
+    CalendarDataComponent
   ],
-  providers: [SumPipe, ConfirmationService],
+  providers: [SumPipe, ConfirmationService, DecimalPipe],
   templateUrl: './expense-list.page.component.html',
   styleUrls: ['./expense-list.page.component.scss'],
-  encapsulation: ViewEncapsulation.Emulated
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExpenseListPageComponent implements OnInit, OnDestroy {
   private ngUnsubscribe$ = new Subject();
@@ -128,7 +138,8 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   calendarDate? = new Date();
   calendarLoadingInProgress$ = new BehaviorSubject(false);
   calendarDateRange$ = new BehaviorSubject<any>(undefined);
-  dailyTotal$!: Observable<any>;
+  dailyTotal$!: Observable<TotalPerDate[]>;
+  reminders$!: Observable<ReminderModel[]>;
 
   constructor(
     private router: Router,
@@ -140,7 +151,9 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     private sumPipe: SumPipe,
     private dialogService: DialogService,
     private confirmationService: ConfirmationService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private reminderService: ReminderService,
+    public decimalPipe: DecimalPipe
   ) {
     this.createForm();
   }
@@ -218,57 +231,21 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
         this.filterForm.get('view')?.setValue(view, { emitEvent: false });
       });
 
-    // // will execute on initial load
-    // view$.pipe(startWith(''), debounceTime(1500), take(1)).subscribe((v) => {
-    //   this.applyFilter();
-    // });
-
-    // //
-    // combineLatest([
-    //   this.filterForm.get('dateFrom')!.valueChanges.pipe(startWith('')),
-    //   this.filterForm.get('dateTo')!.valueChanges.pipe(startWith('')),
-    // ])
-    //   .pipe(skip(1), takeUntil(this.ngUnsubscribe$))
-    //   .subscribe((v) => {
-    //     this.filterForm.get('view')?.setValue(null, { emitEvent: false });
-    //   });
 
     // this will contain the sum of expenses per category
     this.dailyTotal$ = this.calendarDateRange$.pipe(
       filter((v) => !!v),
+      distinctUntilChanged((prev, curr) => {
+        return JSON.stringify(prev) === JSON.stringify(curr);
+      }),
       debounceTime(500),
-      tap(() => this.calendarLoadingInProgress$.next(true)),
       switchMap((filter) => {
-        const dateFrom = filter.dateFrom?.toISOString();
-        const dateTo = filter.dateTo?.toISOString();
+        this.reminderService.initReminders(filter.dateFrom.toISOString(), filter.dateTo.toISOString());
+
+        const dateFrom = filter.dateFrom.toISOString();
+        const dateTo = filter.dateTo.toISOString();
         return this.summaryService.getDailyTotalByDateRange(dateFrom, dateTo);
       }),
-      map((v) => {
-        const summary: any = {};
-        const filter = this.calendarDateRange$.value;
-        const dates = eachDayOfInterval({
-          start: filter.dateFrom,
-          end: filter.dateTo,
-        });
-
-        for (const date of dates) {
-          const sum = v
-            .filter((x) => isSameDay(date, new Date(x.expenseDate)))
-            .reduce((acc, obj) => acc + obj.total, 0);
-          summary[
-            `${format(date, 'yyyy')}-${+format(date, 'MM')}-${+format(
-              date,
-              'dd'
-            )}`
-          ] = sum || '';
-        }
-
-        return summary;
-      }),
-      tap(() => this.calendarLoadingInProgress$.next(false)),
-      catchError((err) => {
-        return of({});
-      })
     );
 
 
@@ -277,6 +254,15 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.applyFilter();
     }, 500);
+
+
+
+
+    this.reminders$ = this.reminderService.getReminderData()
+      .pipe(
+        map(x => x.data)
+      )
+
   }
 
   ngOnDestroy(): void {
@@ -390,7 +376,8 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     // this.applyFilter();
   }
 
-  onMonthChange(event: any) {
+  onMonthChange(event : { year: number, month: number}) {
+    console.log('[DEBUg] onMonthChange', event);
     const date = new Date(event.year, event.month - 1, 1);
     this.calendarDateRange$.next({
       dateFrom: startOfMonth(date),
@@ -400,12 +387,13 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
 
   onSelectedDate(event: any) {}
 
-  applyDateFilter() {
-    if (!this.calendarDate) return;
+  applyDateFilter(date: any) {
+    console.log('[DEBUG] applyDateFilter', date)
+    if (!date) return;
 
     this.validationMessageService.clear();
-    this.filterForm.get('dateFrom')?.setValue(startOfDay(this.calendarDate), { emitEvent: false });
-    this.filterForm.get('dateTo')?.setValue(endOfDay(this.calendarDate), { emitEvent: false });
+    this.filterForm.get('dateFrom')?.setValue(startOfDay(date), { emitEvent: false });
+    this.filterForm.get('dateTo')?.setValue(endOfDay(date), { emitEvent: false });
     this.filterForm.get('view')?.setValue(null, { emitEvent: false });
     this.filter$.next({
       dateFrom: this.filterForm.get('dateFrom')?.value,
