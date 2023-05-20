@@ -35,7 +35,6 @@ export class ExpenseService {
     else {
       this.expenseData$.next({ status: 'LOADING', data: [...this.expenseData$.value.data] });
 
-      console.log('[DEBUG] initExpenses', params)
       this.http.post<PaginatedList<Expense>>(`${this.baseUrl}/GetExpenses`, params)
         .pipe(
           tap(x => {

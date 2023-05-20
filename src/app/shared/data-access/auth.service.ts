@@ -31,14 +31,7 @@ export class AuthService {
   ) {
     this.authUrl = environment.API_BASE_URL + 'api/Auth';
 
-    afAuth.onAuthStateChanged(user => {
-      console.log('[DEBUG] onAuthStateChanged', user)
-      user?.getIdTokenResult().then(idTokenResult => {
-        console.log('[DEBUG] onAuthStateChanged getIdTokenResult', idTokenResult)
-      })
-    })
     afAuth.authState.subscribe((user) => {
-      console.log('[DEBUG] afAuth user', user);
       this.firebaseUser$.next(user);
     });
 

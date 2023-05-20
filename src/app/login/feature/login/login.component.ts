@@ -90,7 +90,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         if (!_user) return;
 
         const testResult = await _user.getIdTokenResult();
-        console.log('[DEBUG] testing', Object.assign({}, testResult))
 
 
         this.googleLoginInProgress = true;
@@ -109,7 +108,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
               const idTokenResult = await _user.getIdTokenResult();
               if (idTokenResult) {
-                console.log('[DEBUG] login idTokenResult', idTokenResult);
                 localStorage.setItem('accessToken', idTokenResult.token);
                 localStorage.setItem('user',JSON.stringify({ ..._user, token: idTokenResult.token }));
 
@@ -118,30 +116,6 @@ export class LoginComponent implements OnInit, OnDestroy {
                 this.authService.googleLoginInProgress$.next(false);
                 this.router.navigateByUrl('/');
               }
-
-              // console.log('[DEBUG] login', loginAuthResult);
-              // _user.getIdTokenResult().then(idTokenResult => {
-              //   console.log('[DEBUG] login idTokenResult', idTokenResult);
-              //   localStorage.setItem('accessToken', idTokenResult.token);
-              //   localStorage.setItem('user',JSON.stringify({ ..._user, token: idTokenResult.token }));
-
-              //       //   const user = JSON.parse((localStorage.getItem('user') || null) as any);
-              // //   this.authService.user$.next(user);
-              // //   this.authService.googleLoginInProgress$.next(false);
-              // //   this.router.navigateByUrl('/');
-              // })
-
-              // const result = await this.afAuth.signInWithCustomToken(loginAuthResult.token);
-              // if (result?.user) {
-              //   const accessToken = await result.user.getIdToken(true);
-              //   localStorage.setItem('accessToken', accessToken);
-              //   localStorage.setItem('user',JSON.stringify({ ...result.user, token: accessToken }));
-
-              //   const user = JSON.parse((localStorage.getItem('user') || null) as any);
-              //   this.authService.user$.next(user);
-              //   this.authService.googleLoginInProgress$.next(false);
-              //   this.router.navigateByUrl('/');
-              // }
             },
             error: (error) => {
               this.googleLoginInProgress = false;

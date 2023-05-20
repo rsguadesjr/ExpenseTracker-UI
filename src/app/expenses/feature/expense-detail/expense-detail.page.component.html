@@ -10,12 +10,12 @@
       <div class="flex flex-column gap-2">
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-category">Category</label>
-          <p-dropdown id="form-category" formControlName="category" [options]="(categories$ | async) ?? []" optionLabel="name" class="w-100"></p-dropdown>
+          <p-dropdown id="form-category" formControlName="category" [options]="categories" optionLabel="name" class="w-100"></p-dropdown>
           <small class="text-red-400" *ngFor="let error of validationErrors['category']">{{ error }}</small>
         </div>
-        <div class="flex flex-column gap-2">
+        <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-amount">Amount</label>
-          <input pInputText id="form-amount" aria-describedby="username-help" formControlName="amount"/>
+          <p-inputNumber inputId="form-amount" formControlName="amount"></p-inputNumber>
           <small class="text-red-400" *ngFor="let error of validationErrors['amount']">{{ error }}</small>
         </div>
         <div class="flex flex-column gap-2 p-fluid">
@@ -30,7 +30,7 @@
         </div>
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-source">Source</label>
-          <p-dropdown id="form-source" formControlName="source" [options]="(sources$ | async) ?? []" optionLabel="name"></p-dropdown>
+          <p-dropdown id="form-source" formControlName="source" [options]="sources" optionLabel="name"></p-dropdown>
           <small class="text-red-400" *ngFor="let error of validationErrors['source']">{{ error }}</small>
         </div>
         <div class="flex flex-column gap-2 p-fluid">

@@ -92,21 +92,17 @@ export class ReminderCalendarComponent {
   constructor(public decimalPipe: DecimalPipe) {}
 
   onMonthChange(e: any) {
-    console.log('[DEBUG] onMonthChange', e);
   }
 
   onSelectedDate(date: Date) {
-    console.log('[DEBUG] onSelectedDate', date);
     this.selectedReminders = this.reminders.filter((x) =>
       isSameDay(x.date, date)
     );
   }
 
   selectReminder(reminder: ReminderModel) {
-    console.log('[DEBUG] selectReminder', reminder);
   }
 
   newReminder() {
-    console.log('[DEBUG] newReminder');
   }
 }

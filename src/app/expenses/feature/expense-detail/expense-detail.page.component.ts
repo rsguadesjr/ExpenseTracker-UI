@@ -13,7 +13,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { Expense } from '../../model/expense.model';
-import { map, take, BehaviorSubject, switchMap, of, forkJoin, Observable, takeUntil, Subject } from 'rxjs';
+import { map, take, BehaviorSubject, switchMap, of, forkJoin, Observable, takeUntil, Subject, combineLatest } from 'rxjs';
 import { CalendarModule } from 'primeng/calendar';
 import { ExpenseDto } from '../../model/expense-dto.model';
 import { ToastService } from 'src/app/shared/utils/toast.service';
@@ -21,13 +21,14 @@ import { ValidationMessageService } from 'src/app/shared/utils/validation-messag
 import { CategoryService } from 'src/app/shared/data-access/category.service';
 import { SourceService } from 'src/app/shared/data-access/source.service';
 import { Option } from 'src/app/shared/model/option.model';
-import { startOfDay } from 'date-fns';
+import { parseISO, startOfDay } from 'date-fns';
 import { CardModule } from 'primeng/card';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ChipsModule } from 'primeng/chips';
 import { MessagesModule } from 'primeng/messages';
 import { Message } from 'primeng/api';
 import { FormValidation } from 'src/app/shared/utils/form-validation';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 @Component({
   selector: 'app-expense-detail',
@@ -38,6 +39,7 @@ import { FormValidation } from 'src/app/shared/utils/form-validation';
     ReactiveFormsModule,
     DropdownModule,
     InputTextModule,
+    InputNumberModule,
     ButtonModule,
     CalendarModule,
     CardModule,
@@ -57,8 +59,8 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
   expenseId?: string;
 
   loadingDetails$ = new BehaviorSubject<boolean>(false);
-  categories$: Observable<Option[]>;
-  sources$: Observable<Option[]>;
+  categories: Option[] = [];
+  sources: Option[] = [];
   messages: Message[] = [];
   validationErrors: { [key: string]: string[] } = {};
 
@@ -73,16 +75,17 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
     @Optional() public dialogConfig: DynamicDialogConfig,
     @Optional() private dialogRef: DynamicDialogRef
   ) {
+    const expense: ExpenseDto | undefined = dialogConfig.data.expense;
     this.expenseForm = new FormGroup({
       category: new FormControl(null, FormValidation.requiredObjectValidator('id', 'Category is required')),
-      amount: new FormControl<Number | null>(null, [
+      amount: new FormControl<Number | undefined>(expense?.amount, [
         FormValidation.minNumberValidator(1, 'Amount must be greater than 0'),
         FormValidation.requiredValidator('Amount is required')
       ]),
-      date: new FormControl(startOfDay(new Date()), FormValidation.requiredValidator('Date is required')),
+      date: new FormControl(expense?.expenseDate ? startOfDay(parseISO(expense.expenseDate)) : startOfDay(new Date()), FormValidation.requiredValidator('Date is required')),
       description: new FormControl(null, FormValidation.requiredValidator('Description is required')),
-      source: new FormControl({ id: 1, name: 'Cash' }, FormValidation.requiredObjectValidator('id', 'Source is required')),
-      tags: new FormControl([])
+      source: new FormControl(null, FormValidation.requiredObjectValidator('id', 'Source is required')),
+      tags: new FormControl(expense?.tags ?? [])
     });
 
     let expenseId$: Observable<string>;
@@ -135,8 +138,23 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
         });
     }
 
-    this.categories$ = this.categoryService.getCategories().pipe(map(opt => [{ id: undefined, name: '' }, ...opt]));
-    this.sources$ = this.sourceService.getSources().pipe(map(opt => [{ id: undefined, name: '' }, ...opt]));
+    combineLatest([
+      this.categoryService.getCategories().pipe(map(opt => [{ id: undefined, name: '' }, ...opt])),
+      this.sourceService.getSources().pipe(map(opt => [{ id: undefined, name: '' }, ...opt]))
+    ])
+    .pipe(takeUntil(this.ngUnsubscribe$))
+    .subscribe(([categories, sources]) => {
+      this.categories = categories;
+      this.sources = sources;
+
+      if (expense?.categoryId) {
+        this.expenseForm.get('category')?.setValue(categories.find(x => x.id == expense.categoryId))
+      }
+
+      if (expense?.sourceId) {
+        this.expenseForm.get('source')?.setValue(sources.find(x => x.id == expense.sourceId))
+      }
+    })
 
     // set only unique values
     this.expenseForm.get('tags')?.valueChanges
@@ -185,7 +203,7 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
         next: (v) => {
           this.alertService.showSuccess(`${this.isEdit ? 'Updated entry' : 'Created new entry'}`);
           if (this.dialogRef) {
-            this.dialogRef.close();
+            this.dialogRef.close(v);
           } else {
             this.location.back();
           }

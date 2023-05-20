@@ -1,0 +1,95 @@
+<div class="form xl:w-4 lg:w-5 md:w-7 m-auto">
+  <p-card styleClass="bg-black-alpha-40 px-2">
+    <form [formGroup]="form">
+      <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
+
+      <div class="flex flex-column gap-2">
+        <div class="flex flex-column flex-grow-1  gap-2">
+          <label htmlFor="form-subject">Subject</label>
+          <input pInputText id="form-subject" aria-describedby="username-help" formControlName="subject" />
+          <small class="text-red-400" *ngFor="let error of validationErrors['subject']">{{ error }}</small>
+        </div>
+        <div class="flex flex-column gap-2">
+          <label htmlFor="form-note">Note</label>
+          <input pInputText id="form-note" aria-describedby="username-help" formControlName="note" />
+          <small class="text-red-400" *ngFor="let error of validationErrors['note']">{{ error }}</small>
+        </div>
+        <div class="flex justify-content-between gap-2">
+          <div class="flex flex-column flex-grow-1 justify-content-end gap-2 p-fluid">
+            <label htmlFor="form-start-date">Start Date</label>
+            <p-calendar id="form-start-date" formControlName="startDate" dateFormat="dd-M-yy"  [maxDate]="form.get('endDate')?.value"></p-calendar>
+            <small class="text-red-400" *ngFor="let error of validationErrors['startDate']">{{ error }}</small>
+          </div>
+          <div class="flex flex-column flex-grow-1 justify-content-end gap-2 p-fluid">
+            <label htmlFor="form-end-date">End Date (End of occurence)</label>
+            <p-calendar id="form-end-date" formControlName="endDate" dateFormat="dd-M-yy" [minDate]="form.get('startDate')?.value"></p-calendar>
+            <small class="text-red-400" *ngFor="let error of validationErrors['endDate']">{{ error }}</small>
+          </div>
+          <div class="flex flex-column flex-grow-1 justify-content-end gap-2 p-fluid">
+            <label htmlFor="form-date">Occurence Date (Readonly)</label>
+            <input pInputText id="form-date" aria-describedby="username-help" formControlName="date" readonly/>
+            <!-- <p-calendar id="form-date" formControlName="date" dateFormat="dd-M-yy" ></p-calendar> -->
+            <small class="text-red-400" *ngFor="let error of validationErrors['date']">{{ error }}</small>
+          </div>
+        </div>
+        <div class="flex flex-column gap-2 mb-4 p-fluid w-6">
+          <label htmlFor="form-type">Type</label>
+          <p-dropdown id="form-type" formControlName="type" [options]="types"
+            optionLabel="name" class="w-100"></p-dropdown>
+          <small class="text-red-400" *ngFor="let error of validationErrors['type']">{{ error }}</small>
+        </div>
+
+        <p-message severity="info" text='Fields below are optional. The entered data will be used to auto fill the fields in the expense form when the "Create Expense" button from the reminder is clicked '></p-message>
+
+        <div class="flex justify-content-between gap-2">
+          <!-- col -->
+          <div class="flex flex-column w-6 gap-2">
+            <div class="flex flex-column gap-2">
+              <label htmlFor="form-amount">Amount</label>
+              <input pInputText id="form-amount" aria-describedby="username-help" formControlName="amount" />
+              <small class="text-red-400" *ngFor="let error of validationErrors['amount']">{{ error }}</small>
+            </div>
+            <div class="flex flex-column gap-2 p-fluid">
+              <label htmlFor="form-category">Category</label>
+              <p-dropdown id="form-category" formControlName="category" [options]="categories"
+                optionLabel="name" class="w-100"></p-dropdown>
+              <small class="text-red-400" *ngFor="let error of validationErrors['category']">{{ error }}</small>
+            </div>
+            <div class="flex flex-column gap-2 p-fluid">
+              <label htmlFor="form-expense-date">Expense Date</label>
+              <p-calendar id="form-expense-date" formControlName="expenseDate" dateFormat="dd-M-yy"></p-calendar>
+              <small class="text-red-400" *ngFor="let error of validationErrors['expenseDate']">{{ error }}</small>
+            </div>
+          </div>
+          <!-- /col -->
+
+          <div class="flex flex-column w-6 gap-2">
+            <!-- <div class="flex flex-column gap-2">
+              <label htmlFor="form-description">Description</label>
+              <input pInputText id="form-description" aria-describedby="username-help" formControlName="description" />
+              <small class="text-red-400" *ngFor="let error of validationErrors['description']">{{ error }}</small>
+            </div> -->
+            <div class="flex flex-column gap-2 p-fluid">
+              <label htmlFor="form-source">Source</label>
+              <p-dropdown id="form-source" formControlName="source" [options]="sources"
+                optionLabel="name"></p-dropdown>
+              <small class="text-red-400" *ngFor="let error of validationErrors['source']">{{ error }}</small>
+            </div>
+            <div class="flex flex-column gap-2 p-fluid">
+              <label htmlFor="form-tags">Tags</label>
+              <p-chips id="form-tags" formControlName="tags" separator=","></p-chips>
+              <small class="text-red-400" *ngFor="let error of validationErrors['tags']">{{ error }}</small>
+            </div>
+          </div>
+
+          <!-- col -->
+          <!-- /col -->
+        </div>
+      </div>
+    </form>
+    <div class="flex flex-row justify-content-end gap-2 mt-4">
+      <button pButton pRipple label="Cancel" (click)="cancel()"></button>
+      <button pButton pRipple label="Submit" class="p-button-success" (click)="submit()"></button>
+    </div>
+  </p-card>
+</div>

@@ -147,7 +147,6 @@ export class SignUpComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (result) => {
-          console.log('[DEBUG] result', result);
           this.confirmationService.confirm({
             header: 'Sign up successful! Please proceed to login form to continue.',
             icon: 'pi pi-check',

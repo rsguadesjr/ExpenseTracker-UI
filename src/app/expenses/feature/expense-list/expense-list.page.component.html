@@ -21,10 +21,10 @@
           <p-dropdown formControlName="category" [options]="categories" optionLabel="name" id="category"></p-dropdown>
         </div> -->
         <p-button icon="pi {{  (filterInProgress$ | async) ? 'pi-spin pi-spinner' : 'pi-search' }}"
-          styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
-        <p-button icon="pi pi-filter-slash" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
+                  pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
+        <p-button icon="pi pi-filter-slash" pTooltip="Clear fields" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
       </div>
-      <p-button icon="pi pi-plus" styleClass="p-button-rounded " (click)="addEntry()"></p-button>
+      <p-button icon="pi pi-plus" pTooltip="Create Expense" styleClass="p-button-rounded " (click)="addEntry()"></p-button>
     </div>
     <!-- <div class="flex justify-content-end gap-2 ">
       <p-selectButton [options]="toggleViewStateOptions" [(ngModel)]="toggleViewValue" optionLabel="name"
@@ -33,7 +33,7 @@
     <ng-container *ngIf="expenseEntries$ | async as data; else noResult">
       <div class="flex gap-2 align-items-center py-2">
         <span>Total spent for this period:</span>
-        <span class="text-xl">{{ data | sum: 'amount' | number: '0.0'}}</span>
+        <span class="text-xl border-round bg-cyan-800 p-2 font-bold">{{ data | sum: 'amount' | number: '0.0'}}</span>
       </div>
       <div class="card" *ngIf="data.length > 0; else noResult">
         <!-- <app-expense-list *ngIf="toggleViewValue === 'compact'" [items]="data.data" [totalRows]="data.totalRows"
@@ -60,8 +60,8 @@
           [dailyTotalSummary]="(dailyTotal$ | async) || []"
           (applySelectedDate)="applyDateFilter($event)"
           (monthChange)="onMonthChange($event)"
-          [startDate]="(calendarDateRange$ | async)?.dateFrom"
-          [endDate]="(calendarDateRange$ | async)?.dateTo">
+          [startDate]="(calendarDateRange$ | async)?.dateFrom!"
+          [endDate]="(calendarDateRange$ | async)?.dateTo!">
       </app-calendar-data>
     </div>
 

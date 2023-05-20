@@ -54,14 +54,6 @@ export class AppComponent implements OnInit {
     private categoryService: CategoryService,
     private sourceService: SourceService
   ) {
-
-    console.log('[DEBUG] loading', {
-      t1: document.referrer,
-      t2: window.history,
-      t3: navigator
-    })
-
-
     this.validationMessagService.message$.subscribe((v) => {
       if (v) {
         this.validationMessages = [v, ...this.validationMessages];
@@ -92,7 +84,7 @@ export class AppComponent implements OnInit {
     });
 
 
-    this.afAuth.authState
+    this.authService.user$
     .subscribe({
       next: (user) => {
         if (user) {

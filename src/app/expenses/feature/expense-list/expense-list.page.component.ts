@@ -69,8 +69,9 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ReminderService } from '../../data-access/reminder.service';
 import { ReminderCalendarComponent } from 'src/app/shared/ui/reminder-calendar/reminder-calendar.component';
 import { ReminderModel } from 'src/app/shared/model/reminder-model';
-import { CalendarDataComponent } from 'src/app/shared/ui/calendar-data/calendar-data.component';
+import { CalendarDataComponent } from 'src/app/shared/feature/calendar-data/calendar-data.component';
 import { TotalPerDate } from 'src/app/shared/model/total-per-date';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-expense-list-page',
@@ -96,7 +97,8 @@ import { TotalPerDate } from 'src/app/shared/model/total-per-date';
     ConfirmDialogModule,
     ReminderCalendarComponent,
     DecimalPipe,
-    CalendarDataComponent
+    CalendarDataComponent,
+    TooltipModule
   ],
   providers: [SumPipe, ConfirmationService, DecimalPipe],
   templateUrl: './expense-list.page.component.html',
@@ -137,7 +139,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
 
   calendarDate? = new Date();
   calendarLoadingInProgress$ = new BehaviorSubject(false);
-  calendarDateRange$ = new BehaviorSubject<any>(undefined);
+  calendarDateRange$ = new BehaviorSubject< { dateFrom: Date, dateTo: Date, forceUpdate?: boolean } | undefined>(undefined);
   dailyTotal$!: Observable<TotalPerDate[]>;
   reminders$!: Observable<ReminderModel[]>;
 
@@ -233,20 +235,27 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
 
 
     // this will contain the sum of expenses per category
-    this.dailyTotal$ = this.calendarDateRange$.pipe(
+    this.calendarDateRange$.pipe(
       filter((v) => !!v),
       distinctUntilChanged((prev, curr) => {
         return JSON.stringify(prev) === JSON.stringify(curr);
       }),
-      debounceTime(500),
-      switchMap((filter) => {
-        this.reminderService.initReminders(filter.dateFrom.toISOString(), filter.dateTo.toISOString());
+      debounceTime(500)
+    ).subscribe(filter => {
+      const dateFrom = filter!.dateFrom.toISOString();
+      const dateTo = filter!.dateTo.toISOString();
 
-        const dateFrom = filter.dateFrom.toISOString();
-        const dateTo = filter.dateTo.toISOString();
-        return this.summaryService.getDailyTotalByDateRange(dateFrom, dateTo);
-      }),
-    );
+      this.summaryService.fetchDailyTotalByDateRange(dateFrom, dateTo, filter!.forceUpdate);
+      this.reminderService.fetchReminders(dateFrom, dateTo);
+    })
+
+
+    this.dailyTotal$ = this.summaryService.getDailyTotalByDateRange();
+    this.reminders$ = this.reminderService.getReminderData()
+    .pipe(
+      map(x => x.data)
+    )
+
 
 
 
@@ -258,10 +267,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
 
 
 
-    this.reminders$ = this.reminderService.getReminderData()
-      .pipe(
-        map(x => x.data)
-      )
+
 
   }
 
@@ -282,7 +288,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   // TODO: decide if this will be page navigation or will just open a modal
   addEntry() {
     // this.router.navigate(['expenses', 'new']);
-    this.dialogService.open(ExpenseDetailComponent, {
+    const dialgoRef = this.dialogService.open(ExpenseDetailComponent, {
       width: '420px',
       header: 'Create',
       contentStyle: { overflow: 'auto' },
@@ -291,14 +297,22 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
       closeOnEscape: true,
       data: {
         isDialog: true
+      },
+
+    })
+
+    dialgoRef.onClose.pipe(take(1))
+    .subscribe((result: Expense) => {
+      if (result) {
+        this.calendarDateRange$.next({...this.calendarDateRange$.value!, forceUpdate: true });
       }
-    });
+    })
   }
 
   // TODO: udpate model
   editEntry(expense: Expense) {
     // this.router.navigate(['expenses', 'edit', expense.id]);
-    this.dialogService.open(ExpenseDetailComponent, {
+    const dialgoRef = this.dialogService.open(ExpenseDetailComponent, {
       width: '420px',
       header: 'Update',
       contentStyle: { overflow: 'auto' },
@@ -311,6 +325,14 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
         id: expense.id
       }
     });
+
+    dialgoRef.onClose.pipe(take(1))
+      .subscribe((result: Expense) => {
+        console.log('[DEBUG] editEntry', result);
+        if (result) {
+          this.calendarDateRange$.next({...this.calendarDateRange$.value!, forceUpdate: true });
+        }
+      })
   }
 
   deleteEntry(expense: Expense) {
@@ -330,6 +352,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
                 take(1)
               ).subscribe(v => {
                 this.toastService.showSuccess('Delete successful');
+                this.calendarDateRange$.next({...this.calendarDateRange$.value!, forceUpdate: true });
               })
         },
         reject: () => {
@@ -377,18 +400,17 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   }
 
   onMonthChange(event : { year: number, month: number}) {
-    console.log('[DEBUg] onMonthChange', event);
     const date = new Date(event.year, event.month - 1, 1);
     this.calendarDateRange$.next({
       dateFrom: startOfMonth(date),
       dateTo: endOfMonth(date),
+      forceUpdate: false
     });
   }
 
   onSelectedDate(event: any) {}
 
   applyDateFilter(date: any) {
-    console.log('[DEBUG] applyDateFilter', date)
     if (!date) return;
 
     this.validationMessageService.clear();
