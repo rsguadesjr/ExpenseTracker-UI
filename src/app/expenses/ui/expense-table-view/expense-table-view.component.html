@@ -1,64 +1,90 @@
 
 <p-table #dt
-      [value]="items"
+      [value]="(items$ | async) || []"
       [rows]="10"
       [paginator]="true"
       [showCurrentPageReport]="true"
       [tableStyle]="{ 'min-width': '50rem' }"
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
       [rowsPerPageOptions]="[10, 20, 50]"
-      [globalFilterFields]="['category', 'source', 'description']">
+      [globalFilterFields]="['category', 'source', 'description', 'tags']"
+      (onFilter)="onFilter($event)">
   <ng-template pTemplate="header">
       <tr>
           <th pSortableColumn="category" style="width: 15%">
-            Category
-            <p-sortIcon field="category"></p-sortIcon>
-            <p-columnFilter field="category" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
-                <ng-template pTemplate="header">
-                    <div class="px-3 pt-3 pb-0">
-                        <span class="font-bold">Filter Category</span>
-                    </div>
-                </ng-template>
-                <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                    <p-multiSelect [ngModel]="value" [options]="categories" placeholder="Any" (onChange)="filter($event.value)">
-                        <ng-template let-option pTemplate="item">
-                            <div class="inline-block vertical-align-middle">
-                                <span class="ml-1 mt-1">{{ option }}</span>
-                            </div>
-                        </ng-template>
-                    </p-multiSelect>
-                </ng-template>
-            </p-columnFilter>
+            <div class="flex gap-2 align-items-center">
+              Category
+              <p-sortIcon field="category"></p-sortIcon>
+              <p-columnFilter field="category" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" [matchMode]="'dataArrayFilter'">
+                  <ng-template pTemplate="header">
+                      <div class="px-3 pt-3 pb-0">
+                          <span class="font-bold">Filter Category</span>
+                      </div>
+                  </ng-template>
+                  <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                      <p-multiSelect [ngModel]="value" [options]="(categories$ | async | sort:'name') || []" placeholder="Any" (onChange)="filter($event.value)" optionLabel="name">
+                          <ng-template let-option pTemplate="item">
+                              <div class="inline-block vertical-align-middle">
+                                  <span class="ml-1 mt-1">{{ option.name }}</span>
+                              </div>
+                          </ng-template>
+                      </p-multiSelect>
+                  </ng-template>
+              </p-columnFilter>
+            </div>
           </th>
           <th pSortableColumn="amount" style="width: 15%">Amount <p-sortIcon field="amount"></p-sortIcon></th>
           <th pSortableColumn="expenseDate" style="width: 15%">Date <p-sortIcon field="expenseDate"></p-sortIcon></th>
           <th pSortableColumn="description" style="width: 20%">
-            Description
-            <p-sortIcon field="description"></p-sortIcon>
-            <p-columnFilter type="text" field="description" display="menu"></p-columnFilter>
+            <div class="flex gap-2 align-items-center">
+              Description
+              <p-sortIcon field="description"></p-sortIcon>
+              <p-columnFilter type="text" field="description" display="menu"></p-columnFilter>
+            </div>
           </th>
           <th pSortableColumn="source" style="width: 15%">
-            Source
-            <p-sortIcon field="source"></p-sortIcon>
-            <p-columnFilter field="category" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false">
-                <ng-template pTemplate="header">
-                    <div class="px-3 pt-3 pb-0">
-                        <span class="font-bold">Filter Source</span>
-                    </div>
-                </ng-template>
-                <ng-template pTemplate="filter" let-value let-filter="filterCallback">
-                    <p-multiSelect [ngModel]="value" [options]="sources" placeholder="Any" (onChange)="filter($event.value)">
-                        <ng-template let-option pTemplate="item">
-                            <div class="inline-block vertical-align-middle">
-                                <span class="ml-1 mt-1">{{ option }}</span>
-                            </div>
-                        </ng-template>
-                    </p-multiSelect>
-                </ng-template>
-            </p-columnFilter>
+            <div class="flex gap-2 align-items-center">
+              Source
+              <p-sortIcon field="source"></p-sortIcon>
+              <p-columnFilter field="source" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" [matchMode]="'dataArrayFilter'">
+                  <ng-template pTemplate="header">
+                      <div class="px-3 pt-3 pb-0">
+                          <span class="font-bold">Filter Source</span>
+                      </div>
+                  </ng-template>
+                  <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                      <p-multiSelect [ngModel]="value" [options]="(sources$ | async | sort:'name') || []" placeholder="Any" (onChange)="filter($event.value)" optionLabel="name">
+                          <ng-template let-option pTemplate="item">
+                              <div class="inline-block vertical-align-middle">
+                                  <span class="ml-1 mt-1">{{ option.name }}</span>
+                              </div>
+                          </ng-template>
+                      </p-multiSelect>
+                  </ng-template>
+              </p-columnFilter>
+            </div>
           </th>
-          <th pSortableColumn="description" style="width: 20%">
-            Tags
+          <th pSortableColumn="tags" style="width: 20%">
+            <div class="flex gap-2 align-items-center">
+              Tags
+              <p-columnFilter field="tags" matchMode="in" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false"
+                [matchMode]="'dataArrayFilter'">
+                  <ng-template pTemplate="header">
+                      <div class="px-3 pt-3 pb-0">
+                          <span class="font-bold">Filter Tags</span>
+                      </div>
+                  </ng-template>
+                  <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                      <p-multiSelect [ngModel]="value" [options]="(tags$ | async | sort:'name') || []" placeholder="Any" (onChange)="filter($event.value)" optionLabel="name">
+                          <ng-template let-option pTemplate="item">
+                              <div class="inline-block vertical-align-middle">
+                                  <span class="ml-1 mt-1">{{ option.name }}</span>
+                              </div>
+                          </ng-template>
+                      </p-multiSelect>
+                  </ng-template>
+              </p-columnFilter>
+            </div>
           </th>
           <th style="width: 5%"></th>
       </tr>

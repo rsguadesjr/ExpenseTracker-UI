@@ -6,36 +6,57 @@ import { Expense } from '../../model/expense.model';
 import { PaginatorModule } from 'primeng/paginator';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { TagModule } from 'primeng/tag';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { FilterService } from 'primeng/api';
+import { BehaviorSubject, map, of } from 'rxjs';
+import { Option } from 'src/app/shared/model/option.model';
+import { SortPipe } from 'src/app/shared/utils/sort.pipe';
 
 @Component({
   selector: 'app-expense-table-view',
   standalone: true,
-  imports: [CommonModule,TableModule,ButtonModule,PaginatorModule,MultiSelectModule,TagModule],
+  imports: [
+    CommonModule,
+    TableModule,
+    ButtonModule,
+    PaginatorModule,
+    MultiSelectModule,
+    TagModule,
+    AutoCompleteModule,
+    SortPipe
+  ],
   templateUrl: './expense-table-view.component.html',
-  styleUrls: ['./expense-table-view.component.scss']
+  styleUrls: ['./expense-table-view.component.scss'],
 })
 export class ExpenseTableViewComponent {
-
-  categories: string[] = [];
-  sources: string[] = [];
-
-  private _items:Expense[] = [];
+  items$ = new BehaviorSubject<Expense[]>([]);
   @Input() set items(value: Expense[]) {
-    this._items = value ?? [];
-
-    const categories = this._items.map(x => x.category) as string[];
-    this.categories = Array.from(new Set(categories));
-
-    const sources = this._items.map(x => x.source) as string[];
-    this.sources = Array.from(new Set(sources));
+    if (value) {
+      this.items$.next(value);
+    }
   }
-  get items() {
-    return this._items;
-  }
+
+  categories$ = this.items$.pipe(map(v => {
+    const value = v.map(x => x.category);
+    return Array.from(new Set(value)).map(x => ({ name: x } as Option));
+  }))
+
+  sources$ = this.items$.pipe(map(v => {
+    const value = v.map(x => x.source);
+    return Array.from(new Set(value)).map(x => ({ name: x } as Option));
+  }))
+
+  tags$ = this.items$.pipe(map(v => {
+    const value = v.reduce((acc: string[], obj: Expense) => {
+      acc = [...acc, ...obj.tags!];
+      return acc;
+    }, [])
+    return Array.from(new Set(value)).map(x => ({ name: x } as Option));
+  }))
 
   @Output() selected = new EventEmitter<Expense>();
   @Output() delete = new EventEmitter<Expense>();
-
+  @Output() onFilterChange = new EventEmitter<Expense[]>();
 
   editEntry(item: Expense) {
     this.selected.emit(item);
@@ -43,5 +64,25 @@ export class ExpenseTableViewComponent {
 
   deleteEntry(item: Expense) {
     this.delete.emit(item);
+  }
+
+  constructor(private filterService: FilterService) {
+    const customFilterName = 'dataArrayFilter';
+    this.filterService.register(customFilterName, (value: any | any[], filter: Option[]): boolean => {
+      if (filter == null || filter.length == 0) {
+        return true;
+      }
+
+      if (Array.isArray(value)) {
+        return value.some((r: any) => filter.map(x => x.name).includes(r));
+      }
+      else {
+        return filter.some(x => x.name == value);
+      }
+    });
+  }
+
+  onFilter({ filteredValue } : { filteredValue: Expense[] }) {
+    this.onFilterChange.emit(filteredValue);
   }
 }

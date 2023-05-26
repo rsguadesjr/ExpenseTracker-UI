@@ -26,7 +26,7 @@ import {
   FormControl,
 } from '@angular/forms';
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -121,9 +121,10 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   ];
   filterForm!: FormGroup;
   filter$ = new BehaviorSubject<any>(undefined);
-  expenseEntries$!: Observable<ExpenseDto[]>;
+  expenseEntries$!: Observable<Expense[]>;
   filterInProgress$ = new BehaviorSubject<boolean>(false);
   totalPerCategory$!: Observable<TotalPerCategory[]>;
+  filteredItems$ = new BehaviorSubject<Expense[] | undefined>(undefined);
 
   rowsPerPage: number = 10;
   currentPage: number = 0;
@@ -140,8 +141,8 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   calendarDate? = new Date();
   calendarLoadingInProgress$ = new BehaviorSubject(false);
   calendarDateRange$ = new BehaviorSubject< { dateFrom: Date, dateTo: Date, forceUpdate?: boolean } | undefined>(undefined);
-  dailyTotal$!: Observable<TotalPerDate[]>;
-  reminders$!: Observable<ReminderModel[]>;
+  dailyTotal$: Observable<TotalPerDate[]>;
+  reminders$: Observable<ReminderModel[]>;
 
   constructor(
     private router: Router,
@@ -155,12 +156,15 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     private confirmationService: ConfirmationService,
     private toastService: ToastService,
     private reminderService: ReminderService,
-    public decimalPipe: DecimalPipe
+    public decimalPipe: DecimalPipe,
+    private cdr: ChangeDetectorRef
   ) {
     this.createForm();
-  }
 
-  ngOnInit() {
+    this.dailyTotal$ = this.summaryService.getDailyTotalByDateRange();
+    this.reminders$ = this.reminderService.getReminderData()
+                                          .pipe(map(x => x.data));
+
     // executes every time applyFilter/applyDateFilter is triggered
     this.filter$
       .pipe(
@@ -191,10 +195,15 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
       })
     );
 
+
     // data to be used for category summarization
     // total per category will used the current expense entries
-    this.totalPerCategory$ = this.expenseService.getExpenseData().pipe(
-      map(({ data }) => {
+    this.totalPerCategory$ = combineLatest([
+      this.expenseEntries$,
+      this.filteredItems$
+    ]).pipe(
+      map(([entries, filteredEntries]) => {
+        const data = filteredEntries ?? entries;
         const categoryIds = Array.from(new Set(data.map((d) => d.categoryId)));
         const result = categoryIds.map((categoryId) => {
           const category = data.find(
@@ -213,7 +222,8 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
       })
     );
 
-    // // auto populate date fields based on view value
+
+    // auto populate date fields based on view value
     // this will listen to route changes and filter change
     combineLatest([
       this.filterForm.get('view')!.valueChanges.pipe(startWith('')),
@@ -236,6 +246,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
 
     // this will contain the sum of expenses per category
     this.calendarDateRange$.pipe(
+      takeUntil(this.ngUnsubscribe$),
       filter((v) => !!v),
       distinctUntilChanged((prev, curr) => {
         return JSON.stringify(prev) === JSON.stringify(curr);
@@ -248,27 +259,13 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
       this.summaryService.fetchDailyTotalByDateRange(dateFrom, dateTo, filter!.forceUpdate);
       this.reminderService.fetchReminders(dateFrom, dateTo);
     })
+  }
 
-
-    this.dailyTotal$ = this.summaryService.getDailyTotalByDateRange();
-    this.reminders$ = this.reminderService.getReminderData()
-    .pipe(
-      map(x => x.data)
-    )
-
-
-
-
+  ngOnInit() {
     // TODO: UPDATE LOGIC HERE?????
     setTimeout(() => {
       this.applyFilter();
     }, 500);
-
-
-
-
-
-
   }
 
   ngOnDestroy(): void {
@@ -328,7 +325,6 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
 
     dialgoRef.onClose.pipe(take(1))
       .subscribe((result: Expense) => {
-        console.log('[DEBUG] editEntry', result);
         if (result) {
           this.calendarDateRange$.next({...this.calendarDateRange$.value!, forceUpdate: true });
         }
@@ -424,5 +420,10 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
       pageNumber: 0,
       totalRows: 9999, //this.rowsPerPage,
     });
+  }
+
+  onFilterChange(data: Expense[]) {
+    this.filteredItems$.next(data);
+    this.cdr.detectChanges();
   }
 }

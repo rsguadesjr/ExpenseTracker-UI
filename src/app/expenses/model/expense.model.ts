@@ -9,4 +9,5 @@ export interface Expense {
   description: string;
   sourceId?: number;
   source?: string;
+  tags?: string[];
 }

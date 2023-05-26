@@ -33,7 +33,7 @@ export class ExpenseService {
       this.expenseData$.next({ status: 'SUCCESS', data: this.expenseData$.value?.data || [] });
     }
     else {
-      this.expenseData$.next({ status: 'LOADING', data: [...this.expenseData$.value.data] });
+      // this.expenseData$.next({ status: 'LOADING', data: [...this.expenseData$.value.data] });
 
       this.http.post<PaginatedList<Expense>>(`${this.baseUrl}/GetExpenses`, params)
         .pipe(
