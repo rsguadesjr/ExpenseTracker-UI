@@ -1,0 +1,14 @@
+<div class="w-full h-full flex gap-4">
+  <!-- side bar -->
+  <div class="h-full w-2 p-fluid">
+
+
+    <p-menu [model]="items" styleClass="w-full h-full" ></p-menu>
+  </div>
+  <!-- /side bar -->
+  <div class="main flex-grow-1">
+    <div class="bg-black-alpha-40 p-4 border-round">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

@@ -61,6 +61,14 @@ const routes: Routes = [
         (m) => m.AccountShellRoutingModule
       ),
   },
+  {
+    path: 'settings',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./settings/feature/settings-shell/settings-shell-routing.module').then(
+        (m) => m.SettingsShellRoutingModule
+      ),
+  },
 ];
 
 @NgModule({

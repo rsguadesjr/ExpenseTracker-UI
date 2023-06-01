@@ -75,7 +75,7 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
     @Optional() public dialogConfig: DynamicDialogConfig,
     @Optional() private dialogRef: DynamicDialogRef
   ) {
-    const expense: ExpenseDto | undefined = dialogConfig.data.expense;
+    const expense: ExpenseDto | undefined = dialogConfig?.data?.expense;
     this.expenseForm = new FormGroup({
       category: new FormControl(null, FormValidation.requiredObjectValidator('id', 'Category is required')),
       amount: new FormControl<Number | undefined>(expense?.amount, [
@@ -90,8 +90,8 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
 
     let expenseId$: Observable<string>;
     if (dialogConfig) {
-      this.isEdit = dialogConfig.data.isEdit;
-      expenseId$ = of(dialogConfig.data.id);
+      this.isEdit = dialogConfig.data?.isEdit;
+      expenseId$ = of(dialogConfig.data?.id);
     } else {
       this.isEdit = (route.snapshot.url.length > 0 && route.snapshot.url[0]?.path == 'edit');
       expenseId$ = route.params.pipe(
@@ -120,16 +120,18 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
           })
         )
         .subscribe({
-          next: (value) => {
-            if (value) {
+          next: (result) => {
+            if (result) {
+              const category = this.categories.find(x => x.id == result.categoryId )
               this.expenseForm.patchValue({
-                category: { id: value.categoryId, name: value.category },
-                date: new Date(value.expenseDate),
-                description: value.description,
-                amount: value.amount,
-                source: { id: value.sourceId, name: value.source },
-                tags: value.tags
+                category: Object.assign({}, category),
+                date: new Date(result.expenseDate),
+                description: result.description,
+                amount: result.amount,
+                source: { id: result.sourceId, name: result.source },
+                tags: result.tags
               });
+
             }
           },
           error: (error) => {
@@ -137,6 +139,7 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
           }
         });
     }
+
 
     combineLatest([
       this.categoryService.getCategories().pipe(map(opt => [{ id: undefined, name: '' }, ...opt])),
@@ -147,10 +150,11 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
       this.categories = categories;
       this.sources = sources;
 
+      // just there was a delay in getting the options, update category and value here
+      // but it should be done in the patch value above
       if (expense?.categoryId) {
         this.expenseForm.get('category')?.setValue(categories.find(x => x.id == expense.categoryId))
       }
-
       if (expense?.sourceId) {
         this.expenseForm.get('source')?.setValue(sources.find(x => x.id == expense.sourceId))
       }

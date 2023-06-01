@@ -36,8 +36,9 @@
     <ng-template pTemplate="content">
       <div class="flex flex-column pt-4">
         <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['']" (click)="sidebarVisible = false">Home</a>
-        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['/expenses']"  (click)="sidebarVisible = false">Expenses</a>
+        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['expenses']"  (click)="sidebarVisible = false">Expenses</a>
         <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['summary']"  (click)="sidebarVisible = false">Summary</a>
+        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['settings']"  (click)="sidebarVisible = false">Settings</a>
         <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['account']"  (click)="sidebarVisible = false">Account</a>
       </div>
     </ng-template>
