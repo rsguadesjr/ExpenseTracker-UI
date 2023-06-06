@@ -14,7 +14,7 @@ import { AuthGuard } from './shared/data-access/auth-guard.service';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './shared/utils/auth-interceptor';
 import { ToastService } from './shared/utils/toast.service';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
@@ -40,7 +40,8 @@ export function tokenGetter() {
       },
     }),
     HttpClientModule,
-    DynamicDialogModule
+    DynamicDialogModule,
+    ConfirmDialogModule
   ],
   providers: [
     { provide: JWT_OPTIONS, useValue: JWT_OPTIONS },
@@ -49,7 +50,8 @@ export function tokenGetter() {
     AuthGuard,
     MessageService,
     ToastService,
-    DialogService
+    DialogService,
+    ConfirmationService
   ],
   bootstrap: [AppComponent],
 })

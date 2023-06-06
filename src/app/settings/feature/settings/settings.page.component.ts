@@ -25,6 +25,11 @@ export class SettingsPageComponent {
       routerLink: './source',
     },
     {
+      label: 'Budget',
+      title: 'Budget',
+      routerLink: './budget',
+    },
+    {
       label: 'Preference',
       title: 'Category',
       routerLink: './preference',

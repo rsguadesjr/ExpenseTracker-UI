@@ -24,6 +24,13 @@ const routes: Routes = [
           )
       },
       {
+        path: 'budget',
+        loadComponent: () =>
+          import('../settings-budget/settings-budget.page.component').then(
+            (m) => m.SettingsBudgetPageComponent
+          )
+      },
+      {
         path: 'preference',
         loadComponent: () =>
           import('../settings-preference/settings-preference.page.component').then(

@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableModule } from 'primeng/table';
+import { Table, TableModule } from 'primeng/table';
 import { DataTableColumn } from '../../model/data-table-column';
 import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
@@ -22,6 +22,7 @@ import { ToastModule } from 'primeng/toast';
   styleUrls: ['./data-table.component.scss']
 })
 export class DataTableComponent {
+  @ViewChild(Table) dt?: Table;
 
   rowData?: any[];
   @Input() set data(value: any[] | null) {

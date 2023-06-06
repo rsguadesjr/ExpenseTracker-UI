@@ -96,7 +96,7 @@ export class SettingsCategoryFormComponent {
       .subscribe({
         next: (result) => {
           if (result) {
-            this.toastService.showSuccess(`${this.id ? 'Updated Successfully' : 'Created Successfuly'}`)
+            this.toastService.showSuccess(`${this.id ? 'Updated Successfully' : 'Created Successfully'}`)
             this.dialogRef.close(result);
           }
         },

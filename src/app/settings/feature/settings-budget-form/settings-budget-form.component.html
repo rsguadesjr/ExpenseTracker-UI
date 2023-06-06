@@ -1,0 +1,59 @@
+<p-card styleClass="bg-black-alpha-40">
+  <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
+  <form [formGroup]="form" class="flex flex-column gap-4">
+    <div class="flex gap-2 justify-content-between">
+      <div class="flex flex-column gap-2 p-fluid w-6">
+        <label htmlFor="form-month">Month</label>
+        <p-dropdown id="form-month" formControlName="month" [options]="monthOptions" optionLabel="name" class="w-100"></p-dropdown>
+        <small class="text-red-400" *ngFor="let error of validationErrors['month']">{{ error }}</small>
+      </div>
+      <div class="flex flex-column gap-2 p-fluid w-6">
+        <label htmlFor="form-year">Year</label>
+        <p-dropdown id="form-year" formControlName="year" [options]="yearOptions" optionLabel="name" class="w-100"></p-dropdown>
+        <small class="text-red-400" *ngFor="let error of validationErrors['year']">{{ error }}</small>
+      </div>
+    </div>
+
+    <div class="flex gap-2 justify-content-between">
+      <div class="flex flex-column gap-2 p-fluid w-6">
+        <label htmlFor="form-amount">Amount</label>
+        <p-inputNumber inputId="form-amount" formControlName="amount"></p-inputNumber>
+        <small class="text-red-400" *ngFor="let error of validationErrors['amount']">{{ error }}</small>
+      </div>
+      <div class="flex flex-column justify-content-start gap-2 w-6">
+        <label htmlFor="form-status">Status</label>
+        <div class="flex gap-2 justify-content-start align-items-center flex-grow-1">
+          <p-inputSwitch formControlName="isActive"></p-inputSwitch>
+          <span>{{ form.get('isActive')?.value ? 'Active' : 'Inactive' }}</span>
+        </div>
+      </div>
+    </div>
+    <div formArrayName="budgetCategories" class="mt-4">
+      <div class="text-2xl">Categories</div>
+      <div *ngFor="let categories of budgetCategoriesArray.controls; let i=index">
+        <div [formGroupName]="i" class="flex gap-2 justify-content-between align-items-center mb-2">
+          <div class="w-6">{{ budgetCategoriesArray.controls[i].get('category')?.value }}</div>
+          <div class="p-fluid w-6">
+
+          <p-inputNumber [inputId]="'budget-category-amount' + '_' + budgetCategoriesArray.controls[i].get('category')?.value" formControlName="amount"></p-inputNumber>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-content-between align-items-center gap-2 mt-4">
+        <div class="flex flex-column align-items-center justify-content-center gap-2 w-6 surface-50 border-round p-2">
+          <label >Unallocated</label>
+          <div class="text-xl">{{ unallocatedAmount | number }}</div>
+        </div>
+        <div class="flex flex-column align-items-center justify-content-center gap-2 w-6 surface-50 border-round p-2">
+          <label >Total</label>
+          <div class="text-xl">{{ totalAmount | number }}</div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <div class="flex flex-row justify-content-end gap-2 mt-4">
+    <button pButton pRipple label="Cancel" (click)="cancel()"></button>
+    <button pButton pRipple [label]="saveInProgress ? 'Saving...' : 'Submit'"
+      [icon]="saveInProgress ? 'pi pi-spin pi-spinner' : ''" class="p-button-success" (click)="submit()"></button>
+  </div>
+</p-card>
