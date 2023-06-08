@@ -17,6 +17,7 @@ import { ToastService } from './shared/utils/toast.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { GoogleLoginProvider, SocialAuthServiceConfig, SocialLoginModule } from '@abacritt/angularx-social-login';
 
 export function tokenGetter() {
   return localStorage.getItem("accessToken");
@@ -24,10 +25,13 @@ export function tokenGetter() {
 
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [
+    AppComponent,
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
+    SocialLoginModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireAuthModule,
     PrimeNgModule,
@@ -41,7 +45,7 @@ export function tokenGetter() {
     }),
     HttpClientModule,
     DynamicDialogModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
   ],
   providers: [
     { provide: JWT_OPTIONS, useValue: JWT_OPTIONS },
@@ -51,7 +55,27 @@ export function tokenGetter() {
     MessageService,
     ToastService,
     DialogService,
-    ConfirmationService
+    ConfirmationService,
+    {
+      provide: 'SocialAuthServiceConfig',
+      useValue: {
+        autoLogin: false,
+        providers: [
+          {
+            id: GoogleLoginProvider.PROVIDER_ID,
+            provider: new GoogleLoginProvider(
+              environment.auth.googleClientId,
+              {
+                oneTapEnabled: false
+              }
+            ),
+          }
+        ],
+        onError: (err) => {
+          console.error(err);
+        }
+      } as SocialAuthServiceConfig,
+    }
   ],
   bootstrap: [AppComponent],
 })

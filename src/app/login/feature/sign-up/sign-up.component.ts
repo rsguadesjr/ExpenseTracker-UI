@@ -159,7 +159,7 @@ export class SignUpComponent implements OnInit, OnDestroy {
               this.router.navigateByUrl('/login');
             }});
         },
-        error: (eerr) => {
+        error: (err) => {
           this.signUpInProgress = false;
         }
       })

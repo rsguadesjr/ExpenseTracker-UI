@@ -1,6 +1,6 @@
 <div class="main-container">
   <div>
-    <p-toolbar *ngIf="authService.user$ | async">
+    <p-toolbar *ngIf="authService.firebaseUser$ | async">
       <div class="p-toolbar-group-start">
         <p-button (click)="showSideBar()" icon="pi pi-bars" styleClass="p-button-rounded p-button-text "></p-button>
         <a class="text-2xl no-underline" routerLink="/">Expense Tracker</a>
@@ -32,7 +32,6 @@
         <p-button icon="pi pi-plus" label="New Entry" styleClass="p-button-primary" (click)="newEntry()"></p-button>
       </div>
   </div>
-
   <p-sidebar [(visible)]="sidebarVisible">
     <ng-template pTemplate="header">Header Content</ng-template>
     <ng-template pTemplate="content">

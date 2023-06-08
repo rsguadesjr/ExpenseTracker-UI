@@ -1,5 +1,25 @@
 :host {
   height: calc(100vh - 2rem);
   display: flex;
-}
 
+  ::ng-deep {
+    iframe {
+      color-scheme: light !important;
+    }
+  }
+
+  .action-button {
+    border-radius: 50%;
+    outline: 0 !important;
+    background: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}

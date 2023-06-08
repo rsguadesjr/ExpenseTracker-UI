@@ -24,6 +24,7 @@ import {
 } from 'rxjs';
 import { CategoryService } from './shared/data-access/category.service';
 import { SourceService } from './shared/data-access/source.service';
+import { SocialAuthService } from '@abacritt/angularx-social-login';
 
 @Component({
   selector: 'app-root',
@@ -52,7 +53,8 @@ export class AppComponent implements OnInit {
     private validationMessagService: ValidationMessageService,
     private route: ActivatedRoute,
     private categoryService: CategoryService,
-    private sourceService: SourceService
+    private sourceService: SourceService,
+    private socialAuthService: SocialAuthService
   ) {
     this.validationMessagService.message$.subscribe((v) => {
       if (v) {
@@ -84,15 +86,23 @@ export class AppComponent implements OnInit {
     });
 
 
-    this.authService.user$
-    .subscribe({
-      next: (user) => {
-        if (user) {
-          this.categoryService.initCategories();
-          this.sourceService.initSources();
-        }
-      }
+    // this.authService.user$
+    // .subscribe({
+    //   next: (user) => {
+    //     if (user) {
+    //       this.categoryService.initCategories();
+    //       this.sourceService.initSources();
+    //     }
+    //   }
+    // })
+
+    this.afAuth.authState.subscribe(result => {
+      console.log('[DEBUG] result', result)
     })
+
+
+    this.categoryService.initCategories();
+    this.sourceService.initSources();
 
 
   }
@@ -105,6 +115,7 @@ export class AppComponent implements OnInit {
 
   signOut() {
     this.authService.signOut();
+    this.router.navigateByUrl('login')
   }
 
   showSideBar() {

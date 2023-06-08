@@ -38,6 +38,11 @@ export class SettingsCategoryPageComponent {
     // take only initial value
     this.categoryService.initCategories();
     this.categories$ = this.categoryService.getCategories();
+
+
+    console.log('[DEBUG] settings category', {
+      route: this.route.pathFromRoot
+    })
   }
 
   onEdit(item: any) {
