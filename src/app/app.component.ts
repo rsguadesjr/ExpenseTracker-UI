@@ -17,6 +17,7 @@ import {
   BehaviorSubject,
   Observable,
   combineLatest,
+  debounceTime,
   filter,
   map,
   startWith,
@@ -96,13 +97,22 @@ export class AppComponent implements OnInit {
     //   }
     // })
 
-    this.afAuth.authState.subscribe(result => {
-      console.log('[DEBUG] result', result)
+    // this.afAuth.authState.subscribe(result => {
+    //   if (result) {
+    //     this.categoryService.initCategories();
+    //     this.sourceService.initSources();
+    //   }
+    // })
+    this.authService.initialize$
+    .pipe(
+      debounceTime(300)
+    )
+    .subscribe(v => {
+      if (v) {
+        this.categoryService.initCategories();
+        this.sourceService.initSources();
+      }
     })
-
-
-    this.categoryService.initCategories();
-    this.sourceService.initSources();
 
 
   }
@@ -115,7 +125,6 @@ export class AppComponent implements OnInit {
 
   signOut() {
     this.authService.signOut();
-    this.router.navigateByUrl('login')
   }
 
   showSideBar() {

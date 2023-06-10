@@ -136,7 +136,6 @@ export class SettingsBudgetFormComponent {
         categoryId: x.categoryId
       }))
     }
-    console.log('[DEBUG] submit', this.form.value)
     let submit$ = this.id
                   ? this.budgetService.update(data)
                   : this.budgetService.create(data);

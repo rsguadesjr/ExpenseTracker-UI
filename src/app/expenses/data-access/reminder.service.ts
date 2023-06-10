@@ -147,7 +147,6 @@ export class ReminderService {
       }
 
       for(let i=0; i < (Math.abs(dateDiff) + 1); i++ ) {
-        console.log('[DEBUG]')
         let duration: any = {};
         duration[key!] = i;
         const _newDate = add(_currentReminderStartDate, duration );

@@ -16,34 +16,7 @@ export class AuthGuardLoggedIn implements CanActivate {
   ) {}
 
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    // return this.authService.user$.pipe(
-    //   take(1),
-    //   map((user) => {
-    //     if (user) {
-    //       const urlRedirect = route.queryParams['returnUrl'] || '/';
-    //       this.router.navigateByUrl(urlRedirect)
-    //       return true;
-    //     }
-
-    //     return true;
-    //   })
-    // );
-    console.log('[DEBUG] AuthGuard 1', {
-      state,
-      user: await this.afAuth.currentUser,
-      isAuth: this.authService.isAuthenticated()
-    })
-    this.afAuth.authState.subscribe(result => {
-      result?.getIdToken
-      console.log('[DEBUG] AuthGuard 1.2', {
-        state,
-        user: result,
-        isAuth: this.authService.isAuthenticated()
-      })
-    })
-
     if (this.authService.isAuthenticated()) {
-      // this.router.navigate([''], { queryParams: { returnUrl: state.url }});
       const urlRedirect = route.queryParams['returnUrl'] || '/';
       this.router.navigateByUrl(urlRedirect)
       return false;

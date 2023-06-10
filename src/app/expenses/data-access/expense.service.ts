@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { ExpenseDto } from '../model/expense-dto.model';
 import { PaginatedList } from 'src/app/shared/model/paginated-list.model';
 import { ResponseData } from '../model/response-data';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -24,8 +25,15 @@ export class ExpenseService {
 
   private previousParam?: string;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private afAuth: AngularFireAuth) {
     this.baseUrl = environment.API_BASE_URL + 'api/expenses';
+
+    // if user logged out, empty the value;
+    this.afAuth.authState.subscribe((user) => {
+      if (!user) {
+        this.expenseData$.next({ status: 'SUCCESS', data: [] });
+      }
+    })
   }
 
   initExpenses(params: any) {

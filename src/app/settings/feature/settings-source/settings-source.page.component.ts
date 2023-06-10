@@ -31,9 +31,6 @@ export class SettingsSourcePageComponent {
     { header: 'Name', field: 'name' },
     { header: 'Description', field: 'description' },
     { header: 'Tags', field: 'tags', formatValue: (value: any, index: number) => {
-
-      console.log('[DEBUG] formatvalue', { value, index})
-      // return `${value.tags.join('-')} [${index + 1}]`
       return 'test'
     } }
   ]

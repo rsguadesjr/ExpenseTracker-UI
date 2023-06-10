@@ -34,16 +34,10 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     // // Get the auth token from the service.
     // const accessToken = localStorage.getItem('accessToken');
-    console.log('[DEBUG] intercept 1', {
-      e1: req.url.toLowerCase().includes('api/auth/login'),
-      e2: req.url
-    })
     if (req.url.toLowerCase().includes('api/auth/login')) {
       return next.handle(req.clone()).pipe(
         catchError((error) => {
-          console.log('[DEBUG] intercept 3 error', error)
           this.authService.signOut();
-          this.router.navigate(['login']);
           return throwError(() => error);
         })
       )
@@ -64,9 +58,7 @@ export class AuthInterceptor implements HttpInterceptor {
           _: Observable<HttpEvent<any>>
         ) => {
 
-          console.log('[DEBUG] intercept 2', httpErrorResponse)
           if (httpErrorResponse.status === HttpStatusCode.Unauthorized) {
-            console.log('[DEBUG] intercept 2.1', httpErrorResponse)
             return from(this.authService.refreshToken()).pipe(
               switchMap(() => {
                 let request = req.clone({
@@ -74,17 +66,13 @@ export class AuthInterceptor implements HttpInterceptor {
                 });
                 return next.handle(request).pipe(
                   catchError((error) => {
-                    console.log('[DEBUG] intercept 3 error', error)
                     this.authService.signOut();
-                    this.router.navigate(['login']);
                     return throwError(() => error);
                   })
                 )
               }),
               catchError((error) => {
-                console.log('[DEBUG] intercept 4 error', error)
                 this.authService.signOut();
-                this.router.navigate(['login']);
                 return throwError(() => error);
               })
             )

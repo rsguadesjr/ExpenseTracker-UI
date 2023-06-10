@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, take } from 'rxjs';
 import { CategoryService } from 'src/app/shared/data-access/category.service';
 import { ToastService } from 'src/app/shared/utils/toast.service';
@@ -33,16 +33,12 @@ export class SettingsCategoryPageComponent {
     private route: ActivatedRoute,
     private categoryService: CategoryService,
     private toastService: ToastService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private router: Router
   ) {
     // take only initial value
     this.categoryService.initCategories();
     this.categories$ = this.categoryService.getCategories();
-
-
-    console.log('[DEBUG] settings category', {
-      route: this.route.pathFromRoot
-    })
   }
 
   onEdit(item: any) {

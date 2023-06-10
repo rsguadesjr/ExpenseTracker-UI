@@ -34,7 +34,6 @@ export class SettingsBudgetPageComponent {
     { header: 'Month', field: 'monthText' },
     { header: 'Year', field: 'yearText' },
     { header: 'Amount', field: 'amount', formatValue: (value) => {
-      console.log('haha')
       if (value.amount)
         return this.decimalPipe.transform(value.amount, '') || '0';
 
@@ -105,7 +104,6 @@ export class SettingsBudgetPageComponent {
   }
 
   onDelete(item: BudgetResult & { monthText: string, yearText: string }) {
-    console.log('sadfasd')
     const message = ['Do you want to delete this entry?',
                     `Amount: ${item.amount}`,
                     `Month: ${item.monthText}`,

@@ -79,7 +79,6 @@ export class DataTableComponent {
   }
 
   deleteItem(item: any) {
-    console.log(item);
     this.deleteSelected.emit(item);
   }
 
