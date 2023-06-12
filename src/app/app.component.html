@@ -1,16 +1,6 @@
 <div class="main-container">
-  <div>
-    <p-toolbar *ngIf="authService.firebaseUser$ | async">
-      <div class="p-toolbar-group-start">
-        <p-button (click)="showSideBar()" icon="pi pi-bars" styleClass="p-button-rounded p-button-text "></p-button>
-        <a class="text-2xl no-underline" routerLink="/">Expense Tracker</a>
-      </div>
-      <div class="p-toolbar-group-end">
-        <p-button icon="pi pi-user" styleClass="p-button-rounded p-button-info" (click)="menu.toggle($event)"></p-button>
-        <p-menu #menu [model]="accountMenuItems" [popup]="true"></p-menu>
-      </div>
-    </p-toolbar>
-  </div>
+  <app-header (showSideBar)="showSideBar()"></app-header>
+  <app-sidebar [(visible)]="sidebarVisible"></app-sidebar>
 
   <div class="container relative p-2">
 
@@ -32,18 +22,5 @@
         <p-button icon="pi pi-plus" label="New Entry" styleClass="p-button-primary" (click)="newEntry()"></p-button>
       </div>
   </div>
-  <p-sidebar [(visible)]="sidebarVisible">
-    <ng-template pTemplate="header">Header Content</ng-template>
-    <ng-template pTemplate="content">
-      <div class="flex flex-column pt-4">
-        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['']" (click)="sidebarVisible = false">Home</a>
-        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['expenses']"  (click)="sidebarVisible = false">Expenses</a>
-        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['summary']"  (click)="sidebarVisible = false">Summary</a>
-        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['settings']"  (click)="sidebarVisible = false">Settings</a>
-        <a class="cursor-pointer no-underline p-2 text-color-secondary" [routerLink]="['account']"  (click)="sidebarVisible = false">Account</a>
-      </div>
-    </ng-template>
-    <ng-template pTemplate="footer">Footer Content</ng-template>
-  </p-sidebar>
 
 </div>

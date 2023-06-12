@@ -57,6 +57,7 @@ export class AppComponent implements OnInit {
     private sourceService: SourceService,
     private socialAuthService: SocialAuthService
   ) {
+
     this.validationMessagService.message$.subscribe((v) => {
       if (v) {
         this.validationMessages = [v, ...this.validationMessages];
@@ -97,34 +98,23 @@ export class AppComponent implements OnInit {
     //   }
     // })
 
-    // this.afAuth.authState.subscribe(result => {
-    //   if (result) {
-    //     this.categoryService.initCategories();
-    //     this.sourceService.initSources();
-    //   }
-    // })
-    this.authService.initialize$
-    .pipe(
-      debounceTime(300)
-    )
-    .subscribe(v => {
-      if (v) {
-        this.categoryService.initCategories();
-        this.sourceService.initSources();
-      }
-    })
 
+    this.authService.initialize$
+      .pipe(
+        debounceTime(300)
+      )
+      .subscribe(v => {
+        console.log('[DEBUG] initialize$', v)
+        if (v) {
+          this.categoryService.initCategories();
+          this.sourceService.initSources();
+        }
+      })
 
   }
 
   ngOnInit(): void {
-    this.accountMenuItems = [
-      { label: 'Logout', command: () => this.signOut() },
-    ];
-  }
 
-  signOut() {
-    this.authService.signOut();
   }
 
   showSideBar() {
@@ -142,5 +132,9 @@ export class AppComponent implements OnInit {
 
   newEntry() {
     this.router.navigate(['/expenses', 'new']);
+  }
+
+  visibleChange(e: any) {
+    console.log('[DEBUG] visibleChange', e)
   }
 }

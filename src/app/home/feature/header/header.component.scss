@@ -1,0 +1,19 @@
+:host {
+  ::ng-deep  button {
+    position: relative;
+    &.active-notification::before {
+      top: 2px;
+      right: 2px;
+      display: block;
+      position: absolute;
+      content: "";
+      height: .5rem;
+      width: .5rem;
+      border-radius: 50%;
+      background-color: red;
+    }
+    .p-button-icon {
+      // font-size: 1.75rem !important;
+    }
+  }
+}

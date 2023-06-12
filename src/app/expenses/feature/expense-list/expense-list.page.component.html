@@ -1,7 +1,8 @@
 
-<div class="flex gap-4">
+<div class="text-2xl p-2">Manage Expenses</div>
+<div class="flex flex-column lg:flex-row gap-2">
   <!-- col -->
-  <div class="w-8 p-4 border-solid border-1 surface-border border-round-md bg-black-alpha-40 table-wrapper">
+  <div class="w-full lg:w-8 p-4 border-solid border-1 surface-border border-round-md bg-black-alpha-40 table-wrapper ">
     <div [formGroup]="filterForm" class="flex mb-4  align-items-end">
       <div class="flex gap-2 flex-grow-1  align-items-end">
         <div class="flex flex-column gap-2 p-fluid">
@@ -47,8 +48,8 @@
   <!-- /col -->
 
   <!-- col -->
-  <div class="w-4 flex flex-column gap-4">
-    <div class="p-fluid">
+  <div class="w-full lg:w-4 flex flex-column md:flex-row lg:flex-column gap-2">
+    <div class="w-12 md:w-6 lg:w-12 p-fluid">
       <app-calendar-data
           [reminders]="(reminders$ | async) || []"
           [dailyTotalSummary]="(dailyTotal$ | async) || []"
@@ -58,7 +59,8 @@
           [endDate]="(calendarDateRange$ | async)?.dateTo!">
       </app-calendar-data>
     </div>
-    <div class="border-solid border-1 surface-border border-round-md p-4 bg-black-alpha-40">
+
+    <div class="w-12 md:w-6 lg:w-12 border-solid border-1 surface-border border-round-md p-4 bg-black-alpha-40">
       <div class="flex gap-2 align-items-center justify-content-between">
         <span class="text-2xl">Categories</span>
         <div class="font-italic text-sm" *ngIf="filter$ | async as filter">(filtered data from {{ filter.dateFrom | date: 'MMM-dd-yyy'}} to {{ filter.dateTo | date: 'MMM-dd-yyy'}})</div>

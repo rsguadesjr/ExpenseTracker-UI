@@ -126,7 +126,8 @@ export class LoginComponent implements OnInit, OnDestroy {
             .subscribe({
               next: (result) => {
                 this.authService.setAuthData(result);
-                this.router.navigate(['']);
+                const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+                this.router.navigateByUrl(returnUrl);
               },
               error: (error) => {
                 this.messages = [

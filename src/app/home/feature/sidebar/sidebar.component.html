@@ -1,0 +1,28 @@
+<p-sidebar [visible]="visible" (visibleChange)="toggleVisibility($event)">
+  <ng-template pTemplate="header">Header Content</ng-template>
+  <ng-template pTemplate="content">
+    <div class="flex flex-column pt-4 gap-4">
+      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['']" (click)="toggleVisibility(false)">
+        <i class="pi pi-home text-xl"></i>
+        <span class="font-medium text-xl">Home</span>
+      </a>
+      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['expenses']"  (click)="toggleVisibility(false)">
+        <i class="pi pi-list text-xl"></i>
+        <span class="font-medium text-xl">Expenses</span>
+      </a>
+      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['summary']"  (click)="toggleVisibility(false)">
+        <i class="pi pi-chart-bar text-xl"></i>
+        <span class="font-medium text-xl">Summary</span>
+      </a>
+      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['settings']"  (click)="toggleVisibility(false)">
+        <i class="pi pi-wrench text-xl"></i>
+        <span class="font-medium text-xl">Settings</span>
+      </a>
+      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['account']"  (click)="toggleVisibility(false)">
+        <i class="pi pi-user text-xl"></i>
+        <span class="font-medium text-xl">Account</span>
+      </a>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">Footer Content</ng-template>
+</p-sidebar>

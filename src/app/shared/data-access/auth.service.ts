@@ -31,7 +31,7 @@ export class AuthService {
   // firebaseToken$ = new BehaviorSubject<any>(null);
   firebaseUser$ = this.afAuth.authState;
 
-  initialize$ = new Subject<boolean>();
+  initialize$ = new BehaviorSubject<boolean>(false);
 
   googleLoginInProgress$ = new BehaviorSubject<boolean>(false);
 
@@ -42,6 +42,7 @@ export class AuthService {
     private http: HttpClient
   ) {
     this.authUrl = environment.API_BASE_URL + 'api/Auth';
+    this.initialize$.next(this.isAuthenticated());
     // afAuth.authState.subscribe((user) => {
     //   this.firebaseUser$.next(user);
     // });
@@ -78,6 +79,7 @@ export class AuthService {
     this.afAuth.signOut();
     this.initialize$.next(false);
     const state = this.router.routerState.snapshot;
+    console.log('[DEBUG] state', state)
     this.router.navigate(['login'], { queryParams: { returnUrl: state?.url }});
   }
 
