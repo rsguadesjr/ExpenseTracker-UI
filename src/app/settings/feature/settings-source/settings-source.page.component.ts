@@ -6,6 +6,7 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { SettingsSourceFormComponent } from '../settings-source-form/settings-source-form.component';
 import { take } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
+import { AccessDirective } from 'src/app/shared/utils/access.directive';
 
 @Component({
   selector: 'app-settings-source.page',
@@ -14,7 +15,8 @@ import { ButtonModule } from 'primeng/button';
     CommonModule,
     DataTableComponent,
     SettingsSourceFormComponent,
-    ButtonModule
+    ButtonModule,
+    AccessDirective
   ],
   templateUrl: './settings-source.page.component.html',
   styleUrls: ['./settings-source.page.component.scss'],

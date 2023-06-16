@@ -1,5 +1,5 @@
 
-<div class="text-2xl p-2">Manage Expenses</div>
+<div class="text-2xl p-2 font-bold">Manage Expenses</div>
 <div class="flex flex-column lg:flex-row gap-2">
   <!-- col -->
   <div class="w-full lg:w-8 p-4 border-solid border-1 surface-border border-round-md bg-black-alpha-40 table-wrapper ">
@@ -21,7 +21,7 @@
                   pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
         <p-button icon="pi pi-filter-slash" pTooltip="Clear fields" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
       </div>
-      <p-button icon="pi pi-plus" pTooltip="Create Expense" styleClass="p-button-rounded " (click)="addEntry()"></p-button>
+      <p-button *access="['SuperAdmin', 'Admin', 'Standard']" icon="pi pi-plus" pTooltip="Create Expense" styleClass="p-button-rounded " (click)="addEntry()"></p-button>
     </div>
     <ng-container *ngIf="expenseEntries$ | async as data; else noResult">
       <div class="flex gap-2 align-items-center py-2">

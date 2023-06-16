@@ -26,7 +26,7 @@
       <div class="flex align-items-center gap-1">
         <p-button *ngIf="calendarDate" label="Apply Date Filter" pTooltip="Apply selected date as filter" styleClass="p-button-rounded"
           (click)="applySelectedDate()"></p-button>
-        <p-button icon="pi pi-calendar-plus" pTooltip="Create Reminder" tooltipPosition="left" styleClass="p-button-rounded" (click)="newReminder()"></p-button>
+        <p-button *access="['SuperAdmin', 'Admin', 'Standard']" icon="pi pi-calendar-plus" pTooltip="Create Reminder" tooltipPosition="left" styleClass="p-button-rounded" (click)="newReminder()"></p-button>
 
       </div>
     </div>
@@ -35,9 +35,11 @@
       <div class="font-italic py-2" *ngIf="selectedReminders.length === 0">No data</div>
       <div class="flex w-full align-items-center gap-1 mb-1 border-round surface-50 p-2 mb-1" *ngFor="let reminder of selectedReminders">
         <span class="mr-2 flex-grow-1">{{ reminder.subject }}</span>
-        <p-button icon="pi pi-pencil" pTooltip="Edit Reminder" styleClass="p-button-rounded p-button-outlined p-button-sm p-button-secondary reminder-action" (click)="editReminder(reminder)"></p-button>
-        <p-button icon="pi pi-trash" pTooltip="Delete Reminder" styleClass="p-button-rounded p-button-outlined p-button-sm p-button-danger reminder-action" (click)="removeReminder(reminder)"></p-button>
-        <p-button icon="pi pi-plus" pTooltip="Create Expense" tooltipPosition="left" styleClass="p-button-rounded p-button-outlined p-button-sm p-button-help reminder-action" (click)="createExpense(reminder)"></p-button>
+        <ng-container *access="['SuperAdmin', 'Admin', 'Standard']">
+          <p-button icon="pi pi-pencil" pTooltip="Edit Reminder" styleClass="p-button-rounded p-button-outlined p-button-sm p-button-secondary reminder-action" (click)="editReminder(reminder)"></p-button>
+          <p-button icon="pi pi-trash" pTooltip="Delete Reminder" styleClass="p-button-rounded p-button-outlined p-button-sm p-button-danger reminder-action" (click)="removeReminder(reminder)"></p-button>
+          <p-button icon="pi pi-plus" pTooltip="Create Expense" tooltipPosition="left" styleClass="p-button-rounded p-button-outlined p-button-sm p-button-help reminder-action" (click)="createExpense(reminder)"></p-button>
+        </ng-container>
       </div>
     </div>
   </ng-template>

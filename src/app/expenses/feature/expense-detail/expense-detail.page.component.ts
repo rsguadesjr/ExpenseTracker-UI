@@ -142,8 +142,18 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
 
 
     combineLatest([
-      this.categoryService.getCategories().pipe(map(opt => [{ id: undefined, name: '' }, ...opt])),
-      this.sourceService.getSources().pipe(map(opt => [{ id: undefined, name: '' }, ...opt]))
+      this.categoryService.getCategories().pipe(map(opt => {
+        const activeCategries = opt.filter(x => x.isActive)
+                                  .sort((a, b) => a.order - b.order)
+                                  .map(x => ({ id: x.id, name: x.name }) as Option);
+        return [{ id: undefined, name: '' }, ...activeCategries]
+      })),
+      this.sourceService.getSources().pipe(map(opt => {
+        const activeSources = opt.filter(x => x.isActive)
+                                .sort((a, b) => a.order - b.order)
+                                .map(x => ({ id: x.id, name: x.name }) as Option);
+        return [{ id: undefined, name: '' }, ...activeSources];
+      }))
     ])
     .pipe(takeUntil(this.ngUnsubscribe$))
     .subscribe(([categories, sources]) => {

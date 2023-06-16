@@ -8,9 +8,12 @@ import {
   Observable,
   Subject,
   catchError,
+  combineLatest,
+  debounceTime,
   from,
   map,
   of,
+  startWith,
   switchMap,
   tap,
   throwError,
@@ -30,8 +33,7 @@ export class AuthService {
 
   // firebaseToken$ = new BehaviorSubject<any>(null);
   firebaseUser$ = this.afAuth.authState;
-
-  initialize$ = new BehaviorSubject<boolean>(false);
+  isAuthenticated$ = new BehaviorSubject<boolean>(false);
 
   googleLoginInProgress$ = new BehaviorSubject<boolean>(false);
 
@@ -42,13 +44,7 @@ export class AuthService {
     private http: HttpClient
   ) {
     this.authUrl = environment.API_BASE_URL + 'api/Auth';
-    this.initialize$.next(this.isAuthenticated());
-    // afAuth.authState.subscribe((user) => {
-    //   this.firebaseUser$.next(user);
-    // });
-
-    // // const googleLoginStatus = sessionStorage.getItem('googleLoginStatus');
-    // // this.googleLoginStatus(googleLoginStatus?.toLowerCase() === 'true');
+    this.isAuthenticated$.next(this.isAuthenticated());
   }
 
   // /**
@@ -73,55 +69,97 @@ export class AuthService {
 
   /**
    * Signout
+   * Removes the accessToken item in localStorage
+   * signout from firebase
+   * will trigger the authentication to be false
+   * navigates back to login page
    */
   public signOut() {
     localStorage.removeItem('accessToken');
     this.afAuth.signOut();
-    this.initialize$.next(false);
+    this.isAuthenticated$.next(false);
     const state = this.router.routerState.snapshot;
-    console.log('[DEBUG] state', state)
     this.router.navigate(['login'], { queryParams: { returnUrl: state?.url }});
   }
 
+  /**
+   *
+   * @param data username and password object to be sent to api to create the account
+   * @returns
+   */
   public signUp(data: EmailPasswordRegistration) {
     return this.http.post(`${this.authUrl}/RegisterWithEmailAndPassword`, data);
   }
 
+  /**
+   *
+   * @param email will send an email containing reset password link to the provided email
+   * @returns
+   */
   public resetPassword(email: string) {
     return this.afAuth.sendPasswordResetEmail(email, {
       url: `${location.origin}/login`,
     });
   }
 
-  // public login(token: string) {
-  //   return this.http.post<AuthRequestResult>(`${this.authUrl}/login`, { token });
-  // }
 
+  /**
+   *
+   * @param token the token from firebase authentication, will be used to authenticate to the api
+   * @param provider right now not needed, not sure if additional auth providers will be added
+   * @returns a jwt token generated from the api
+   */
   public login(token: string, provider: string = '') {
     return this.http.post<AuthRequestResult>(`${this.authUrl}/login`, {
       token,
       provider,
-    })
-    .pipe(
-      tap(() => {
-        this.initialize$.next(true);
-      })
-    );
+    });
   }
 
+  /**
+   * will set the accessToken to the localStorage
+   * and triggers the isAuthenticated$
+   */
   public setAuthData(authData: any) {
     localStorage.setItem('accessToken', authData.token);
+    this.isAuthenticated$.next(this.isAuthenticated());
   }
 
+
+  /**
+   * helper method to return if accessToken is present and not yet expired
+   * @returns validity of token
+   */
   public isAuthenticated() {
     const token = localStorage.getItem('accessToken');
     return !!token && !this.jwtHelper.isTokenExpired(token);
   }
 
+  /**
+   * helper method to get current access token
+   * @returns token value
+   */
   public getAccessToken() {
     return localStorage.getItem('accessToken');
   }
 
+
+  /**
+   *
+   * @returns the user data from the decoded token
+   */
+  public getUserData() {
+    if (this.isAuthenticated())
+      return this.jwtHelper.decodeToken(this.getAccessToken()!);
+
+    return null;
+  }
+
+  /**
+   * If current token has expired, will have to refetch token from firebase
+   * and revalidate the token to the api to get a new jwt token
+   * @returns
+   */
   public refreshToken() {
     return this.firebaseUser$.pipe(
       switchMap((user) => {

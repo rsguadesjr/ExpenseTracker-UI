@@ -86,7 +86,7 @@
               </p-columnFilter>
             </div>
           </th>
-          <th style="width: 5%"></th>
+          <th style="width: 5%" *access="['SuperAdmin', 'Admin', 'Standard']"></th>
       </tr>
   </ng-template>
   <ng-template pTemplate="body" let-item>
@@ -103,7 +103,7 @@
               </ng-container>
             </div>
           </td>
-          <td>
+          <td *access="['SuperAdmin', 'Admin', 'Standard']">
             <div class="flex gap-1">
               <p-button icon="pi pi-pencil" styleClass="p-button-text" (click)="editEntry(item)"></p-button>
               <p-button icon="pi pi-trash" styleClass="p-button-text" (click)="deleteEntry(item)"></p-button>

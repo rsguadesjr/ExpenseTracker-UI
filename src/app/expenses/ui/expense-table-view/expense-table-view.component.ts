@@ -11,6 +11,7 @@ import { FilterService } from 'primeng/api';
 import { BehaviorSubject, map, of } from 'rxjs';
 import { Option } from 'src/app/shared/model/option.model';
 import { SortPipe } from 'src/app/shared/utils/sort.pipe';
+import { AccessDirective } from 'src/app/shared/utils/access.directive';
 
 @Component({
   selector: 'app-expense-table-view',
@@ -23,7 +24,8 @@ import { SortPipe } from 'src/app/shared/utils/sort.pipe';
     MultiSelectModule,
     TagModule,
     AutoCompleteModule,
-    SortPipe
+    SortPipe,
+    AccessDirective
   ],
   templateUrl: './expense-table-view.component.html',
   styleUrls: ['./expense-table-view.component.scss'],

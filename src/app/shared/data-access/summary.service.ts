@@ -5,6 +5,7 @@ import { SummaryResult } from '../model/summary-result.model';
 import { TotalPerCategory } from '../model/total-per-category.mode';
 import { TotalPerDate } from '../model/total-per-date';
 import { BehaviorSubject, Observable, map, of } from 'rxjs';
+import { AuthService } from './auth.service';
 
 
 @Injectable({
@@ -19,8 +20,16 @@ export class SummaryService {
   private dailyTotal$ = new BehaviorSubject<TotalPerDate[]>([]);
   private dailyTotalCache = new Map();
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private authService: AuthService) {
     this.baseUrl = environment.API_BASE_URL + 'api/Summary';
+
+    authService.isAuthenticated$
+      .subscribe(isAuth => {
+        if (!isAuth) {
+          this.dailyTotal$.next([]);
+          this.dailyTotalCache.clear();
+        }
+      })
   }
 
   getTotalAmountPerCategory(startDate: string, endDate: string) {

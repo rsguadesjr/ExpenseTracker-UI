@@ -17,6 +17,7 @@ import { ExpenseDetailComponent } from 'src/app/expenses/feature/expense-detail/
 import { ExpenseDto } from 'src/app/expenses/model/expense-dto.model';
 import { ReminderType } from '../../enums/reminder-type';
 import { TooltipModule } from 'primeng/tooltip';
+import { AccessDirective } from '../../utils/access.directive';
 
 @Component({
   selector: 'app-calendar-data',
@@ -27,7 +28,8 @@ import { TooltipModule } from 'primeng/tooltip';
     FormsModule,
     DecimalPipe,
     ButtonModule,
-    TooltipModule
+    TooltipModule,
+    AccessDirective
   ],
   providers: [DecimalPipe],
   templateUrl: './calendar-data.component.html',

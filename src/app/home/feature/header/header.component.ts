@@ -6,6 +6,7 @@ import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { AuthService } from 'src/app/shared/data-access/auth.service';
 import { BadgeDirective, BadgeModule } from 'primeng/badge';
+import { map, of, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -21,7 +22,13 @@ export class HeaderComponent {
   accountMenuItems: MenuItem[] = [
     { label: 'Logout', command: () => this.signOut() },
   ];
+
   authService = inject(AuthService);
+  authenticated$ = this.authService.isAuthenticated$.pipe(
+    switchMap((isAuth) => {
+      return isAuth ? this.authService.firebaseUser$ : of(null);
+    })
+  )
 
   toggleSidebar() {
     this.showSideBar.emit(true);

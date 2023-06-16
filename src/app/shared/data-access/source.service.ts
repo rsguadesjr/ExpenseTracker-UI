@@ -3,25 +3,26 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { Option } from '../model/option.model';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { SourceResponseModel } from '../model/source-response.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SourceService {
   baseUrl: string;
-  private sources$ = new BehaviorSubject<Option[]>([]);
+  private sources$ = new BehaviorSubject<SourceResponseModel[]>([]);
 
   constructor(private http: HttpClient) {
     this.baseUrl = environment.API_BASE_URL + 'api/Sources';
   }
 
   initSources() {
-    this.http.get<Option[]>(this.baseUrl).subscribe({
+    this.http.get<SourceResponseModel[]>(this.baseUrl).subscribe({
       next: (result) => this.sources$.next(result),
     });
   }
 
-  getSources(): Observable<Option[]> {
+  getSources(): Observable<SourceResponseModel[]> {
     return this.sources$;
   }
 

@@ -20,7 +20,10 @@ import {
   debounceTime,
   filter,
   map,
+  mergeMap,
+  of,
   startWith,
+  switchMap,
   takeUntil,
 } from 'rxjs';
 import { CategoryService } from './shared/data-access/category.service';
@@ -98,14 +101,11 @@ export class AppComponent implements OnInit {
     //   }
     // })
 
-
-    this.authService.initialize$
+    this.authService.isAuthenticated$
       .pipe(
-        debounceTime(300)
       )
-      .subscribe(v => {
-        console.log('[DEBUG] initialize$', v)
-        if (v) {
+      .subscribe(isAuth => {
+        if (isAuth) {
           this.categoryService.initCategories();
           this.sourceService.initSources();
         }
@@ -138,3 +138,4 @@ export class AppComponent implements OnInit {
     console.log('[DEBUG] visibleChange', e)
   }
 }
+

@@ -9,6 +9,7 @@ import { DataTableComponent } from 'src/app/shared/feature/data-table/data-table
 import { DialogService } from 'primeng/dynamicdialog';
 import { SettingsCategoryFormComponent } from '../settings-category-form/settings-category-form.component';
 import { ButtonModule } from 'primeng/button';
+import { AccessDirective } from 'src/app/shared/utils/access.directive';
 
 @Component({
   selector: 'app-settings-category.page',
@@ -16,7 +17,8 @@ import { ButtonModule } from 'primeng/button';
   imports: [
     CommonModule,
     DataTableComponent,
-    ButtonModule
+    ButtonModule,
+    AccessDirective
   ],
   templateUrl: './settings-category.page.component.html',
   styleUrls: ['./settings-category.page.component.scss'],

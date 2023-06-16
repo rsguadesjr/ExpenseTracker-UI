@@ -32,6 +32,7 @@ export class ExpenseService {
     this.afAuth.authState.subscribe((user) => {
       if (!user) {
         this.expenseData$.next({ status: 'SUCCESS', data: [] });
+        this.previousParam = '';
       }
     })
   }

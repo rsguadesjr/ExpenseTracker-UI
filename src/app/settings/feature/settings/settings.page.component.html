@@ -1,8 +1,8 @@
 <div class="w-full h-full flex gap-2">
   <!-- side bar -->
-  <div class="h-full w-2 p-fluid flex flex-column gap-4 p-fluid p-4 shadow-5">
+  <div class="h-full w-2 p-fluid flex flex-column gap-4 p-fluid p-2 shadow-5">
     <ng-container  class="text-red-400" *ngFor="let item of items">
-      <button pButton pRipple [label]="item.label ?? ''" [icon]="'pi ' + item.icon" class="text-left  p-button-text text-lg" [routerLink]="item.routerLink" ></button>
+      <button pButton pRipple [label]="item.label ?? ''" [icon]="'pi ' + item.icon" class="text-left  p-button-text text-lg text-color-secondary" [routerLink]="item.routerLink" ></button>
     </ng-container >
 
         <!-- <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['']">

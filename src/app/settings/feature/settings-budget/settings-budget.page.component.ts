@@ -12,6 +12,7 @@ import { BudgetResult } from 'src/app/shared/model/budget-result';
 import { format } from 'date-fns';
 import { ConfirmationService } from 'primeng/api';
 import { ToastService } from 'src/app/shared/utils/toast.service';
+import { AccessDirective } from 'src/app/shared/utils/access.directive';
 
 @Component({
   selector: 'app-settings-budget.page',
@@ -19,7 +20,8 @@ import { ToastService } from 'src/app/shared/utils/toast.service';
   imports: [
     CommonModule,
     ButtonModule,
-    DataTableComponent
+    DataTableComponent,
+    AccessDirective
   ],
   templateUrl: './settings-budget.page.component.html',
   styleUrls: ['./settings-budget.page.component.scss'],

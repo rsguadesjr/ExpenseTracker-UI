@@ -20,6 +20,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { GoogleLoginProvider, SocialAuthServiceConfig, SocialLoginModule } from '@abacritt/angularx-social-login';
 import { HeaderComponent } from './home/feature/header/header.component';
 import { SidebarComponent } from './home/feature/sidebar/sidebar.component';
+import { AccessDirective } from './shared/utils/access.directive';
 
 export function tokenGetter() {
   return localStorage.getItem("accessToken");
@@ -49,7 +50,8 @@ export function tokenGetter() {
     DynamicDialogModule,
     ConfirmDialogModule,
     HeaderComponent,
-    SidebarComponent
+    SidebarComponent,
+    AccessDirective
   ],
   providers: [
     { provide: JWT_OPTIONS, useValue: JWT_OPTIONS },

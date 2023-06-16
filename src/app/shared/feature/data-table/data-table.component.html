@@ -4,7 +4,7 @@
       <ng-container  *ngFor="let col of columns">
         <th [width]="col.width">{{ col.header}}</th>
       </ng-container>
-      <th ></th>
+      <th *access="['SuperAdmin', 'Admin', 'Standard']"></th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-item let-ri="rowIndex">
@@ -12,7 +12,7 @@
       <ng-container *ngFor="let col of columns" >
         <td> {{ item.__data && item.__data[col.field] }} </td>
       </ng-container>
-      <td>
+      <td *access="['SuperAdmin', 'Admin', 'Standard']">
         <div class="flex gap-2">
           <p-button icon="pi pi-pencil" styleClass="p-button-text" (click)="editItem(item)"></p-button>
           <p-button icon="pi pi-trash" styleClass="p-button-text" (click)="deleteItem(item)"></p-button>

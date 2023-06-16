@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToastModule } from 'primeng/toast';
+import { AccessDirective } from '../../utils/access.directive';
 
 @Component({
   selector: 'app-data-table',
@@ -16,7 +17,8 @@ import { ToastModule } from 'primeng/toast';
     ButtonModule,
     ProgressBarModule,
     ProgressSpinnerModule,
-    ToastModule
+    ToastModule,
+    AccessDirective
   ],
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss']

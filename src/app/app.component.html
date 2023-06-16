@@ -18,9 +18,11 @@
   <div *ngIf="showActionButtons" class="flex justify-content-center gap-2 py-4 ">
     <p-button *ngIf="showViewAllExpensesButton" icon="pi pi-search" label="View All Expenses" styleClass="p-button-secondary"
       (click)="viewExpenses()"></p-button>
-      <div  *ngIf="showNewButton">
-        <p-button icon="pi pi-plus" label="New Entry" styleClass="p-button-primary" (click)="newEntry()"></p-button>
-      </div>
+      <ng-container *access="['SuperAdmin', 'Admin', 'Standard']">
+        <div *ngIf="showNewButton">
+          <p-button icon="pi pi-plus" label="New Entry" styleClass="p-button-primary" (click)="newEntry()"></p-button>
+        </div>
+      </ng-container>
   </div>
 
 </div>

@@ -1,18 +1,14 @@
 import {
   BehaviorSubject,
-  catchError,
   combineLatest,
   debounceTime,
   distinctUntilChanged,
   filter,
-  finalize,
   map,
   Observable,
-  of,
   skip,
   startWith,
   Subject,
-  switchMap,
   take,
   takeUntil,
   tap,
@@ -26,7 +22,7 @@ import {
   FormControl,
 } from '@angular/forms';
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -34,7 +30,6 @@ import { Expense } from '../../model/expense.model';
 import { ToolbarModule } from 'primeng/toolbar';
 import { CalendarModule } from 'primeng/calendar';
 import { PaginatorModule } from 'primeng/paginator';
-import { PaginatedList } from 'src/app/shared/model/paginated-list.model';
 import { ExpenseListComponent } from '../../ui/expense-list/expense-list.component';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { ExpenseTableViewComponent } from '../../ui/expense-table-view/expense-table-view.component';
@@ -48,19 +43,13 @@ import { Option } from 'src/app/shared/model/option.model';
 import { ValidationMessageService } from 'src/app/shared/utils/validation-message.service';
 import { BadgeModule } from 'primeng/badge';
 import {
-  eachDayOfInterval,
   endOfDay,
   endOfMonth,
   format,
-  formatISO,
-  isSameMonth,
-  isWithinInterval,
   startOfDay,
   startOfMonth,
 } from 'date-fns';
-import { isSameDay } from 'date-fns';
 import { SumPipe } from 'src/app/shared/utils/sum.pipe';
-import { ExpenseDto } from '../../model/expense-dto.model';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ExpenseDetailComponent } from '../expense-detail/expense-detail.page.component';
 import { ConfirmationService } from 'primeng/api';
@@ -72,6 +61,7 @@ import { ReminderModel } from 'src/app/shared/model/reminder-model';
 import { CalendarDataComponent } from 'src/app/shared/feature/calendar-data/calendar-data.component';
 import { TotalPerDate } from 'src/app/shared/model/total-per-date';
 import { TooltipModule } from 'primeng/tooltip';
+import { AccessDirective } from 'src/app/shared/utils/access.directive';
 
 @Component({
   selector: 'app-expense-list-page',
@@ -98,7 +88,8 @@ import { TooltipModule } from 'primeng/tooltip';
     ReminderCalendarComponent,
     DecimalPipe,
     CalendarDataComponent,
-    TooltipModule
+    TooltipModule,
+    AccessDirective
   ],
   providers: [SumPipe, ConfirmationService, DecimalPipe],
   templateUrl: './expense-list.page.component.html',
@@ -168,11 +159,11 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     // executes every time applyFilter/applyDateFilter is triggered
     this.filter$
       .pipe(
-        takeUntil(this.ngUnsubscribe$),
         skip(1),
         tap((x) => {
           this.filterInProgress$.next(true);
-        })
+        }),
+        takeUntil(this.ngUnsubscribe$),
       )
       .subscribe((filter) => {
         this.expenseService.initExpenses(filter);

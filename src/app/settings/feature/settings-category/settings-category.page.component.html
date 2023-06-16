@@ -1,7 +1,7 @@
 
 <div class="w-full flex justify-content-end align-items-center py-2">
   <span class="flex-grow-1 text-2xl">Category</span>
-  <p-button icon="pi pi-plus" pTooltip="Create Expense" styleClass="p-button-rounded " (click)="onCreate()"></p-button>
+  <p-button *access="['SuperAdmin', 'Admin', 'Standard']" icon="pi pi-plus" pTooltip="Create Expense" styleClass="p-button-rounded " (click)="onCreate()"></p-button>
 </div>
 
 <app-data-table [data]="categories$ | async" [columns]="columns" (editSelected)="onEdit($event)"

@@ -3,25 +3,26 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { Option } from '../model/option.model';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { CategoryResponseModel } from '../model/category-response.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CategoryService {
   baseUrl: string;
-  private categories$ = new BehaviorSubject<Option[]>([]);
+  private categories$ = new BehaviorSubject<CategoryResponseModel[]>([]);
 
   constructor(private http: HttpClient) {
     this.baseUrl = environment.API_BASE_URL + 'api/Categories';
   }
 
   initCategories() {
-    this.http.get<Option[]>(this.baseUrl).subscribe({
+    this.http.get<CategoryResponseModel[]>(this.baseUrl).subscribe({
       next: (result) => this.categories$.next(result),
     });
   }
 
-  getCategories(): Observable<Option[]> {
+  getCategories(): Observable<CategoryResponseModel[]> {
     return this.categories$;
   }
 
