@@ -12,10 +12,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class SummaryService {
-
   baseUrl: string;
-
-
 
   private dailyTotal$ = new BehaviorSubject<TotalPerDate[]>([]);
   private dailyTotalCache = new Map();
@@ -81,5 +78,6 @@ export class SummaryService {
   getDailyTotalByDateRange(): Observable<TotalPerDate[]> {
     return this.dailyTotal$;
   }
+
 
 }

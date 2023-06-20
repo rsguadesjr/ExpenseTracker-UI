@@ -49,8 +49,8 @@ const routes: Routes = [
     path: 'summary',
     canActivate: [AuthGuard],
     loadChildren: () =>
-      import('./summary/feature/summary-shell/summary-shell-routing.module').then(
-        (m) => m.SummaryShellRoutingModule
+      import('./summary/feature/summary-shell/summary-shell.module').then(
+        (m) => m.SummaryShellModule
       ),
   },
   {
