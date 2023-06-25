@@ -9,31 +9,42 @@
         <p-dropdown formControlName="view" [options]="dateViewOptions" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
       </div>
 
-      <div class="flex flex-column gap-2 p-fluid w-15rem" *ngIf="form.value.view === 'month'">
-        <label htmlFor="view">Month</label>
-        <p-dropdown formControlName="monthRange" [options]="monthOptions" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
-      </div>
+      <ng-container *ngIf="form.value.view === 'month'" >
+        <div class="flex flex-column gap-2 p-fluid w-15rem" >
+          <label htmlFor="view">Month</label>
+          <p-dropdown formControlName="month" [options]="monthOptions" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="form.value.view === 'annual'">
+        <div class="flex flex-column gap-2 p-fluid w-15rem" >
+          <label htmlFor="view">Year</label>
+          <p-dropdown formControlName="year" [options]="yearOptions" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
+        </div>
+      </ng-container>
+
       <ng-container *ngIf="form.value.view === 'custom'">
         <div class="flex flex-column gap-2 p-fluid w-10rem">
           <label htmlFor="startDate">Date From</label>
-          <p-calendar id="startDate" formControlName="startDate" dateFormat="dd-M-yy"></p-calendar>
+          <p-calendar id="startDate" formControlName="startDate" dateFormat="dd-M-yy" [maxDate]="form.value.endDate"></p-calendar>
         </div>
         <div class="flex flex-column gap-2 p-fluid w-10rem">
           <label htmlFor="endDate">Date To</label>
-          <p-calendar id="endDate" formControlName="endDate" dateFormat="dd-M-yy"></p-calendar>
+          <p-calendar id="endDate" formControlName="endDate" dateFormat="dd-M-yy" [minDate]="form.value.startDate" ></p-calendar>
         </div>
       </ng-container>
+
+
+      <div class="flex flex-column gap-2 p-fluid w-15rem" >
+        <label htmlFor="view">Categories (Optional)</label>
+        <p-multiSelect [options]="(categories$ | async) || []" formControlName="category" optionLabel="name" optionValue="id" ></p-multiSelect>
+      </div>
       <p-button icon="pi {{  (filterInProgress) ? 'pi-spin pi-spinner' : 'pi-search' }}"
                 pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
       <p-button icon="pi pi-filter-slash" pTooltip="Clear fields" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
     </div>
 
-    <div class="flex flex-column gap-2 p-fluid w-15rem" >
-      <label htmlFor="view">Filter by Categories</label>
-      <p-dropdown formControlName="category"  [options]="(categories$ | async) || []" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
-    </div>
   </div>
 
-  <p-chart type="bar" [data]="chartData" [options]="chartOptions"></p-chart>
-
+  <app-summary-main-chart type="bar" [chartFilterData]="chartData$ | async"></app-summary-main-chart>
 </div>

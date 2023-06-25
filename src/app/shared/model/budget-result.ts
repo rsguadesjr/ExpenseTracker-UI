@@ -2,7 +2,7 @@ import { BudgetCategoryResult } from "./budget-category-result";
 
 export interface BudgetResult {
   id: number;
-  amount: Number
+  amount: number
   month: number;
   year: number;
   isDefault: boolean;

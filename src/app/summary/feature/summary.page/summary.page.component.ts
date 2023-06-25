@@ -4,14 +4,21 @@ import { ChartModule } from 'primeng/chart';
 import { SummaryService } from '../../data-access/summary.service';
 import {
   addMonths,
+  addYears,
+  differenceInMonths,
   eachDayOfInterval,
   endOfMonth,
+  endOfYear,
   format,
   isSameDay,
+  isSameMonth,
+  monthsInYear,
   startOfMonth,
+  startOfYear,
 } from 'date-fns';
 import {
   BehaviorSubject,
+  Observable,
   Subject,
   combineLatest,
   combineLatestAll,
@@ -19,6 +26,7 @@ import {
   filter,
   finalize,
   forkJoin,
+  map,
   of,
   switchMap,
   takeUntil,
@@ -38,18 +46,25 @@ import { DropdownModule } from 'primeng/dropdown';
 import { CalendarModule } from 'primeng/calendar';
 import { MessagesModule } from 'primeng/messages';
 import { Message } from 'primeng/api';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { SummaryMainChartComponent } from '../../ui/summary-main-chart/summary-main-chart.component';
+import { SummaryFilter } from '../../model/summary-filter.model';
+import { BudgetResult } from 'src/app/shared/model/budget-result';
+import { CategoryResponseModel } from 'src/app/shared/model/category-response.model';
+import { TotalAmountPerCategoryPerDate } from '../../model/total-amount-per-category-per-date';
 @Component({
   selector: 'app-summary.page',
   standalone: true,
   imports: [
     CommonModule,
-    ChartModule,
     ButtonModule,
     FormsModule,
     ReactiveFormsModule,
     DropdownModule,
     CalendarModule,
-    MessagesModule
+    MessagesModule,
+    MultiSelectModule,
+    SummaryMainChartComponent
   ],
   templateUrl: './summary.page.component.html',
   styleUrls: ['./summary.page.component.scss'],
@@ -57,6 +72,7 @@ import { Message } from 'primeng/api';
 export class SummaryComponent implements OnInit, OnDestroy {
   private ngUnsubscribe$ = new Subject<void>();
 
+  chartData$?: Observable<{ categories: CategoryResponseModel[], budgets: BudgetResult[], data: TotalAmountPerCategoryPerDate[], filter: SummaryFilter | null}>;
   chartData: any;
   chartOptions: any;
 
@@ -70,15 +86,13 @@ export class SummaryComponent implements OnInit, OnDestroy {
   dateViewOptions: Option[] = [
     { id: null, name: '' },
     { id: 'month', name: 'Month' },
+    { id: 'annual', name: 'Annual' },
     { id: 'custom', name: 'Custom Range' },
   ];
 
   monthOptions: Option[] = [{ id: null, name: '' }];
-  filter$ = new BehaviorSubject<{
-    view: string;
-    startDate: Date;
-    endDate: Date;
-  } | null>(null);
+  yearOptions: Option[] = [{ id: null, name: '' }];
+  filter$ = new BehaviorSubject<SummaryFilter | null>(null);
   filterInProgress: boolean = false;
 
   messages: Message[] = [];
@@ -87,21 +101,23 @@ export class SummaryComponent implements OnInit, OnDestroy {
   constructor() {
     this.form = new FormGroup({
       view: new FormControl(),
-      monthRange: new FormControl(),
+      month: new FormControl(),
+      year: new FormControl(),
       startDate: new FormControl(),
       endDate: new FormControl(),
       category: new FormControl()
     });
 
     this.setupDefaultMonthOptions();
-
+    this.setupDefaultYearOptions();
 
   }
 
   ngOnInit() {
     this.budgetService.initBudgets();
 
-    this.filter$
+
+    this.chartData$ = this.filter$
       .pipe(
         filter((f) => !!f),
         switchMap((filter) => {
@@ -117,99 +133,10 @@ export class SummaryComponent implements OnInit, OnDestroy {
             of(filter),
           ]);
         }),
+        map(([categories, budgets, data, filter]) => ({ categories, budgets, data, filter })),
         tap(() => (this.filterInProgress = false)),
         takeUntil(this.ngUnsubscribe$)
-      )
-      .subscribe(([categories, budgets, result, filter]) => {
-        console.log('[DEBUG] ', { categories, budgets, result });
-        categories = categories.filter((x) => x.isActive);
-        const barRGB = categories.map((c) => {
-          const r = Math.ceil(Math.random() * 255);
-          const g = Math.ceil(Math.random() * 255);
-          const b = Math.ceil(Math.random() * 255);
-          return { categoryId: c.id, r, g, b };
-        });
-
-        const dates = eachDayOfInterval({
-          start: filter?.startDate ?? new Date(),
-          end: filter?.endDate ?? new Date(),
-        });
-        const datasets = categories.map((c) => {
-          const perCategoryData = result.filter((x) => x.categoryId == c.id);
-          const data = dates.map((date) => {
-            const currentDateResult = perCategoryData.filter((x) =>
-              isSameDay(new Date(x.expenseDate), date)
-            );
-            const totalPerDate = currentDateResult.reduce(
-              (total, curr) => total + curr.total,
-              0
-            );
-            return totalPerDate;
-          });
-
-          const rgb = barRGB.find((x) => x.categoryId == c.id) ?? {
-            r: 0,
-            g: 0,
-            b: 0,
-          };
-          return {
-            label: c.name,
-            data,
-            backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.8)`,
-            borderColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
-            borderWidth: 1,
-          };
-        });
-        const labels = dates.map((x) => format(x, 'd'));
-
-        // this.basicData.labels = labels;
-        // this.basicData.datasets = dataSets;
-        console.log('[DEBUG]', { labels, datasets });
-
-        this.chartData = {
-          labels,
-          datasets,
-        };
-      });
-
-
-
-      const documentStyle = getComputedStyle(document.documentElement);
-      const textColor = documentStyle.getPropertyValue('--text-color');
-      const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-      const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
-
-      this.chartOptions = {
-        maintainAspectRatio: false,
-        aspectRatio: 0.6,
-        plugins: {
-            legend: {
-                labels: {
-                    color: textColor
-                }
-            }
-        },
-        scales: {
-            x: {
-              // stacked: true,
-                ticks: {
-                    color: textColorSecondary
-                },
-                grid: {
-                    color: surfaceBorder
-                }
-            },
-            y: {
-              // stacked: true,
-                ticks: {
-                    color: textColorSecondary
-                },
-                grid: {
-                    color: surfaceBorder
-                }
-            }
-        }
-      };
+      );
   }
 
   ngOnDestroy() {
@@ -221,11 +148,11 @@ export class SummaryComponent implements OnInit, OnDestroy {
     if (!this.form.value.view) return;
 
     if (this.form.value.view === 'month') {
-      if (this.form.value.monthRange) {
+      if (this.form.value.month) {
         this.filterInProgress = true;
 
-        const dateRange = this.form.value.monthRange;
-        this.filter$.next({ view: this.form.value.view, ...dateRange });
+        const dateRange = this.form.value.month;
+        this.filter$.next({ view: this.form.value.view, categoryIds: this.form.value.category ?? [], ...dateRange });
       }
       // show a message to required this option
       else {
@@ -236,7 +163,8 @@ export class SummaryComponent implements OnInit, OnDestroy {
           },
         ];
       }
-    } else if (this.form.value.view === 'custom') {
+    }
+    else if (this.form.value.view === 'custom') {
       if (this.form.value.startDate && this.form.value.endDate) {
         this.filterInProgress = true;
 
@@ -244,7 +172,7 @@ export class SummaryComponent implements OnInit, OnDestroy {
           startDate: this.form.value.startDate,
           endDate: this.form.value.endDate,
         };
-        this.filter$.next({ view: this.form.value.view, ...dateRange });
+        this.filter$.next({ view: this.form.value.view, categoryIds: this.form.value.category ?? [], ...dateRange });
       }
       // show a message to required this option
       else {
@@ -252,6 +180,23 @@ export class SummaryComponent implements OnInit, OnDestroy {
           {
             severity: 'info',
             detail: 'Please provide a valid value form "Date From" and "Date To" date picker fields',
+          },
+        ];
+      }
+    }
+    else if (this.form.value.view === 'annual') {
+      if (this.form.value.year) {
+        this.filterInProgress = true;
+
+        const dateRange = this.form.value.year;
+        this.filter$.next({ view: this.form.value.view, categoryIds: this.form.value.category ?? [], ...dateRange });
+      }
+      // show a message to required this option
+      else {
+        this.messages = [
+          {
+            severity: 'info',
+            detail: 'Please select a value from the "Year" dropdown option',
           },
         ];
       }
@@ -267,7 +212,6 @@ export class SummaryComponent implements OnInit, OnDestroy {
     const monthsCounter = new Array(10).fill(0);
     const currentDate = new Date();
     monthsCounter.forEach((_, i) => {
-      console.log('[DEBUG]', i);
       const month = addMonths(currentDate, -i);
 
       const option: Option = {
@@ -277,4 +221,20 @@ export class SummaryComponent implements OnInit, OnDestroy {
       this.monthOptions.push(option);
     });
   }
+
+
+  setupDefaultYearOptions() {
+    const yearsCounter = new Array(5).fill(0);
+    const currentDate = new Date();
+    yearsCounter.forEach((_, i) => {
+      const year = addYears(currentDate, -i);
+
+      const option: Option = {
+        id: { startDate: startOfYear(year), endDate: endOfYear(year) },
+        name: format(year, 'yyyy'),
+      };
+      this.yearOptions.push(option);
+    });
+  }
+
 }
