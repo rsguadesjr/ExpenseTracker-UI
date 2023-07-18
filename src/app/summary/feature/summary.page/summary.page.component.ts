@@ -52,6 +52,7 @@ import { SummaryFilter } from '../../model/summary-filter.model';
 import { BudgetResult } from 'src/app/shared/model/budget-result';
 import { CategoryResponseModel } from 'src/app/shared/model/category-response.model';
 import { TotalAmountPerCategoryPerDate } from '../../model/total-amount-per-category-per-date';
+import { InputSwitchModule } from 'primeng/inputswitch';
 @Component({
   selector: 'app-summary.page',
   standalone: true,
@@ -64,7 +65,8 @@ import { TotalAmountPerCategoryPerDate } from '../../model/total-amount-per-cate
     CalendarModule,
     MessagesModule,
     MultiSelectModule,
-    SummaryMainChartComponent
+    SummaryMainChartComponent,
+    InputSwitchModule
   ],
   templateUrl: './summary.page.component.html',
   styleUrls: ['./summary.page.component.scss'],
@@ -105,7 +107,8 @@ export class SummaryComponent implements OnInit, OnDestroy {
       year: new FormControl(),
       startDate: new FormControl(),
       endDate: new FormControl(),
-      category: new FormControl()
+      category: new FormControl(),
+      breakdown: new FormControl()
     });
 
     this.setupDefaultMonthOptions();
@@ -152,7 +155,10 @@ export class SummaryComponent implements OnInit, OnDestroy {
         this.filterInProgress = true;
 
         const dateRange = this.form.value.month;
-        this.filter$.next({ view: this.form.value.view, categoryIds: this.form.value.category ?? [], ...dateRange });
+        this.filter$.next({ view: this.form.value.view,
+                            categoryIds: this.form.value.category ?? [],
+                            ...dateRange,
+                            breakdown: this.form.value.breakdown });
       }
       // show a message to required this option
       else {
@@ -172,7 +178,7 @@ export class SummaryComponent implements OnInit, OnDestroy {
           startDate: this.form.value.startDate,
           endDate: this.form.value.endDate,
         };
-        this.filter$.next({ view: this.form.value.view, categoryIds: this.form.value.category ?? [], ...dateRange });
+        this.filter$.next({ view: this.form.value.view, categoryIds: this.form.value.category ?? [], ...dateRange, breakdown: this.form.value.breakdown });
       }
       // show a message to required this option
       else {
@@ -189,7 +195,7 @@ export class SummaryComponent implements OnInit, OnDestroy {
         this.filterInProgress = true;
 
         const dateRange = this.form.value.year;
-        this.filter$.next({ view: this.form.value.view, categoryIds: this.form.value.category ?? [], ...dateRange });
+        this.filter$.next({ view: this.form.value.view, categoryIds: this.form.value.category ?? [], ...dateRange, breakdown: this.form.value.breakdown  });
       }
       // show a message to required this option
       else {

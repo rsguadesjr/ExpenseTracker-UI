@@ -3,7 +3,7 @@
 <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
 <div class="w-full border-solid border-1 surface-border border-round-md bg-black-alpha-40 p-4">
   <div [formGroup]="form" class="flex mb-4  justify-content-between align-items-end">
-    <div class="flex gap-2 flex-grow-1  align-items-end">
+    <div class="flex gap-2 flex-grow-1  align-items-stretch">
       <div class="flex flex-column gap-2 p-fluid w-15rem">
         <label htmlFor="view">View</label>
         <p-dropdown formControlName="view" [options]="dateViewOptions" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
@@ -34,14 +34,24 @@
         </div>
       </ng-container>
 
-
       <div class="flex flex-column gap-2 p-fluid w-15rem" >
         <label htmlFor="view">Categories (Optional)</label>
         <p-multiSelect [options]="(categories$ | async) || []" formControlName="category" optionLabel="name" optionValue="id" ></p-multiSelect>
       </div>
-      <p-button icon="pi {{  (filterInProgress) ? 'pi-spin pi-spinner' : 'pi-search' }}"
-                pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
-      <p-button icon="pi pi-filter-slash" pTooltip="Clear fields" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
+
+      <div class="flex flex-column gap-2 p-fluid w-8rem ">
+        <label htmlFor="view">Breakdown</label>
+        <div class="flex-grow-1 flex justify-content-between align-items-center h-auto">
+          <p-inputSwitch formControlName="breakdown"></p-inputSwitch>
+        </div>
+      </div>
+
+
+      <div class="flex gap-2 align-items-end">
+        <p-button icon="pi {{  (filterInProgress) ? 'pi-spin pi-spinner' : 'pi-search' }}"
+                  pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
+        <p-button icon="pi pi-filter-slash" pTooltip="Clear fields" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
+      </div>
     </div>
 
   </div>

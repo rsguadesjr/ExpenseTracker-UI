@@ -3,4 +3,5 @@ export interface SummaryFilter {
   startDate: Date;
   endDate: Date;
   categoryIds: number[];
+  breakdown: boolean;
 }

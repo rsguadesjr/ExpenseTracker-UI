@@ -5,7 +5,8 @@ import { SummaryFilter } from '../../model/summary-filter.model';
 import { CategoryResponseModel } from 'src/app/shared/model/category-response.model';
 import { BudgetResult } from 'src/app/shared/model/budget-result';
 import { TotalAmountPerCategoryPerDate } from '../../model/total-amount-per-category-per-date';
-import { format, isSameMonth, eachDayOfInterval, isSameDay } from 'date-fns';
+import { format, isSameMonth, eachDayOfInterval, isSameDay, getDaysInMonth } from 'date-fns';
+import { ChartData } from '../../model/chart-data';
 
 @Component({
   selector: 'app-summary-main-chart',
@@ -29,230 +30,138 @@ export class SummaryMainChartComponent {
     if (!value || !value.filter) return;
 
 
-    const result = value?.data ?? [];
-    const budgets = value.budgets ?? [];
+    let result = value?.data ?? [];
+    let budgets = value.budgets ?? [];
     const filter = value.filter;
     const categories = value.categories?.filter(
-        (x) =>
-          x.isActive &&
-          (filter?.categoryIds?.length === 0 ||
-            filter?.categoryIds?.includes(x.id))
-      ) ?? [];
-    const colors = this.getRGB(categories.length);
+          (x) =>
+            x.isActive &&
+            (filter?.categoryIds?.length === 0 ||
+              filter?.categoryIds?.includes(x.id))
+        ) ?? [];
+    const colors = this.getRGB(value.categories.length);
+
+    if (value.categories.length > 0) {
+      result = result.filter(x => categories.findIndex(y => y.id == x.categoryId) != -1);
+    }
 
     let labels: string[] = [];
-    let datasets: any[] = [];
+    let dataSets: any[] = [];
+    let dates: Date[] = [];
+    let compare: (dateLeft: Date, dateRight: Date) => boolean;
 
-    // annual
+
     if (filter?.view === 'annual') {
+      // for annual, breakdown only to months
+      compare = (date1, date2) => isSameMonth(date1, date2);
       const year = +format(filter.startDate, 'yyyy');
-      const monthlyDates = new Array(12)
-        .fill(0)
-        .map((_, i) => new Date(year, i));
-
-      labels = monthlyDates.map((x) => format(x, 'MMM'));
-      datasets = categories.map((c, i) => {
-        const perCategoryData = result.filter((x) => x.categoryId == c.id);
-        const data = monthlyDates.map((date) => {
-          const currentDateResult = perCategoryData.filter((x) =>
-            isSameMonth(new Date(x.expenseDate), date)
-          );
-          const totalPerDate = currentDateResult.reduce(
-            (total, curr) => total + curr.total,
-            0
-          );
-          return totalPerDate;
-        });
-
-        const rgb = colors[i];
-
-        // dataset
-        return {
-          type: 'bar',
-          label: c.name,
-          data,
-          backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5`,
-          borderColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
-          borderWidth: 1,
-          minBarLength: 5,
-        };
-      });
-
-
-      // get the default budget
-      let defaultBudget = budgets.find((x) => x.year === -1);
-      let budgetDatasets: any[] = [];
-
-      if (!filter?.categoryIds || filter.categoryIds.length != categories.length) {
-        const data = monthlyDates.map((date) => {
-          const monthlyBudget = budgets
-            .filter((x) => x.id != defaultBudget?.id)
-            .find(
-              (x) =>
-                (x.year == +format(date, 'yyyy') || x.year === -1) &&
-                x.month == +format(date, 'M')
-            );
-          const budget = monthlyBudget ?? defaultBudget;
-          return budget?.amount ?? 0;
-        });
-        budgetDatasets = [
-          {
-            type: 'line',
-            fill: true,
-            label: 'Budget',
-            data: data,
-            backgroundColor: `rgb(87 87 87 / 20%)`,
-            borderColor: `rgb(87 87 87 )`,
-            borderWidth: 1,
-            minBarLength: 5,
-          },
-        ];
-      } else {
-        budgetDatasets = categories.map((category) => {
-          const data = monthlyDates.map((date) => {
-            const monthlyBudget = budgets
-              .filter((x) => x.id != defaultBudget?.id)
-              .find(
-                (x) =>
-                  (x.year == +format(date, 'yyyy') || x.year === -1) &&
-                  x.month == +format(date, 'M')
-              );
-            const budget =
-              monthlyBudget?.budgetCategories.find(
-                (x) => x.categoryId == category.id
-              ) ??
-              defaultBudget?.budgetCategories.find(
-                (x) => x.categoryId == category.id
-              );
-            return budget?.amount ?? 0;
-          });
-
-          const r = Math.ceil(Math.random() * 255);
-          const g = Math.ceil(Math.random() * 255);
-          const b = Math.ceil(Math.random() * 255);
-          return {
-            type: 'line',
-            fill: true,
-            label: `Budget(${category?.name})`,
-            data: data,
-            backgroundColor: `rgb(${r} ${g} ${b} / 20%)`,
-            borderColor: `rgb(${r} ${g} ${b} )`,
-            borderWidth: 1,
-            minBarLength: 5,
-          };
-        });
-      }
-
-      this.data = {
-        labels,
-        datasets: [...datasets, ...budgetDatasets],
-      };
-
-      return;
+      dates = new Array(12).fill(0).map((_,i)=> new Date(year, i));
+      labels = dates.map(date => format(date, 'MMM'));
     }
     else {
-      const dates = eachDayOfInterval({
+      compare = (date1, date2) => isSameDay(date1, date2);
+      dates = eachDayOfInterval({
         start: filter?.startDate ?? new Date(),
         end: filter?.endDate ?? new Date(),
       });
-
-      labels = dates.map((x) => format(x, 'd'));
-      datasets = categories.map((c, i) => {
-        const perCategoryData = result.filter((x) => x.categoryId == c.id);
-        const data = dates.map((date) => {
-          const currentDateResult = perCategoryData.filter((x) =>
-            isSameDay(new Date(x.expenseDate), date)
-          );
-          const totalPerDate = currentDateResult.reduce(
-            (total, curr) => total + curr.total,
-            0
-          );
-          return totalPerDate;
-        });
-
-        const rgb = colors[i];
-
-        // dataset
-        return {
-          type: 'bar',
-          label: c.name,
-          data,
-          backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5`,
-          borderColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
-          borderWidth: 1,
-          minBarLength: 5,
-        };
-      });
-
-      // get the default budget
-      let defaultBudget = budgets.find((x) => x.month === -1 && x.year === -1);
-      let budgetDatasets: any[] = [];
-      if (
-        !filter?.categoryIds ||
-        filter.categoryIds.length != categories.length
-      ) {
-        const data = dates.map((date) => {
-          const monthlyBudget = budgets
-            .filter((x) => x.id != defaultBudget?.id)
-            .find(
-              (x) =>
-                (x.year == +format(date, 'yyyy') || x.year === -1) &&
-                x.month == +format(date, 'M')
-            );
-          const budget = monthlyBudget ?? defaultBudget;
-          return !budget?.amount ? 0 : budget.amount / dates.length;
-        });
-        budgetDatasets = [
-          {
-            type: 'line',
-            fill: true,
-            label: 'Budget',
-            data: data,
-            backgroundColor: `rgb(87 87 87 / 20%)`,
-            borderColor: `rgb(87 87 87 )`,
-            borderWidth: 1,
-            minBarLength: 5,
-          },
-        ];
-      } else {
-        budgetDatasets = filter.categoryIds.map((id) => {
-          const data = dates.map((date) => {
-            const monthlyBudget = budgets
-              .filter((x) => x.id != defaultBudget?.id)
-              .find(
-                (x) =>
-                  (x.year == +format(date, 'yyyy') || x.year === -1) &&
-                  x.month == +format(date, 'M')
-              );
-            const budget =
-              monthlyBudget?.budgetCategories.find((x) => x.categoryId == id) ??
-              defaultBudget?.budgetCategories.find((x) => x.categoryId == id);
-            return !budget?.amount ? 0 : budget.amount / dates.length;
-          });
-
-          const category = categories.find((x) => x.id == id);
-          const r = Math.ceil(Math.random() * 255);
-          const g = Math.ceil(Math.random() * 255);
-          const b = Math.ceil(Math.random() * 255);
-          return {
-            type: 'line',
-            fill: true,
-            label: `Budget(${category?.name})`,
-            data: data,
-            backgroundColor: `rgb(${r} ${g} ${b} / 20%)`,
-            borderColor: `rgb(${r} ${g} ${b} )`,
-            borderWidth: 1,
-            minBarLength: 5,
-          };
-        });
-      }
-
-      this.data = {
-        labels,
-        datasets: [...datasets, ...budgetDatasets],
-      };
+      labels = dates.map(date => format(date, 'd'));
     }
 
+
+    // let categorized = false;
+    let groupings = filter.breakdown ? categories.map(x => ({ id: x.id, name: x.name })) : [{ id: null, name: 'Total' }];
+
+    // group or categorized the data
+    let groupedData = groupings.map(group => {
+      // data per category/group
+      const perGroupData = result.filter((x) => !group.id || x.categoryId == group.id);
+      // total per date
+      const data = dates.map((date) => {
+          const currentDateResult = perGroupData.filter((x) => compare(new Date(x.expenseDate), date));
+          const total = currentDateResult.reduce((total, curr) => total + curr.total, 0);
+          return { date, total }
+      });
+
+      return  { ...group, data }
+    });
+
+    // convert the grouped/categorized data into datasets
+    dataSets = groupedData.map((gd, i) => {
+      const rgb = colors[i];
+      return {
+        type: 'bar',
+        label: gd.name,
+        backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5`,
+        borderColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
+        data: gd.data.map(d => d.total),
+        borderWidth: 1,
+        minBarLength: 3,
+      }
+    })
+
+
+    const defaultBudget = budgets.find((x) => x.month === -1 && x.year === -1);
+    // group or categorized the data
+    let budgetGroupData = groupings.map(group => {
+      // total per date
+      const data = dates.map((date) => {
+          let month = +format(date, 'M');
+          let year = +format(date, 'yyyy');
+          let budget = budgets.find(x => x.month == month && (x.year == year || x.year == -1))
+                          ?? defaultBudget;
+          let defaultBudgetAmount = budget?.amount ?? 0;
+
+          // if categories are selected, then get the total from the categorized budget instead of total budget
+          if (categories.length > 0 && categories.length < value.categories.length) {
+            defaultBudgetAmount = budget?.budgetCategories
+                                    .filter(x => categories.findIndex(y => y.id == x.categoryId) != -1)
+                                    .reduce((total, current) => total + current.amount, 0) ?? 0;
+          }
+
+
+          let bc = budget?.budgetCategories.find(bc => bc.categoryId == group.id);
+          let budgetLimit = bc?.amount ?? defaultBudgetAmount;
+
+
+          let total: number;
+
+          if (filter?.view === 'annual') {
+            total = budgetLimit;
+          }
+          else {
+            let newDate = new Date(year, month );
+            let daysInMonth = getDaysInMonth(newDate);
+            total = budgetLimit/daysInMonth;
+          }
+
+          return { date, total }
+      });
+
+      return  { ...group, data }
+    });
+
+    let budgetDataSets = budgetGroupData.map((gd, i) => {
+      const r = Math.ceil(Math.random() * 255);
+      const g = Math.ceil(Math.random() * 255);
+      const b = Math.ceil(Math.random() * 255);
+      const rgb = { r, g,b };
+      return {
+        type: 'line',
+        fill: true,
+        label: `${gd.name} (Budget)`,
+        backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`,
+        borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
+        data: gd.data.map(d => d.total),
+        borderWidth: 1,
+        minBarLength: 3,
+      }
+    })
+
+
+    this.data = {
+      labels,
+      datasets: [...dataSets, ...budgetDataSets],
+    };
   }
 
   @Input() type: 'bar' | 'line' = 'bar';
@@ -295,6 +204,12 @@ export class SummaryMainChartComponent {
           },
         },
       },
+      'onClick' : function (event: any, elements: any, chart: any) {
+        if (elements[0]) {
+           const i = elements[0].index;
+           console.log(chart.data.labels[i] + ': ' + chart.data.datasets[0].data[i]);
+        }
+      }
     };
   }
 
@@ -333,5 +248,45 @@ export class SummaryMainChartComponent {
         return rgb(r, g, b);
       });
     }
+  }
+
+
+  getChartData(result: TotalAmountPerCategoryPerDate[],
+              filter: SummaryFilter,
+              categories: CategoryResponseModel[],
+              labelFormat = 'd',
+              dateCompratorFn: Function) {
+    const dates = eachDayOfInterval({
+      start: filter?.startDate ?? new Date(),
+      end: filter?.endDate ?? new Date(),
+    });
+    const colors = this.getRGB(categories.length);
+    const labels = dates.map((x) => format(x, labelFormat));
+    const datasets = categories.map((c, i) => {
+      const perCategoryData = result.filter((x) => x.categoryId == c.id);
+      const data = dates.map((date) => {
+        const currentDateResult = perCategoryData.filter((x) =>
+          dateCompratorFn(new Date(x.expenseDate), date)
+        );
+        const totalPerDate = currentDateResult.reduce(
+          (total, curr) => total + curr.total,
+          0
+        );
+        return totalPerDate;
+      });
+
+      const rgb = colors[i];
+
+      // dataset
+      return {
+        type: 'bar',
+        label: c.name,
+        data,
+        backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5`,
+        borderColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
+        borderWidth: 1,
+        minBarLength: 5,
+      };
+    });
   }
 }
