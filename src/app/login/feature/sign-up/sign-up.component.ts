@@ -99,31 +99,6 @@ export class SignUpComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // trim email
-    this.form.get('email')?.valueChanges
-      .pipe(
-        takeUntil(this.ngUnsubscribe$),
-        debounceTime(100)
-      )
-      .subscribe(v => {
-        if (v) {
-          this.form.get('email')?.setValue(v.trim(), { emitEvent: false })
-        }
-      })
-
-
-    // trim display name
-    this.form.get('displayName')?.valueChanges
-      .pipe(
-        takeUntil(this.ngUnsubscribe$),
-        debounceTime(100)
-      )
-      .subscribe(v => {
-        if (v) {
-          this.form.get('displayName')?.setValue(v.trim(), { emitEvent: false })
-        }
-      })
-
   }
 
   ngOnDestroy(): void {
@@ -139,8 +114,8 @@ export class SignUpComponent implements OnInit, OnDestroy {
     if (this.form.valid) {
       this.signUpInProgress = true;
       this.authService.signUp({
-        displayName: this.form.get('displayName')?.value,
-        email: this.form.get('email')?.value,
+        displayName: this.form.get('displayName')?.value?.trim(),
+        email: this.form.get('email')?.value?.trim(),
         password: this.form.get('password')?.value
       }).pipe(
         takeUntil(this.ngUnsubscribe$)

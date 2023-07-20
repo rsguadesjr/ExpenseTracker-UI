@@ -63,9 +63,9 @@ export class AuthService {
   //     });
   // }
 
-  // public signInWithEmailAndPassword(email: string, password: string) {
-  //   return this.afAuth.signInWithEmailAndPassword(email, password)
-  // }
+  public signInWithEmailAndPassword({ email, password } : { email: string, password: string }) {
+    return this.afAuth.signInWithEmailAndPassword(email, password)
+  }
 
   /**
    * Signout

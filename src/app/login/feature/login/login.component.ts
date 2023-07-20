@@ -16,26 +16,15 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import {
   Subject,
   finalize,
-  from,
-  lastValueFrom,
-  map,
-  mergeMap,
-  of,
-  pipe,
-  switchMap,
-  take,
-  takeUntil,
 } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { ValidationMessageService } from 'src/app/shared/utils/validation-message.service';
 import { TabViewModule } from 'primeng/tabview';
 import { SignUpComponent } from 'src/app/login/feature/sign-up/sign-up.component';
 import { FormValidation } from 'src/app/shared/utils/form-validation';
-import { FirebaseError } from 'firebase/app';
 import { MessagesModule } from 'primeng/messages';
 import { Message, MessageService } from 'primeng/api';
 import {
-  GoogleLoginProvider,
   GoogleSigninButtonModule,
   SocialAuthService,
 } from '@abacritt/angularx-social-login';
@@ -111,14 +100,62 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.form.updateValueAndValidity();
     this.validationErrors = FormValidation.getFormValidationErrors(this.form);
     this.messages = [];
+
+    const data = {
+      email: this.form.get('email')?.value,
+      password: this.form.get('password')?.value
+    };
+
+    this.emailAndPasswordLoginInProgress = true;
+    try {
+      const result = await this.authService.signInWithEmailAndPassword(data);
+      const idToken = await result?.user?.getIdToken();
+      if (idToken) {
+        this.authService
+          .login(idToken, 'Google')
+          .pipe(finalize(() => (this.socialLoginInProgress = false)))
+          .subscribe({
+            next: (result) => {
+              this.authService.setAuthData(result);
+              const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+              this.router.navigateByUrl(returnUrl);
+            },
+            error: (error) => {
+              this.messages = [
+                {
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: error.error ?? 'Invalid login credentials',
+                },
+              ];
+              this.authService.signOut();
+            },
+          });
+      }
+    }
+    catch(e) {
+      console.log(e);
+      this.messages = [
+        {
+          severity: 'error',
+          summary: 'Error',
+          detail: 'An unexpected error was encountered',
+        },
+      ];
+      this.socialLoginInProgress = false;
+    }
+
   }
 
-  signInGoogle() {
-    this.afAuth
-      .signInWithPopup(new GoogleAuthProvider())
-      .then(async (result) => {
-        this.socialLoginInProgress = true;
-        const idToken = await result.user?.getIdToken();
+  async signInGoogle() {
+    // clear messages first
+    this.messages = [];
+
+    try {
+      const result = await this.afAuth.signInWithPopup(new GoogleAuthProvider());
+
+      this.socialLoginInProgress = true;
+        const idToken = await result?.user?.getIdToken();
         if (idToken) {
           this.authService
             .login(idToken, 'Google')
@@ -141,6 +178,46 @@ export class LoginComponent implements OnInit, OnDestroy {
               },
             });
         }
-      });
+    }
+    catch(e) {
+      console.log(e);
+      this.messages = [
+        {
+          severity: 'error',
+          summary: 'Error',
+          detail: 'An unexpected error was encountered',
+        },
+      ];
+      this.socialLoginInProgress = false;
+    }
+
+    // this.afAuth
+    //   .signInWithPopup(new GoogleAuthProvider())
+    //   .then(async (result) => {
+    //     this.socialLoginInProgress = true;
+    //     const idToken = await result.user?.getIdToken();
+    //     if (idToken) {
+    //       this.authService
+    //         .login(idToken, 'Google')
+    //         .pipe(finalize(() => (this.socialLoginInProgress = false)))
+    //         .subscribe({
+    //           next: (result) => {
+    //             this.authService.setAuthData(result);
+    //             const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    //             this.router.navigateByUrl(returnUrl);
+    //           },
+    //           error: (error) => {
+    //             this.messages = [
+    //               {
+    //                 severity: 'error',
+    //                 summary: 'Error',
+    //                 detail: error.error ?? 'Invalid login credentials',
+    //               },
+    //             ];
+    //             this.authService.signOut();
+    //           },
+    //         });
+    //     }
+    //   });
   }
 }
