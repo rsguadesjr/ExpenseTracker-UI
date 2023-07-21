@@ -13,10 +13,7 @@ import {
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import {
-  Subject,
-  finalize,
-} from 'rxjs';
+import { Observable, Subject, finalize, map } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { ValidationMessageService } from 'src/app/shared/utils/validation-message.service';
 import { TabViewModule } from 'primeng/tabview';
@@ -64,6 +61,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   emailAndPasswordLoginInProgress = false;
   messages: Message[] = [];
 
+  showSocialLogin$: Observable<boolean>;
+
   constructor(
     private afAuth: AngularFireAuth,
     private router: Router,
@@ -84,6 +83,9 @@ export class LoginComponent implements OnInit, OnDestroy {
         FormValidation.requiredValidator('Password is required'),
       ]),
     });
+
+    this.showSocialLogin$ = this.route.queryParamMap
+      .pipe(map((v) => v.get('socialLogin') == 'true'))
   }
 
   ngOnInit(): void {}
@@ -103,7 +105,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     const data = {
       email: this.form.get('email')?.value,
-      password: this.form.get('password')?.value
+      password: this.form.get('password')?.value,
     };
 
     this.emailAndPasswordLoginInProgress = true;
@@ -117,7 +119,8 @@ export class LoginComponent implements OnInit, OnDestroy {
           .subscribe({
             next: (result) => {
               this.authService.setAuthData(result);
-              const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+              const returnUrl =
+                this.route.snapshot.queryParams['returnUrl'] || '/';
               this.router.navigateByUrl(returnUrl);
             },
             error: (error) => {
@@ -132,8 +135,7 @@ export class LoginComponent implements OnInit, OnDestroy {
             },
           });
       }
-    }
-    catch(e) {
+    } catch (e) {
       console.log(e);
       this.messages = [
         {
@@ -144,7 +146,6 @@ export class LoginComponent implements OnInit, OnDestroy {
       ];
       this.socialLoginInProgress = false;
     }
-
   }
 
   async signInGoogle() {
@@ -152,34 +153,36 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.messages = [];
 
     try {
-      const result = await this.afAuth.signInWithPopup(new GoogleAuthProvider());
+      const result = await this.afAuth.signInWithPopup(
+        new GoogleAuthProvider()
+      );
 
       this.socialLoginInProgress = true;
-        const idToken = await result?.user?.getIdToken();
-        if (idToken) {
-          this.authService
-            .login(idToken, 'Google')
-            .pipe(finalize(() => (this.socialLoginInProgress = false)))
-            .subscribe({
-              next: (result) => {
-                this.authService.setAuthData(result);
-                const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-                this.router.navigateByUrl(returnUrl);
-              },
-              error: (error) => {
-                this.messages = [
-                  {
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: error.error ?? 'Invalid login credentials',
-                  },
-                ];
-                this.authService.signOut();
-              },
-            });
-        }
-    }
-    catch(e) {
+      const idToken = await result?.user?.getIdToken();
+      if (idToken) {
+        this.authService
+          .login(idToken, 'Google')
+          .pipe(finalize(() => (this.socialLoginInProgress = false)))
+          .subscribe({
+            next: (result) => {
+              this.authService.setAuthData(result);
+              const returnUrl =
+                this.route.snapshot.queryParams['returnUrl'] || '/';
+              this.router.navigateByUrl(returnUrl);
+            },
+            error: (error) => {
+              this.messages = [
+                {
+                  severity: 'error',
+                  summary: 'Error',
+                  detail: error.error ?? 'Invalid login credentials',
+                },
+              ];
+              this.authService.signOut();
+            },
+          });
+      }
+    } catch (e) {
       console.log(e);
       this.messages = [
         {

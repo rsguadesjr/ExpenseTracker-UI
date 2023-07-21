@@ -29,20 +29,39 @@ const routes: Routes = [
         (m) => m.LoginComponent
       ),
   },
+  // Temporary disable this route
+  // {
+  //   path: 'sign-up',
+  //   canActivate: [AuthGuardLoggedIn],
+  //   loadComponent: () =>
+  //     import('./login/feature/sign-up/sign-up.component').then(
+  //       (m) => m.SignUpComponent
+  //     ),
+  // },
+  // {
+  //   path: 'forgot-password',
+  //   canActivate: [AuthGuardLoggedIn],
+  //   loadComponent: () =>
+  //     import('./login/feature/forgot-password/forgot-password.component').then(
+  //       (m) => m.ForgotPasswordComponent
+  //     ),
+  // },
+
+
   {
     path: 'sign-up',
     canActivate: [AuthGuardLoggedIn],
     loadComponent: () =>
-      import('./login/feature/sign-up/sign-up.component').then(
-        (m) => m.SignUpComponent
+      import('./login/feature/disabled-page/disabled-page.component').then(
+        (m) => m.DisabledPageComponent
       ),
   },
   {
     path: 'forgot-password',
     canActivate: [AuthGuardLoggedIn],
     loadComponent: () =>
-      import('./login/feature/forgot-password/forgot-password.component').then(
-        (m) => m.ForgotPasswordComponent
+      import('./login/feature/disabled-page/disabled-page.component').then(
+        (m) => m.DisabledPageComponent
       ),
   },
   {

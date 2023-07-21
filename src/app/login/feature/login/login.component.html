@@ -4,6 +4,11 @@
     <ng-template pTemplate="header">
       <div class="text-4xl py-4 w-full text-center">Expense Tracker</div>
     </ng-template>
+    <div class="bg-yellow-800 text-white font-bold border-round mb-2 flex flex-column justify-content-center p-2">
+      <span class="mb-2">For viewing purposes, please use the following credentials:</span>
+      <span>Email: <b>test@test.com</b></span>
+      <span>Password: <b>Pass123</b></span>
+    </div>
     <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
     <div *ngIf="!socialLoginInProgress else socalLoginLoadingState">
       <form (ngSubmit)="signInEmailAndPassword()" [formGroup]="form" class="flex flex-column gap-4">
@@ -31,7 +36,7 @@
         <a class="no-underline cursor-pointer" routerLink="/sign-up">Sign Up</a>
       </div>
 
-      <div class="flex flex-column align-items-center mt-8">
+      <div *ngIf="showSocialLogin$ | async" class="flex flex-column align-items-center mt-8">
         <span class="mb-4">or sign in with</span>
         <button class="action-button" (click)="signInGoogle()">
           <img src="../../../../assets/google_icon.svg" aria-hidden="true">
