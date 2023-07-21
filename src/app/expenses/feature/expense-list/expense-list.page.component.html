@@ -9,14 +9,22 @@
           <label htmlFor="view">View</label>
           <p-dropdown formControlName="view" [options]="dateViewOptions" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
         </div>
-        <div class="flex flex-column gap-2 p-fluid">
-          <label htmlFor="dateFrom">Date From</label>
-          <p-calendar id="dateFrom" formControlName="dateFrom" dateFormat="dd-M-yy"></p-calendar>
-        </div>
-        <div class="flex flex-column gap-2 p-fluid">
-          <label htmlFor="dateTo">Date To</label>
-          <p-calendar id="dateTo" formControlName="dateTo" dateFormat="dd-M-yy"></p-calendar>
-        </div>
+        <ng-container *ngIf="filterForm.value.view === 'month'" >
+          <div class="flex flex-column gap-2 p-fluid w-15rem" >
+            <label htmlFor="view">Month</label>
+            <p-dropdown formControlName="month" [options]="monthOptions" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="filterForm.value.view !== 'month'" >
+          <div class="flex flex-column gap-2 p-fluid">
+            <label htmlFor="dateFrom">Date From</label>
+            <p-calendar #dateFrom id="dateFrom" formControlName="dateFrom" dateFormat="dd-M-yy" [maxDate]="filterForm.get('dateTo')?.value" (onSelect)="dateTo?.showOverlay()"></p-calendar>
+          </div>
+          <div class="flex flex-column gap-2 p-fluid">
+            <label htmlFor="dateTo">Date To</label>
+            <p-calendar #dateTo id="dateTo" formControlName="dateTo" dateFormat="dd-M-yy" [minDate]="filterForm.get('dateFrom')?.value"></p-calendar>
+          </div>
+        </ng-container>
         <p-button icon="pi {{  (filterInProgress$ | async) ? 'pi-spin pi-spinner' : 'pi-search' }}"
                   pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
         <p-button icon="pi pi-filter-slash" pTooltip="Clear fields" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>

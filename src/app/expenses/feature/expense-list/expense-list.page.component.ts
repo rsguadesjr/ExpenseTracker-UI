@@ -9,6 +9,7 @@ import {
   skip,
   startWith,
   Subject,
+  switchMap,
   take,
   takeUntil,
   tap,
@@ -43,6 +44,7 @@ import { Option } from 'src/app/shared/model/option.model';
 import { ValidationMessageService } from 'src/app/shared/utils/validation-message.service';
 import { BadgeModule } from 'primeng/badge';
 import {
+  addMonths,
   endOfDay,
   endOfMonth,
   format,
@@ -106,7 +108,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   toggleViewValue = 'table';
 
   categories: Option[] = [
-    { id: null, name: '' },
+    { id: '', name: '' },
     { id: 1, name: 'Bills' },
     { id: 2, name: 'Foods' },
   ];
@@ -121,12 +123,13 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   currentPage: number = 0;
 
   dateViewOptions: Option[] = [
-    { id: null, name: '' },
-    { id: 'day', name: 'Day' },
-    { id: 'week', name: 'Week' },
+    { id: '', name: '' },
+    { id: 'day', name: 'Today' },
+    { id: 'week', name: 'This Week' },
     { id: 'month', name: 'Month' },
     { id: 'year', name: 'Year' },
   ];
+  monthOptions: Option[] = [];
 
 
   calendarDate? = new Date();
@@ -151,6 +154,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {
     this.createForm();
+    this.initMonthOptions();
 
     this.dailyTotal$ = this.summaryService.getDailyTotalByDateRange();
     this.reminders$ = this.reminderService.getReminderData()
@@ -214,25 +218,63 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     );
 
 
+    // set date range values for month
+    this.filterForm.get('month')?.valueChanges
+      .pipe(takeUntil(this.ngUnsubscribe$))
+      .subscribe(value => {
+        if (value) {
+          this.filterForm
+            .get('dateFrom')
+            ?.setValue(new Date(value.startDate), { emitEvent: false });
+          this.filterForm
+            .get('dateTo')
+            ?.setValue(new Date(value.endDate), { emitEvent: false });
+        }
+      })
+
+
     // auto populate date fields based on view value
     // this will listen to route changes and filter change
-    combineLatest([
-      this.filterForm.get('view')!.valueChanges.pipe(startWith('')),
-      this.route.queryParamMap.pipe(map((v) => v.get('view'))),
-    ])
-      .pipe(takeUntil(this.ngUnsubscribe$))
-      .subscribe(([v1, v2]) => {
-        const view = v1 || v2 || 'month';
-        const dateParam = this.dateParamService.getDateRange(view);
+    this.route.queryParamMap.pipe(
+      map((v) => v.get('view')),
+      switchMap(view => {
+        const dateView = view?.trim() || 'month';
+        if (dateView === 'month') {
+          const currentDate = new Date();
+          const monthData = { startDate: startOfMonth(currentDate), endDate: endOfMonth(currentDate) };
+          this.filterForm.get('month')?.setValue(monthData, { emitEvent: false });
+        }
 
+        this.filterForm.get('view')?.setValue(dateView, { emitEvent: false });
+        return this.filterForm.get('view')!.valueChanges.pipe(startWith(dateView))
+      })
+    )
+    .subscribe(value => {
+      if (!value) return
+
+      if (value === 'month') {
+        const currentDate = new Date();
+        const monthData = { startDate: startOfMonth(currentDate), endDate: endOfMonth(currentDate) };
+        this.filterForm.get('month')?.setValue(monthData, { emitEvent: false });
+        this.filterForm
+          .get('dateFrom')
+          ?.setValue(new Date(monthData.startDate), { emitEvent: false });
+        this.filterForm
+          .get('dateTo')
+          ?.setValue(new Date(monthData.endDate), { emitEvent: false });
+      }
+      else {
+        const dateParam = this.dateParamService.getDateRange(value);
         this.filterForm
           .get('dateFrom')
           ?.setValue(new Date(dateParam.startDate), { emitEvent: false });
         this.filterForm
           .get('dateTo')
           ?.setValue(new Date(dateParam.endDate), { emitEvent: false });
-        this.filterForm.get('view')?.setValue(view, { emitEvent: false });
-      });
+
+      }
+    });
+
 
 
     // this will contain the sum of expenses per category
@@ -269,6 +311,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
       view: new FormControl(),
       dateFrom: new FormControl(),
       dateTo: new FormControl(),
+      month: new FormControl(),
       category: new FormControl(),
     });
   }
@@ -387,10 +430,10 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   }
 
   onMonthChange(event : { year: number, month: number}) {
-    const date = new Date(event.year, event.month - 1, 1);
+    this.calendarDate = new Date(event.year, event.month - 1, 1);
     this.calendarDateRange$.next({
-      dateFrom: startOfMonth(date),
-      dateTo: endOfMonth(date),
+      dateFrom: startOfMonth(this.calendarDate),
+      dateTo: endOfMonth(this.calendarDate),
       forceUpdate: false
     });
   }
@@ -416,5 +459,22 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
   onFilterChange(data: Expense[]) {
     this.filteredItems$.next(data);
     this.cdr.detectChanges();
+  }
+
+  initMonthOptions() {
+    const currentYear = new Date().getFullYear();
+    const currentDate = new Date(currentYear, 0);
+    this.monthOptions = new Array(12).fill(0).map((_, i) => {
+      const month = addMonths(currentDate, i);
+      return {
+        id: { startDate: startOfMonth(month), endDate: endOfMonth(month) },
+        name: format(month, 'MMM-yyyy'),
+      };
+    })
+  }
+
+
+  test(e: any) {
+    console.log('[DEBUG] test', e)
   }
 }
