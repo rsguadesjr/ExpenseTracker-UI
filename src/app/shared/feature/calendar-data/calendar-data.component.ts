@@ -199,7 +199,7 @@ export class CalendarDataComponent {
           amount: reminder.amount,
           categoryId: reminder.categoryId,
           sourceId: reminder.sourceId,
-          tags: reminder.tags?.split(',') ?? [],
+          tags: reminder.tags ? reminder.tags.split(',') : '',
           expenseDate: reminder.type == ReminderType.OneTime ? reminder.expenseDate : reminder.date.toISOString()
         } as ExpenseDto
       }

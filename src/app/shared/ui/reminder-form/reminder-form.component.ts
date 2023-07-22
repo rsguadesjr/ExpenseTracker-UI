@@ -66,6 +66,7 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
     private reminderService: ReminderService,
     private toastService: ToastService) {
 
+
     this.isEdit = dialogConfig.data.isEdit;
     const reminder = dialogConfig.data.reminder as ReminderModel;
     const type = this.types.find(x => x.id == reminder.type);
@@ -80,7 +81,7 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
       category: new FormControl({ id: reminder.categoryId }),
       amount: new FormControl(reminder.amount),
       source: new FormControl({ id: reminder.sourceId} ),
-      tags: new FormControl(reminder.tags?.split(',') || []),
+      tags: new FormControl(reminder.tags ? reminder.tags.split(',') : ''),
       date: new FormControl({ value: format(reminder.date, 'dd-MMM-yyyy'), disabled: true }), // readonly
     });
 

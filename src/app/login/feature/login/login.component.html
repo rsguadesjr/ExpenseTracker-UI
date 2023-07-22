@@ -4,13 +4,13 @@
     <ng-template pTemplate="header">
       <div class="text-4xl py-4 w-full text-center">Expense Tracker</div>
     </ng-template>
-    <div class="bg-yellow-800 text-white font-bold border-round mb-2 flex flex-column justify-content-center p-2">
-      <span class="mb-2">For viewing purposes, please use the following credentials:</span>
-      <span>Email: <b>test@test.com</b></span>
-      <span>Password: <b>Pass123</b></span>
-    </div>
     <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
     <div *ngIf="!socialLoginInProgress else socalLoginLoadingState">
+      <div class="bg-yellow-800 text-white font-bold border-round mb-2 flex flex-column justify-content-center p-2">
+        <span class="mb-2">For viewing purposes, please use the following credentials:</span>
+        <span>Email: <b>test@test.com</b></span>
+        <span>Password: <b>Pass123</b></span>
+      </div>
       <form (ngSubmit)="signInEmailAndPassword()" [formGroup]="form" class="flex flex-column gap-4">
         <div class="flex flex-column gap-2">
           <label htmlFor="login-email">Email</label>

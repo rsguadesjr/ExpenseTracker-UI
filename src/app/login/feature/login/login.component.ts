@@ -128,7 +128,7 @@ export class LoginComponent implements OnInit, OnDestroy {
                 {
                   severity: 'error',
                   summary: 'Error',
-                  detail: error.error ?? 'Invalid login credentials',
+                  detail: typeof(error.error) === 'string' ? error.error : (error.message ?? 'An unexpected error was encountered'),
                 },
               ];
               this.authService.signOut();
@@ -175,7 +175,7 @@ export class LoginComponent implements OnInit, OnDestroy {
                 {
                   severity: 'error',
                   summary: 'Error',
-                  detail: error.error ?? 'Invalid login credentials',
+                  detail: typeof(error.error) === 'string' ? error.error : 'An unexpected error was encountered',
                 },
               ];
               this.authService.signOut();
