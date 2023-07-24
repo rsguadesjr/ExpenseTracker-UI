@@ -11,6 +11,6 @@ export interface DataTableColumn {
   /**
    *
    */
-
+  html?: (value: any, index: number) => string;
   width?: number | string;
 }

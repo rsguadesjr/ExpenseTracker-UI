@@ -26,6 +26,9 @@ import { AccessDirective } from '../../utils/access.directive';
 export class DataTableComponent {
   @ViewChild(Table) dt?: Table;
 
+  @Input() sortField = '';
+  @Input() sortOrder = -1;
+
   rowData?: any[];
   @Input() set data(value: any[] | null) {
     if (value) {
@@ -36,6 +39,9 @@ export class DataTableComponent {
           for (const col of this._columns) {
             if (col.formatValue) {
               row.__data[col.field] = col.formatValue(row, i);
+            }
+            else if(col.html) {
+              row.__data[col.field] = col.html(row, i);
             }
             else {
               row.__data[col.field] = row[col.field];

@@ -9,11 +9,14 @@ export interface ReminderModel {
   expenseDate: any,
   amount: number,
   categoryId: number,
+  category: string;
   sourceId: number,
+  source: string;
   tags: string,
   startDate: any,
   endDate: any,
   type: ReminderType,
+  remainingDays?: number;
 
 
   date: Date, // will be one to check for the date

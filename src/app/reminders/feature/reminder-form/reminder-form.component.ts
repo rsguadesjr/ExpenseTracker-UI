@@ -3,24 +3,24 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, FormGroupName, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { MessagesModule } from 'primeng/messages';
-import { ReminderService } from 'src/app/expenses/data-access/reminder.service';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Message } from 'primeng/api';
-import { FormValidation } from '../../utils/form-validation';
-import { CategoryService } from '../../data-access/category.service';
-import { SourceService } from '../../data-access/source.service';
+import { FormValidation } from '../../../shared/utils/form-validation';
+import { CategoryService } from '../../../shared/data-access/category.service';
+import { SourceService } from '../../../shared/data-access/source.service';
 import { Observable, Subject, combineLatest, map, take, takeUntil } from 'rxjs';
-import { Option } from '../../model/option.model';
+import { Option } from '../../../shared/model/option.model';
 import { DropdownModule } from 'primeng/dropdown';
 import { format, parseISO, startOfDay } from 'date-fns';
 import { InputTextModule } from 'primeng/inputtext';
 import { CalendarModule } from 'primeng/calendar';
 import { ChipsModule } from 'primeng/chips';
 import { MessageModule } from 'primeng/message';
-import { ReminderModel } from '../../model/reminder-model';
-import { ReminderType } from '../../enums/reminder-type';
-import { ReminderRequestModel } from '../../model/reminder-request-model';
-import { ToastService } from '../../utils/toast.service';
+import { ReminderModel } from '../../../shared/model/reminder-model';
+import { ReminderType } from '../../../shared/enums/reminder-type';
+import { ReminderRequestModel } from '../../../shared/model/reminder-request-model';
+import { ToastService } from '../../../shared/utils/toast.service';
+import { ReminderService } from '../../data-access/reminder.service';
 
 @Component({
   selector: 'app-reminder-form',
@@ -81,7 +81,7 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
       category: new FormControl({ id: reminder.categoryId }),
       amount: new FormControl(reminder.amount),
       source: new FormControl({ id: reminder.sourceId} ),
-      tags: new FormControl(reminder.tags ? reminder.tags.split(',') : ''),
+      tags: new FormControl(reminder.tags ? reminder.tags.split(',') : []),
       date: new FormControl({ value: format(reminder.date, 'dd-MMM-yyyy'), disabled: true }), // readonly
     });
 
@@ -136,7 +136,6 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
     if (this.form.invalid) {
       return
     }
-
 
     const formValue = (key: string) => this.form.get(key)?.value
     const reminder: ReminderRequestModel = {

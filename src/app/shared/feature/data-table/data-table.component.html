@@ -1,4 +1,4 @@
-<p-table #dt [value]="rowData!" [tableStyle]="{ 'min-width': '50rem' }" [rowTrackBy]="trackBy">
+<p-table #dt [value]="rowData!" [tableStyle]="{ 'min-width': '50rem' }" [rowTrackBy]="trackBy" [sortField]="sortField" [sortOrder]="sortOrder">
   <ng-template pTemplate="header">
     <tr>
       <ng-container  *ngFor="let col of columns">
@@ -10,7 +10,10 @@
   <ng-template pTemplate="body" let-item let-ri="rowIndex">
     <tr>
       <ng-container *ngFor="let col of columns" >
-        <td> {{ item.__data && item.__data[col.field] }} </td>
+        <td *ngIf="col.html">
+          <div *ngIf="item.__data && item.__data[col.field]" [innerHtml]="item.__data[col.field]"></div>
+        </td>
+        <td  *ngIf="!col.html"> {{ item.__data && item.__data[col.field] }} </td>
       </ng-container>
       <td *access="['SuperAdmin', 'Admin', 'Standard']">
         <div class="flex gap-2">

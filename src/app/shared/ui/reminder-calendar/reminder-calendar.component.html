@@ -1,4 +1,4 @@
-<p-calendar class="max-w-full" [(ngModel)]="calendarDate" [inline]="true" (onMonthChange)="onMonthChange($event)" (onSelect)="onSelectedDate($event)">
+<p-calendar styleClass="expense-calenda" [(ngModel)]="calendarDate" [inline]="true" (onMonthChange)="onMonthChange($event)" (onSelect)="onSelectedDate($event)">
   <ng-template pTemplate="date" let-date>
     <div class="flex flex-column align-items-center justify-content-end">
       <span class="p-1 text-xl">{{ date.day }}</span>

@@ -57,13 +57,13 @@ import { ExpenseDetailComponent } from '../expense-detail/expense-detail.page.co
 import { ConfirmationService } from 'primeng/api';
 import { ToastService } from 'src/app/shared/utils/toast.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ReminderService } from '../../data-access/reminder.service';
 import { ReminderCalendarComponent } from 'src/app/shared/ui/reminder-calendar/reminder-calendar.component';
 import { ReminderModel } from 'src/app/shared/model/reminder-model';
-import { CalendarDataComponent } from 'src/app/shared/feature/calendar-data/calendar-data.component';
+import { CalendarDataComponent } from 'src/app/expenses/feature/calendar-data/calendar-data.component';
 import { TotalPerDate } from 'src/app/shared/model/total-per-date';
 import { TooltipModule } from 'primeng/tooltip';
 import { AccessDirective } from 'src/app/shared/utils/access.directive';
+import { ReminderService } from 'src/app/reminders/data-access/reminder.service';
 
 @Component({
   selector: 'app-expense-list-page',
@@ -157,7 +157,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     this.initMonthOptions();
 
     this.dailyTotal$ = this.summaryService.getDailyTotalByDateRange();
-    this.reminders$ = this.reminderService.getReminderData()
+    this.reminders$ = this.reminderService.getTansformedData()
                                           .pipe(map(x => x.data));
 
     // executes every time applyFilter/applyDateFilter is triggered
@@ -279,12 +279,12 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
 
     // this will contain the sum of expenses per category
     this.calendarDateRange$.pipe(
-      takeUntil(this.ngUnsubscribe$),
       filter((v) => !!v),
       distinctUntilChanged((prev, curr) => {
         return JSON.stringify(prev) === JSON.stringify(curr);
       }),
-      debounceTime(500)
+      debounceTime(500),
+      takeUntil(this.ngUnsubscribe$),
     ).subscribe(filter => {
       const dateFrom = filter!.dateFrom.toISOString();
       const dateTo = filter!.dateTo.toISOString();
@@ -471,10 +471,5 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
         name: format(month, 'MMM-yyyy'),
       };
     })
-  }
-
-
-  test(e: any) {
-    console.log('[DEBUG] test', e)
   }
 }

@@ -207,7 +207,6 @@ export class SummaryMainChartComponent {
       'onClick' : function (event: any, elements: any, chart: any) {
         if (elements[0]) {
            const i = elements[0].index;
-           console.log(chart.data.labels[i] + ': ' + chart.data.datasets[0].data[i]);
         }
       }
     };

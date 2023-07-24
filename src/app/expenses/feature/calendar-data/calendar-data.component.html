@@ -1,4 +1,4 @@
-<p-calendar class="max-w-full" [(ngModel)]="calendarDate" [inline]="true" (onMonthChange)="onMonthChange($event)"
+<p-calendar class="app-calendar max-w-full" [(ngModel)]="calendarDate" [inline]="true" (onMonthChange)="onMonthChange($event)"
   (onSelect)="onSelectDate($event)" (onShow)="onShow($event)">
   <ng-template pTemplate="date" let-date>
     <div class="flex flex-column align-items-center justify-content-end">

@@ -1,23 +1,23 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { eachDayOfInterval, isSameDay, format, startOfMonth, endOfMonth } from 'date-fns';
-import { ReminderModel } from '../../model/reminder-model';
-import { TotalPerDate } from '../../model/total-per-date';
+import { ReminderModel } from '../../../shared/model/reminder-model';
+import { TotalPerDate } from '../../../shared/model/total-per-date';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CalendarModule } from 'primeng/calendar';
 import { ConfirmationService } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
-import { ReminderFormComponent } from '../../ui/reminder-form/reminder-form.component';
-import { ReminderService } from 'src/app/expenses/data-access/reminder.service';
+import { ReminderFormComponent } from '../../../reminders/feature/reminder-form/reminder-form.component';
 import { take } from 'rxjs';
-import { ToastService } from '../../utils/toast.service';
+import { ToastService } from '../../../shared/utils/toast.service';
 import { Expense } from 'src/app/expenses/model/expense.model';
 import { ExpenseDetailComponent } from 'src/app/expenses/feature/expense-detail/expense-detail.page.component';
 import { ExpenseDto } from 'src/app/expenses/model/expense-dto.model';
-import { ReminderType } from '../../enums/reminder-type';
+import { ReminderType } from '../../../shared/enums/reminder-type';
 import { TooltipModule } from 'primeng/tooltip';
-import { AccessDirective } from '../../utils/access.directive';
+import { AccessDirective } from '../../../shared/utils/access.directive';
+import { ReminderService } from 'src/app/reminders/data-access/reminder.service';
 
 @Component({
   selector: 'app-calendar-data',

@@ -5,7 +5,7 @@ import { Expense } from '../model/expense.model';
 import { HttpClient } from '@angular/common/http';
 import { ExpenseDto } from '../model/expense-dto.model';
 import { PaginatedList } from 'src/app/shared/model/paginated-list.model';
-import { ResponseData } from '../model/response-data';
+import { ResponseData } from '../../shared/model/response-data';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 @Injectable({

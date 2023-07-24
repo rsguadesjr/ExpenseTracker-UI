@@ -84,8 +84,16 @@ const routes: Routes = [
     path: 'settings',
     canActivate: [AuthGuard],
     loadChildren: () =>
-      import('./settings/feature/settings-shell/settings-shell-routing.module').then(
-        (m) => m.SettingsShellRoutingModule
+      import('./settings/feature/settings-shell/settings-shell.module').then(
+        (m) => m.SettingsShellModule
+      ),
+  },
+  {
+    path: 'reminders',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./reminders/feature/reminder-shell/reminder-shell.module').then(
+        (m) => m.ReminderShellModule
       ),
   },
 ];
