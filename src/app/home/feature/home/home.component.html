@@ -1,38 +1,36 @@
-<div class="flex flex-column p-2 mb-2 h-full">
-  <div class="m-auto">
-    <div class="flex bg-primary align-items-center justify-content-center gap-2 font-bold border-round"
-      style="min-width: 200px; min-height: 100px">
-      <div class="text-2xl">&#x20B1;</div>
-      <div class="text-6xl">{{ totalExpenses$ | async | number: '0.0' }}</div>
+<div class="flex flex-row justify-content-between gap-2 mt-4">
+  <div class="flex flex-column gap-2  w-4">
+    <div class="flex flex-column  bg-black-alpha-40 border-round p-4">
+      <div class="text-2xl mb-4">Hi user!</div>
+      <div class="flex flex-column align-items-start">
+        <div class="text-base">This is the total spending for the month of {{ date | date: 'MMMM' }}</div>
+        <div class="text-6xl">{{ totalExpenses$ | async | number: '0.0' }}</div>
+      </div>
     </div>
-    <div class="text-sm text-center mt-2 p-2">{{ dateRangeLabel }}</div>
-  </div>
 
-  <div class="flex flex-column align-items-center" *ngIf="selectedView$ | async as view">
-    <div class="flex gap-2 justify-content-center mt-4">
-      <p-button label="Day"
-        styleClass="border-1 bg-black-alpha-40 border-50  text-500 {{ view?.toLowerCase() === 'day' ? 'text-primary' : '' }}"
-        (click)="updateView('day')"></p-button>
-      <p-button label="Week"
-        styleClass="border-1 bg-black-alpha-40 border-50 text-500 {{ view?.toLowerCase() === 'week' ? 'text-primary' : '' }}"
-        (click)="updateView('week')"></p-button>
-      <p-button label="Month"
-        styleClass="border-1 bg-black-alpha-40 border-50 text-500 {{ view?.toLowerCase() === 'month' ? 'text-primary' : '' }}"
-        (click)="updateView('month')"></p-button>
-      <p-button label="Year"
-        styleClass="border-1 bg-black-alpha-40 border-50 text-500 {{ view?.toLowerCase() === 'year' ? 'text-primary' : '' }}"
-        (click)="updateView('year')"></p-button>
+    <div class=" flex-grow-1 bg-black-alpha-40 border-round p-3">
+      <div class="text-xl mb-4">Recent Transactions</div>
+      <ng-container *ngIf="data$ | async as data; else noResult">
+        <app-expense-list [items]="data" (selected)="editEntry($event)" [hidePagination]="true"></app-expense-list>
+      </ng-container>
     </div>
   </div>
+  <div class="flex flex-column gap-2 flex-grow-1">
+    <div class=" flex-grow-1 bg-black-alpha-40 border-round p-4">
+      <div class="text-xl mb-4">Summary for the month of {{ date | date: 'MMMM' }}</div>
+      <app-summary-main-chart type="line" [aspectRatio]="0.8" [showLegend]="false"
+        [chartFilterData]="chartData$ | async"></app-summary-main-chart>
+    </div>
 
-  <span class="text-xl p-2">Recent Transactions</span>
-  <div class="flex-grow-1 overflow-y-scroll border-round p-2 bg-black-alpha-20 border-solid border-1 surface-border">
-    <ng-container *ngIf="data$ | async as data; else noResult">
-      <app-expense-list [items]="data" (selected)="editEntry($event)" [hidePagination]="true"></app-expense-list>
-    </ng-container>
+    <div class="flex flex-column justify-content-start  flex-grow-1 bg-black-alpha-40 border-round p-3">
+      <div class="text-xl mb-4">Total per category</div>
+      <ng-container *ngIf="data$ | async as data; else noResult">
+        <app-expense-per-category [items]="(perCategoryData$ | async) ?? []"
+          [hideTotal]="true"></app-expense-per-category>
+      </ng-container>
+    </div>
   </div>
 </div>
-
 <ng-template #noResult>
   <div class="mt-4 card flex justify-content-center">
     <span>No result</span>

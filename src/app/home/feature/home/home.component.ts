@@ -7,6 +7,7 @@ import {
   Observable,
   Subject,
   catchError,
+  combineLatest,
   debounceTime,
   filter,
   map,
@@ -33,9 +34,14 @@ import {
   startOfYear,
   endOfYear,
 } from 'date-fns';
-import { SummaryService } from 'src/app/shared/data-access/summary.service';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { DateParamService } from 'src/app/shared/utils/date-param.service';
+import { ExpensePerCategoryComponent } from 'src/app/expenses/ui/expense-per-category/expense-per-category.component';
+import { SummaryService } from 'src/app/summary/data-access/summary.service';
+import { CategoryService } from 'src/app/shared/data-access/category.service';
+import { SummaryFilter } from 'src/app/summary/model/summary-filter.model';
+import { BudgetService } from 'src/app/shared/data-access/budget.service';
+import { SummaryMainChartComponent } from 'src/app/summary/ui/summary-main-chart/summary-main-chart.component';
 
 @Component({
   selector: 'app-home',
@@ -46,32 +52,56 @@ import { DateParamService } from 'src/app/shared/utils/date-param.service';
     ButtonModule,
     RouterModule,
     ChartModule,
-    SpeedDialModule
+    SpeedDialModule,
+    ExpensePerCategoryComponent,
+    SummaryMainChartComponent
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements AfterViewInit {
+export class HomeComponent {
   filter$ = new BehaviorSubject<any>(null);
   data$!: Observable<Expense[]>;
   filterInProgress$ = new BehaviorSubject<boolean>(false);
   selectedView$: Observable<string>;
-  totalExpenses$: Observable<number>;
 
-  view: string = 'week';
+  date = new Date();
+  view: string = 'month';
   dateRangeLabel = '';
 
-  basicData: any;
-  basicOptions: any;
+  perCategoryData$ = this.summaryService.getTotalAmountPerCategory(this.dateRange.startDate, this.dateRange.endDate);
+  totalExpenses$: Observable<number> = this. perCategoryData$.pipe(
+    map(v => {
+      return v.reduce((total, current) => total + current.total, 0)
+    })
+  );
 
-  codeTest = 'Template <script>alert("Test")</script>';
+  chartData$ =  combineLatest([
+    this.categoryService.getCategories(),
+    this.summaryService.getTotalAmountPerCategoryPerDate(this.dateRange.startDate, this.dateRange.endDate),
+    this.budgetService.getBudgets(),
+  ]).pipe(
+    map(([categories, data, budgets]) => {
+      const filter: SummaryFilter = {
+        view: 'month',
+        startDate: startOfMonth(this.date),
+        endDate: endOfMonth(this.date),
+        breakdown: false,
+        categoryIds: categories.map(x => x.id),
+        showBudget: false
+      }
+      return { categories, data, filter, budgets }
+    })
+  );
 
   constructor(
     private expenseService: ExpenseService,
     private router: Router,
     private route: ActivatedRoute,
     private summaryService: SummaryService,
-    private dateParamService: DateParamService
+    private dateParamService: DateParamService,
+    private categoryService: CategoryService,
+    private budgetService: BudgetService
   ) {
 
 
@@ -91,29 +121,9 @@ export class HomeComponent implements AfterViewInit {
         const view = v.get('view')?.toLowerCase();
         return view && ['day', 'week', 'month', 'year'].includes(view)
           ? view
-          : 'day';
+          : 'month';
       })
     );
-
-    // each change of view or route changes will trigger the api call to get the total
-    this.totalExpenses$ = this.selectedView$.pipe(
-      debounceTime(500),
-      switchMap((view: any) => {
-        const value = this.dateParamService.getDateRange(view);
-        return this.summaryService.getTotalAmountPerCategory(
-          value.startDate,
-          value.endDate
-        )
-      }),
-      map((v) => {
-        return v
-          .map((r) => r.total)
-          .reduce((total, current) => total + current, 0);
-      })
-    );
-  }
-  ngAfterViewInit(): void {
-    this.codeTest = 'haha';
   }
 
   editEntry(expense: any) {
@@ -135,5 +145,16 @@ export class HomeComponent implements AfterViewInit {
 
   newEntry() {
     this.router.navigate(['/expenses', 'new']);
+  }
+
+
+  /**
+   * set to month
+   */
+  get dateRange() {
+    return {
+      startDate: startOfMonth(this.date).toISOString(),
+      endDate: endOfMonth(this.date).toISOString(),
+    }
   }
 }

@@ -89,12 +89,12 @@ export class SummaryMainChartComponent {
     dataSets = groupedData.map((gd, i) => {
       const rgb = colors[i];
       return {
-        type: 'bar',
+        type: this.type,
         label: gd.name,
         backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5`,
         borderColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
         data: gd.data.map(d => d.total),
-        borderWidth: 1,
+        borderWidth: 2,
         minBarLength: 3,
       }
     })
@@ -164,9 +164,15 @@ export class SummaryMainChartComponent {
     };
   }
 
-  @Input() type: 'bar' | 'line' = 'bar';
+  @Input() type: 'bar' | 'line' | 'pie' = 'bar';
+  @Input() aspectRatio: number | undefined;
+  @Input() showLegend: boolean = true;
 
   constructor() {
+  }
+
+  ngOnInit() {
+
     const documentStyle = getComputedStyle(document.documentElement);
     const textColor = documentStyle.getPropertyValue('--text-color');
     const textColorSecondary = documentStyle.getPropertyValue(
@@ -175,13 +181,15 @@ export class SummaryMainChartComponent {
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
     this.options = {
+      responsive: true,
       maintainAspectRatio: false,
-      aspectRatio: 0.6,
+      aspectRatio: this.aspectRatio,
       plugins: {
         legend: {
           labels: {
             color: textColor,
           },
+          display: this.showLegend
         },
       },
       scales: {

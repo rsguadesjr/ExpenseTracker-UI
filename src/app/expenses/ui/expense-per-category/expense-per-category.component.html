@@ -10,7 +10,7 @@
       <div class="text-sm text-300">({{ item.total / totalAmount | percent }})</div>
     </div>
   </div>
-  <div class="p-2 mt-4">
+  <div class="p-2 mt-4" *ngIf="!hideTotal">
     <span class="text-xl">Total: {{ totalAmount | number: '0.0'  }}</span>
   </div>
 </div>

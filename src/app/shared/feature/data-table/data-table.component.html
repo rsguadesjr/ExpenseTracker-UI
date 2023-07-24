@@ -18,7 +18,7 @@
         <ng-container *ngIf="!col.html">
           <ng-container *ngIf="col.onClick">
             <td >
-              <p-button [icon]="col.icon ?? ''" styleClass="p-button-text" (click)="col.onClick(item, ri)"></p-button>
+              <p-button *access="['SuperAdmin', 'Admin', 'Standard']" [icon]="col.icon ?? ''" styleClass="p-button-text" (click)="col.onClick(item, ri)"></p-button>
             </td>
           </ng-container>
           <ng-container *ngIf="!col.onClick">

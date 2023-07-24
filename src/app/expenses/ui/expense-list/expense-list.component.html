@@ -1,27 +1,21 @@
-<div class="">
-  <div class="flex flex-row border-1  border-50 mb-2 p-2 list-row surface-section hover:bg-black-alpha-10 border-round" *ngFor="let expense of items">
-    <div class="flex p-2">
-      icon here
-    </div>
-    <div class="flex flex-column flex-grow-1 p-2 gap-2">
-      <div class="text-2xl font-bold text-blue-300">{{ expense.category }}</div>
-      <div class="text-sm text-200">{{ expense.description }}</div>
-    </div>
-    <div class="flex gap-2 align-items-center">
-
-      <div class="flex flex-column p-2 align-items-end gap-2">
-        <div class="flex gap-2 align-items-center">
-          <span class="text-xl font-semibold">&#x20B1;</span>
-          <span class="text-2xl font-bold">{{ expense.amount }}</span>
-        </div>
-        <div class="text-sm text-300"> {{ expense.expenseDate | date: 'dd-MMM' }}</div>
+<div class="flex flex-row border-1  border-50 mb-2 p-1 list-row bg-white-alpha-10  hover:bg-black-alpha-10 border-round" *ngFor="let expense of items">
+  <div class="flex flex-column flex-grow-1 px-2 py-1 gap-2">
+    <div class="text-xl font-bold text-blue-300">{{ expense.category }}</div>
+    <div class="text-sm text-600">{{ expense.description }}</div>
+  </div>
+  <div class="flex gap-2 align-items-center">
+    <div class="flex flex-column px-2 py-1  align-items-end gap-2">
+      <div class="flex gap-2 align-items-center">
+        <span class="text-xl font-semibold">&#x20B1;</span>
+        <span class="text-xl font-bold">{{ expense.amount }}</span>
       </div>
-      <p-button icon="pi pi-eye" styleClass="p-button-info p-button-text" (click)="editEntry(expense)"></p-button>
+      <div class="text-sm text-300"> {{ expense.expenseDate | date: 'dd-MMM' }}</div>
     </div>
+    <p-button icon="pi pi-eye" styleClass="p-button-info p-button-text" (click)="editEntry(expense)"></p-button>
   </div>
+</div>
 
-  <div class="mt-4 flex justify-content-center" *ngIf="!hidePagination">
-    <p-paginator (onPageChange)="onPageChange($event)" [rows]="rowsPerPage" [totalRecords]="totalRows"
-      [rowsPerPageOptions]="[10, 20, 50]"></p-paginator>
-  </div>
+<div class="mt-4 flex justify-content-center" *ngIf="!hidePagination">
+  <p-paginator (onPageChange)="onPageChange($event)" [rows]="rowsPerPage" [totalRecords]="totalRows"
+    [rowsPerPageOptions]="[10, 20, 50]"></p-paginator>
 </div>

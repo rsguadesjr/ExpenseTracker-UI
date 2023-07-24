@@ -13,6 +13,7 @@ import { ChartModule } from 'primeng/chart';
 })
 export class ExpensePerCategoryComponent {
   totalAmount = 0;
+  @Input() hideTotal = false;
 
   private _items: TotalPerCategory[] = [];
   @Input() set items(value: TotalPerCategory[]) {

@@ -4,4 +4,5 @@ export interface SummaryFilter {
   endDate: Date;
   categoryIds: number[];
   breakdown: boolean;
+  showBudget?: boolean;
 }

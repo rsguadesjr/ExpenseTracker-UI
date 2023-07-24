@@ -36,7 +36,6 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { ExpenseTableViewComponent } from '../../ui/expense-table-view/expense-table-view.component';
 import { TabViewModule } from 'primeng/tabview';
 import { ExpensePerCategoryComponent } from '../../ui/expense-per-category/expense-per-category.component';
-import { SummaryService } from 'src/app/shared/data-access/summary.service';
 import { TotalPerCategory } from 'src/app/shared/model/total-per-category.mode';
 import { CardModule } from 'primeng/card';
 import { DateParamService } from 'src/app/shared/utils/date-param.service';
@@ -64,6 +63,7 @@ import { TotalPerDate } from 'src/app/shared/model/total-per-date';
 import { TooltipModule } from 'primeng/tooltip';
 import { AccessDirective } from 'src/app/shared/utils/access.directive';
 import { ReminderService } from 'src/app/reminders/data-access/reminder.service';
+import { SummaryService } from 'src/app/summary/data-access/summary.service';
 
 @Component({
   selector: 'app-expense-list-page',
