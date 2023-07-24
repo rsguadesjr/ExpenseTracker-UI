@@ -28,6 +28,7 @@ export class DataTableComponent {
 
   @Input() sortField = '';
   @Input() sortOrder = -1;
+  @Input() showLoading = false;
 
   rowData?: any[];
   @Input() set data(value: any[] | null) {

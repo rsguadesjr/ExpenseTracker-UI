@@ -1,4 +1,4 @@
-<p-table #dt [value]="rowData!" [tableStyle]="{ 'min-width': '50rem' }" [rowTrackBy]="trackBy" [sortField]="sortField" [sortOrder]="sortOrder">
+<p-table #dt [value]="rowData!" [tableStyle]="{ 'min-width': '50rem' }" [rowTrackBy]="trackBy" [sortField]="sortField" [sortOrder]="sortOrder" [loading]="showLoading">
   <ng-template pTemplate="header">
     <tr>
       <ng-container  *ngFor="let col of columns">

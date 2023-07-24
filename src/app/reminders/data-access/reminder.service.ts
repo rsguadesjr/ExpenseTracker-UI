@@ -21,10 +21,12 @@ export class ReminderService {
   };
 
   private reminderData$ = new BehaviorSubject<ResponseData<ReminderModel[]>>({
-    status: 'LOADING',
+    status: 'SUCCESS',
     data: [],
     params: this.currentParams
   });
+
+  private processState = new BehaviorSubject<'LOADING' | 'SUCCESS' | 'ERROR'>('SUCCESS');
 
   private deletedId$ = new Subject<number>();
   private latestData$ = new Subject<ReminderModel>();
@@ -44,20 +46,21 @@ export class ReminderService {
     // if already exists in the cache, return the cached value else request from api
     if (this.cache.has(cacheKey)) {
       const value = this.cache.get(cacheKey) as ReminderModel[];
-      this.reminderData$.next({ status: 'SUCCESS', data: value || [], params: this.currentParams })
+      this.reminderData$.next({ data: value || [], params: this.currentParams })
     }
     else {
-      // this.reminderData$.next({ status: 'LOADING', data: [...this.reminderData$.value?.data], params: this.currentParams})
       this.http.get<ReminderModel[]>(`${this.baseUrl}`, { params: { startDate: startDate || '', endDate: endDate || ''}})
         .pipe()
         .subscribe({
           next: (result) => {
             // store the data in cache so if the same request just return the cached value
             this.cache.set(cacheKey, result);
-            this.reminderData$.next({ status: 'SUCCESS', data: result, params: this.currentParams });
+            this.reminderData$.next({ data: result, params: this.currentParams });
+            this.processState.next('SUCCESS');
           },
           error: (error) => {
-            this.reminderData$.next({ status: 'ERROR', data: [], params: this.currentParams})
+            this.reminderData$.next({ data: [], params: this.currentParams})
+            this.processState.next('ERROR');
           }
         })
     }
@@ -70,7 +73,7 @@ export class ReminderService {
   getTansformedData(): Observable<ResponseData<ReminderModel[]>> {
     return this.reminderData$.pipe(
       map(result => {
-        if (result.status === 'SUCCESS') {
+        if (result?.data?.length > 0) {
           // process the result, this will handle recurring reminders and will create multiple data base on the recurring type
           const uniqueEntries = this.getUniqueEntries(result.data);
           const processedData = this.process(uniqueEntries,  result.params);
@@ -112,29 +115,48 @@ export class ReminderService {
   }
 
 
+  /**
+   *
+   * @returns loading state, LOADING | SUCCESS | ERRROR
+   */
+  getProcessState() {
+    return this.processState.asObservable();
+  }
+
+
   createReminder(data: ReminderRequestModel) {
-    // this.reminderData$.next({ status: 'LOADING', data: this.reminderData$.value.data, params: this.currentParams });
+    this.processState.next('LOADING');
     return this.http.post<ReminderModel>(`${this.baseUrl}`, data)
               .pipe(
                 tap(result => {
                   const processData = this.process([result], this.currentParams!);
                   const updatedData =  [...processData, ...this.reminderData$.value.data];
-                  this.reminderData$.next({ status: 'SUCCESS', data: updatedData, params: this.currentParams });
+                  this.reminderData$.next({ data: updatedData, params: this.currentParams });
                   this.latestData$.next(result);
+                  this.processState.next('SUCCESS');
+                }),
+                catchError((error) => {
+                  this.processState.next('ERROR');
+                  return throwError(() => error);
                 })
               );
   }
 
   updateReminder(id: number, data: ReminderRequestModel) {
-    // this.reminderData$.next({ status: 'LOADING', data: this.reminderData$.value.data, params: this.currentParams });
+    this.processState.next('LOADING');
     return this.http.put<ReminderModel>(`${this.baseUrl}/${id}`, data)
               .pipe(
                 tap(result => {
                   const processData = this.process([result], this.currentParams!);
                   const filteredCurrentData = this.reminderData$.value.data.filter(x => x.id != id);
                   const updatedData =  [...processData, ...filteredCurrentData];
-                  this.reminderData$.next({ status: 'SUCCESS', data: updatedData, params: this.currentParams  });
+                  this.reminderData$.next({ data: updatedData, params: this.currentParams  });
                   this.latestData$.next(result);
+                  this.processState.next('SUCCESS');
+                }),
+                catchError((error) => {
+                  this.processState.next('ERROR');
+                  return throwError(() => error);
                 })
               );
   }
@@ -148,15 +170,17 @@ export class ReminderService {
     return this.http.delete(`${this.baseUrl}/${id}`)
                 .pipe(
                   tap(() => {
-                    this.reminderData$.next({ status: 'SUCCESS', data: updatedData, params: this.currentParams });
+                    this.reminderData$.next({ data: updatedData, params: this.currentParams });
                     this.deletedId$.next(id);
+                    this.processState.next('SUCCESS');
                   }),
                   catchError((error) => {
                     // if error, add back the deleted entry
                     if (deleted) {
-                      this.reminderData$.next({ status: 'ERROR', data: [deleted, ...updatedData], params: this.currentParams });
+                      this.reminderData$.next({ data: [deleted, ...updatedData], params: this.currentParams });
                     }
 
+                    this.processState.next('ERROR');
                     return throwError(() => error);
                   })
                 );

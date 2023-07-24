@@ -72,7 +72,7 @@
             <div class="flex flex-column gap-2 p-fluid">
               <label htmlFor="form-source">Source</label>
               <p-dropdown id="form-source" formControlName="source" [options]="sources"
-                optionLabel="name"></p-dropdown>
+                optionLabel="name" ></p-dropdown>
               <small class="text-red-400" *ngFor="let error of validationErrors['source']">{{ error }}</small>
             </div>
             <div class="flex flex-column gap-2 p-fluid">
@@ -88,8 +88,10 @@
       </div>
     </form>
     <div class="flex flex-row justify-content-end gap-2 mt-4">
-      <button pButton pRipple label="Cancel" (click)="cancel()"></button>
-      <button pButton pRipple label="Submit" class="p-button-success" (click)="submit()"></button>
+      <p-button label="Cancel" (click)="cancel()" icon="pi pi-times"></p-button>
+      <ng-container *ngIf="processState$ | async; let state">
+        <p-button label="Submit" [icon]="state === 'LOADING' ? 'pi pi-spin pi-spinner' : 'pi pi-check' " [disabled]="state === 'LOADING'" styleClass="p-button-success" (click)="submit()"></p-button>
+      </ng-container>
     </div>
   </p-card>
 </div>

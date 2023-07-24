@@ -1,5 +1,5 @@
 export interface ResponseData<T> {
-  status: 'LOADING' | 'SUCCESS' | 'ERROR',
+  status?: 'LOADING' | 'SUCCESS' | 'ERROR',
   data: T,
   errorMessage?: string,
   params?: any

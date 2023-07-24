@@ -30,11 +30,11 @@
             <i *ngIf="reminder.remainingDays === 1"> is Tomorrow</i>
             <i *ngIf="reminder.remainingDays! > 1"> is in {{ reminder.remainingDays }} Days</i>
           </span>
-          <!-- <ng-container *access="['SuperAdmin', 'Admin', 'Standard']">
+          <ng-container *access="['SuperAdmin', 'Admin', 'Standard']">
             <p-button icon="pi pi-plus" pTooltip="Create Expense" tooltipPosition="left"
               styleClass="p-button-rounded p-button-outlined p-button-sm p-button-help reminder-action"
               (click)="createExpense(reminder)"></p-button>
-          </ng-container> -->
+          </ng-container>
         </div>
     </div>
   </div>
@@ -46,7 +46,8 @@
       <p-button *access="['SuperAdmin', 'Admin', 'Standard']" icon="pi pi-plus" pTooltip="Create Expense" styleClass="p-button-rounded " (click)="onCreate()"></p-button>
     </div>
     <app-data-table [data]="reminders$ | async" [columns]="columns" (editSelected)="onEdit($event)"
-      (deleteSelected)="onDelete($event)" sortField="earliestDate" [sortOrder]="-1"></app-data-table>
+      (deleteSelected)="onDelete($event)" sortField="earliestDate" [sortOrder]="-1"
+      [showLoading]="(showLoading$ | async) ?? false"></app-data-table>
   </div>
   <!-- /col2 -->
 </div>

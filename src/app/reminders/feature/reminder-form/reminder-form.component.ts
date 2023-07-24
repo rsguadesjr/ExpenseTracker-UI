@@ -58,6 +58,8 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
   messages: Message[] = [];
   validationErrors: { [key: string]: string[] } = {};
 
+  processState$ = this.reminderService.getProcessState();
+
   constructor(
     @Optional() public dialogConfig: DynamicDialogConfig,
     @Optional() private dialogRef: DynamicDialogRef,

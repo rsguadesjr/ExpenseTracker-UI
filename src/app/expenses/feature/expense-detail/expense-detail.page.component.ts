@@ -75,70 +75,17 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
     @Optional() public dialogConfig: DynamicDialogConfig,
     @Optional() private dialogRef: DynamicDialogRef
   ) {
-    const expense: ExpenseDto | undefined = dialogConfig?.data?.expense;
     this.expenseForm = new FormGroup({
-      category: new FormControl(null, FormValidation.requiredObjectValidator('id', 'Category is required')),
-      amount: new FormControl<Number | undefined>(expense?.amount, [
+      categoryId: new FormControl(null, FormValidation.requiredValidator('Category is required')),
+      amount: new FormControl<Number | undefined>(undefined, [
         FormValidation.minNumberValidator(1, 'Amount must be greater than 0'),
         FormValidation.requiredValidator('Amount is required')
       ]),
-      date: new FormControl(expense?.expenseDate ? startOfDay(parseISO(expense.expenseDate)) : startOfDay(new Date()), FormValidation.requiredValidator('Date is required')),
+      date: new FormControl(startOfDay(new Date()), FormValidation.requiredValidator('Date is required')),
       description: new FormControl(null, FormValidation.requiredValidator('Description is required')),
-      source: new FormControl(null, FormValidation.requiredObjectValidator('id', 'Source is required')),
-      tags: new FormControl(expense?.tags ?? [])
+      sourceId: new FormControl(null, FormValidation.requiredValidator('Source is required')),
+      tags: new FormControl([])
     });
-
-    let expenseId$: Observable<string>;
-    if (dialogConfig) {
-      this.isEdit = dialogConfig.data?.isEdit;
-      expenseId$ = of(dialogConfig.data?.id);
-    } else {
-      this.isEdit = (route.snapshot.url.length > 0 && route.snapshot.url[0]?.path == 'edit');
-      expenseId$ = route.params.pipe(
-        map(x => x['id'])
-      );
-    }
-
-
-    if (this.isEdit) {
-      expenseId$
-        .pipe(take(1))
-        .pipe(
-          switchMap((id) => {
-            this.expenseId = id;
-
-            if (!this.expenseId) {
-              if (dialogRef)
-                dialogRef.close();
-              else
-                this.router.navigate(['/']);
-
-              return of();
-            }
-
-            return this.expenseService.getExpense(this.expenseId);
-          })
-        )
-        .subscribe({
-          next: (result) => {
-            if (result) {
-              const category = this.categories.find(x => x.id == result.categoryId )
-              this.expenseForm.patchValue({
-                category: Object.assign({}, category),
-                date: new Date(result.expenseDate),
-                description: result.description,
-                amount: result.amount,
-                source: { id: result.sourceId, name: result.source },
-                tags: result.tags
-              });
-
-            }
-          },
-          error: (error) => {
-            console.log('[DEBUG] error', error)
-          }
-        });
-    }
 
 
     combineLatest([
@@ -160,14 +107,6 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
       this.categories = categories;
       this.sources = sources;
 
-      // just there was a delay in getting the options, update category and value here
-      // but it should be done in the patch value above
-      if (expense?.categoryId) {
-        this.expenseForm.get('category')?.setValue(categories.find(x => x.id == expense.categoryId))
-      }
-      if (expense?.sourceId) {
-        this.expenseForm.get('source')?.setValue(sources.find(x => x.id == expense.sourceId))
-      }
     })
 
     // set only unique values
@@ -179,7 +118,90 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
       })
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+
+    let expenseId$: Observable<string>;
+    if (this.dialogConfig) {
+      this.isEdit = this.dialogConfig.data?.isEdit;
+      expenseId$ = of(this.dialogConfig.data?.id);
+    } else {
+      this.isEdit = (this.route.snapshot.url.length > 0 && this.route.snapshot.url[0]?.path == 'edit');
+      expenseId$ = this.route.params.pipe(
+        map(x => x['id'])
+      );
+    }
+
+    // If editing, load data
+    if (this.isEdit) {
+      expenseId$
+        .pipe(take(1))
+        .pipe(
+          switchMap((id) => {
+            this.expenseId = id;
+
+            if (!this.expenseId) {
+              if (this.dialogRef)
+                this.dialogRef.close();
+              else
+                this.router.navigate(['/']);
+
+              return of();
+            }
+
+            return this.expenseService.getExpense(this.expenseId);
+          })
+        )
+        .subscribe({
+          next: (result) => {
+            if (result) {
+              this.expenseForm.patchValue({
+                categoryId: result.categoryId ,
+                date: new Date(result.expenseDate),
+                description: result.description,
+                amount: result.amount,
+                sourceId: result.sourceId,
+                tags: result.tags
+              });
+
+            }
+          },
+          error: (error) => {
+            console.log('[DEBUG] error', error)
+          }
+        });
+    }
+
+    // if creating, possible load of data from queryParams of from dialog object
+    else {
+      let result: any | undefined;
+      // if dialog, load data from dialog
+      if (this.dialogConfig) {
+        result = this.dialogConfig?.data?.expense;
+      }
+      // if not, try to load data from query params
+      else {
+        try {
+          const json = this.route.snapshot.queryParamMap.get('data');
+          result = json ? JSON.parse(json) : null;
+        }
+        catch(e) {
+          console.log('An error occured while parsing of data', e)
+        }
+      }
+
+      // if has data, patch the form value
+      if (result) {
+        this.expenseForm.patchValue({
+          categoryId: result.categoryId,
+          date: result.expenseDate ? startOfDay(new Date(result.expenseDate)) : startOfDay(new Date()),
+          description: result.description,
+          amount: result.amount,
+          sourceId: result.sourceId,
+          tags: result.tags ? result.tags.split(',') : []
+        });
+      }
+    }
+  }
 
   ngOnDestroy(): void {
     this.ngUnsubscribe$.next(null);
@@ -200,11 +222,11 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
 
     const expense: ExpenseDto = {
       id: this.isEdit ? this.expenseId : null,
-      categoryId: this.expenseForm.get('category')?.value?.id,
+      categoryId: this.expenseForm.get('categoryId')?.value,
       amount: +this.expenseForm.get('amount')?.value,
       expenseDate: this.expenseForm.get('date')?.value,
       description: this.expenseForm.get('description')?.value,
-      sourceId: this.expenseForm.get('source')?.value?.id,
+      sourceId: this.expenseForm.get('sourceId')?.value,
       tags: this.expenseForm.get('tags')?.value || []
     };
 

@@ -7,13 +7,14 @@ import { DataTableColumn } from 'src/app/shared/model/data-table-column';
 import { AccessDirective } from 'src/app/shared/utils/access.directive';
 import { ReminderService } from '../../data-access/reminder.service';
 import { add, eachDayOfInterval, endOfMonth, format, isSameDay, startOfDay, startOfMonth } from 'date-fns';
-import { BehaviorSubject, Observable, Subject, combineLatest, debounceTime, map, startWith, switchMap, take, takeUntil, takeWhile } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, combineLatest, debounceTime, map, startWith, switchMap, take, takeUntil, takeWhile, tap } from 'rxjs';
 import { ReminderType } from 'src/app/shared/enums/reminder-type';
 import { ReminderModel } from 'src/app/shared/model/reminder-model';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ReminderFormComponent } from 'src/app/reminders/feature/reminder-form/reminder-form.component';
 import { ConfirmationService } from 'primeng/api';
 import { ToastService } from 'src/app/shared/utils/toast.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-reminder-dashboard.page',
@@ -42,6 +43,7 @@ export class ReminderDashboardPageComponent implements OnInit, OnDestroy {
   dialogService = inject(DialogService);
   confirmationService = inject(ConfirmationService);
   toastService = inject(ToastService);
+  router = inject(Router);
 
   columns: DataTableColumn[] = [
     { header: 'Subject', field: 'subject' },
@@ -67,7 +69,7 @@ export class ReminderDashboardPageComponent implements OnInit, OnDestroy {
 
   calendarData$:Observable<any> = this.reminderService.getTansformedData().pipe(
     map(v => {
-      if (v.status === 'SUCCESS') {
+      if (v.data.length > 0) {
         let data = v.data;
         let dates = eachDayOfInterval({ start: new Date(v.params.startDate), end: new Date(v.params.endDate) });
         let calendarData: any = {};
@@ -99,6 +101,10 @@ export class ReminderDashboardPageComponent implements OnInit, OnDestroy {
     })
   )
 
+  showLoading$:Observable<boolean> = this.reminderService.getProcessState().pipe(
+    map(v => v === 'LOADING'),
+  )
+
 
   /**
    * will trigger the fetching of the data
@@ -119,7 +125,7 @@ export class ReminderDashboardPageComponent implements OnInit, OnDestroy {
     // initially get the list
     // update the list if there are updated/created/deleted item
     this.reminderService.getTansformedData().pipe(
-      takeWhile(v => v.status === 'LOADING', true),
+      take(2),
       map(v => v.data),
       switchMap((data) => {
         this.upcomingReminders = data;
@@ -233,8 +239,16 @@ export class ReminderDashboardPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  createExpense(e: any) {
-    console.log('[DEBUG] createExpense', e)
+  createExpense(e: ReminderModel) {
+    const expenseData = {
+      amount: e.amount,
+      categoryId: e.categoryId,
+      sourceId: e.sourceId,
+      description: e.subject,
+      tags: e.tags,
+      expenseDate: e.date
+    }
+    this.router.navigate(['/expenses', 'new'], { queryParams: { data: JSON.stringify(expenseData) }})
   }
 
   get monthDateRange() {
