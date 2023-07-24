@@ -107,12 +107,14 @@ export class HomeComponent {
 
     // get the data
     this.data$ = this.expenseService.getExpenseData()
-                                    .pipe(map(x => x.data));
+                                    .pipe(map(x => x.data.slice(0, 10)));
 
     // trigger api call, this will only trigger once since we are only displaying the top 10 latest transactions
     this.expenseService.initExpenses({
-      totalRows: 10,
-      pageNumber: 0
+      dateFrom: this.dateRange.startDate,
+      dateTo: this.dateRange.endDate,
+      pageNumber: 0,
+      totalRows: 9999, //this.rowsPerPage,
     })
 
     // capture route query changes

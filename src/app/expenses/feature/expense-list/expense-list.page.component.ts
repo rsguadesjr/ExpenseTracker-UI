@@ -411,7 +411,7 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     this.filter$.next({
       dateFrom: this.filterForm.get('dateFrom')?.value,
       dateTo: this.filterForm.get('dateTo')?.value,
-      categoryId: this.filterForm.get('category')?.value?.id,
+      // categoryId: this.filterForm.get('category')?.value?.id,
       pageNumber: 0,
       totalRows: 9999, //this.rowsPerPage,
     });
