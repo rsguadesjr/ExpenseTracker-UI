@@ -13,4 +13,9 @@ export interface DataTableColumn {
    */
   html?: (value: any, index: number) => string;
   width?: number | string;
+
+  type?: 'button';
+  icon?: string;
+  label?: string;
+  onClick?: (value: any, index: number) => void;
 }

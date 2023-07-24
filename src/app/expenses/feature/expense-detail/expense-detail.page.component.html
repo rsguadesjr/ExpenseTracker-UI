@@ -5,7 +5,6 @@
         <span class="text-2xl p-4 pb-0 flex">{{ isEdit ? 'Update' : 'Create' }}</span>
     </ng-template>
     <form [formGroup]="expenseForm">
-      {{ expenseForm.value | json }}
     <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
       <div class="flex flex-column gap-2">
         <div class="flex flex-column gap-2 p-fluid">
@@ -35,7 +34,7 @@
         </div>
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-tags">Tags</label>
-          <p-chips id="form-tags" formControlName="tags"  separator=","></p-chips>
+          <p-chips id="form-tags" formControlName="tags"  separator="," [addOnBlur]="true"></p-chips>
           <small class="text-red-400" *ngFor="let error of validationErrors['tags']">{{ error }}</small>
         </div>
       </div>

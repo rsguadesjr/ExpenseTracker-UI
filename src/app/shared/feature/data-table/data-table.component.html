@@ -10,10 +10,21 @@
   <ng-template pTemplate="body" let-item let-ri="rowIndex">
     <tr>
       <ng-container *ngFor="let col of columns" >
-        <td *ngIf="col.html">
-          <div *ngIf="item.__data && item.__data[col.field]" [innerHtml]="item.__data[col.field]"></div>
-        </td>
-        <td  *ngIf="!col.html"> {{ item.__data && item.__data[col.field] }} </td>
+        <ng-container *ngIf="col.html">
+          <td>
+            <div *ngIf="item.__data && item.__data[col.field]" [innerHtml]="item.__data[col.field]"></div>
+          </td>
+        </ng-container>
+        <ng-container *ngIf="!col.html">
+          <ng-container *ngIf="col.onClick">
+            <td >
+              <p-button [icon]="col.icon ?? ''" styleClass="p-button-text" (click)="col.onClick(item, ri)"></p-button>
+            </td>
+          </ng-container>
+          <ng-container *ngIf="!col.onClick">
+            <td > {{ item.__data && item.__data[col.field] }} </td>
+          </ng-container>
+        </ng-container>
       </ng-container>
       <td *access="['SuperAdmin', 'Admin', 'Standard']">
         <div class="flex gap-2">

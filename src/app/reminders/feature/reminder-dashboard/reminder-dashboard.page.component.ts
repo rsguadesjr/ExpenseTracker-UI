@@ -63,7 +63,8 @@ export class ReminderDashboardPageComponent implements OnInit, OnDestroy {
     { header: 'Category', field: 'category' },
     { header: 'Source', field: 'source' },
     { header: 'Tags', field: 'tags' },
-    { header: 'Status', field: 'isActive', formatValue: (value) => value.isActive ? 'Active' : 'Inactive' }
+    { header: 'Status', field: 'isActive', formatValue: (value) => value.isActive ? 'Active' : 'Inactive' },
+    { header: '', field: 'actions', type: 'button', icon: 'pi pi-plus', width: '60px', onClick: (value) => this.createExpense(value) }
   ];
 
 
