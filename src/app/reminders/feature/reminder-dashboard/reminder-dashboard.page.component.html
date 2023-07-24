@@ -1,7 +1,7 @@
 <div class="text-2xl p-2 font-bold">Manage Reminders</div>
 <div class="flex flex-column lg:flex-row gap-2 lg:justify-content-between">
   <!-- col1 -->
-  <div class="flex flex-column gap-2 sm:flex-row lg:flex-column">
+  <div class="flex flex-column-reverse gap-2 sm:flex-row lg:flex-column">
     <div class="p-fluid border-round-md bg-black-alpha-40" style="background-color: red;">
       <p-calendar class="max-w-full" [(ngModel)]="calendarDate" [inline]="true" (onMonthChange)="onMonthChange($event)"
         (onSelect)="onSelectedDate($event)">
