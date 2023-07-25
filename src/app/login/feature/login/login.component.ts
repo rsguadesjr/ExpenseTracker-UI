@@ -26,6 +26,7 @@ import {
   SocialAuthService,
 } from '@abacritt/angularx-social-login';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-login',
@@ -44,6 +45,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     MessagesModule,
     GoogleSigninButtonModule,
     ProgressSpinnerModule,
+    TooltipModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
@@ -101,8 +103,11 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.form.markAllAsTouched();
     this.form.updateValueAndValidity();
     this.validationErrors = FormValidation.getFormValidationErrors(this.form);
-    this.messages = [];
 
+    if (this.form.invalid)
+      return
+
+    this.messages = [];
     const data = {
       email: this.form.get('email')?.value,
       password: this.form.get('password')?.value,
@@ -115,7 +120,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (idToken) {
         this.authService
           .login(idToken, 'Google')
-          .pipe(finalize(() => (this.socialLoginInProgress = false)))
+          .pipe(finalize(() => (this.emailAndPasswordLoginInProgress = false)))
           .subscribe({
             next: (result) => {
               this.authService.setAuthData(result);
@@ -123,12 +128,12 @@ export class LoginComponent implements OnInit, OnDestroy {
                 this.route.snapshot.queryParams['returnUrl'] || '/';
               this.router.navigateByUrl(returnUrl);
             },
-            error: (error) => {
+            error: (e) => {
               this.messages = [
                 {
                   severity: 'error',
                   summary: 'Error',
-                  detail: typeof(error.error) === 'string' ? error.error : (error.message ?? 'An unexpected error was encountered'),
+                  detail: this.getErrorMessage(e),
                 },
               ];
               this.authService.signOut();
@@ -136,15 +141,14 @@ export class LoginComponent implements OnInit, OnDestroy {
           });
       }
     } catch (e) {
-      console.log(e);
       this.messages = [
         {
           severity: 'error',
           summary: 'Error',
-          detail: 'An unexpected error was encountered',
+          detail: this.getErrorMessage(e),
         },
       ];
-      this.socialLoginInProgress = false;
+      this.emailAndPasswordLoginInProgress = false;
     }
   }
 
@@ -170,12 +174,12 @@ export class LoginComponent implements OnInit, OnDestroy {
                 this.route.snapshot.queryParams['returnUrl'] || '/';
               this.router.navigateByUrl(returnUrl);
             },
-            error: (error) => {
+            error: (e) => {
               this.messages = [
                 {
                   severity: 'error',
                   summary: 'Error',
-                  detail: typeof(error.error) === 'string' ? error.error : 'An unexpected error was encountered',
+                  detail: this.getErrorMessage(e),
                 },
               ];
               this.authService.signOut();
@@ -183,44 +187,37 @@ export class LoginComponent implements OnInit, OnDestroy {
           });
       }
     } catch (e) {
-      console.log(e);
       this.messages = [
         {
           severity: 'error',
           summary: 'Error',
-          detail: 'An unexpected error was encountered',
+          detail: this.getErrorMessage(e),
         },
       ];
       this.socialLoginInProgress = false;
     }
 
-    // this.afAuth
-    //   .signInWithPopup(new GoogleAuthProvider())
-    //   .then(async (result) => {
-    //     this.socialLoginInProgress = true;
-    //     const idToken = await result.user?.getIdToken();
-    //     if (idToken) {
-    //       this.authService
-    //         .login(idToken, 'Google')
-    //         .pipe(finalize(() => (this.socialLoginInProgress = false)))
-    //         .subscribe({
-    //           next: (result) => {
-    //             this.authService.setAuthData(result);
-    //             const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-    //             this.router.navigateByUrl(returnUrl);
-    //           },
-    //           error: (error) => {
-    //             this.messages = [
-    //               {
-    //                 severity: 'error',
-    //                 summary: 'Error',
-    //                 detail: error.error ?? 'Invalid login credentials',
-    //               },
-    //             ];
-    //             this.authService.signOut();
-    //           },
-    //         });
-    //     }
-    //   });
   }
+
+  copy(value: string) {
+    navigator.clipboard.writeText(value);
+  }
+
+  private getErrorMessage(e: any) {
+    console.log('[DEBUG] getErrorMessage', e)
+    // firebase error
+    if (typeof(e) === 'object') {
+      if (e.name === 'FirebaseError') {
+        let message = e.message?.replace('Firebase:', '')?.replace(`(${e.code}).`, '')
+        return message;
+      }
+
+      if (typeof(e.error) === 'string') {
+        return e.error;
+      }
+    }
+
+    return 'An unexpected error was encountered.';
+  }
+
 }

@@ -6,10 +6,16 @@
     </ng-template>
     <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
     <div *ngIf="!socialLoginInProgress else socalLoginLoadingState">
-      <div class="bg-yellow-800 text-white font-bold border-round mb-2 flex flex-column justify-content-center p-2">
-        <span class="mb-2">For viewing purposes, please use the following credentials:</span>
-        <span>Email: <b>test@test.com</b></span>
-        <span>Password: <b>Pass123</b></span>
+      <div class="bg-yellow-900 text-white font-bold border-round mb-4 flex flex-column justify-content-center p-2">
+        <div class="mb-2">For viewing purposes, please use the following credentials:</div>
+        <div class="flex gap-2 align-items-center">Email:
+            <b>test@test.com</b>
+            <p-button icon="pi pi-copy" styleClass="p-button-rounded p-button-text copy-action text-white-alpha-70 " pTooltip="Copy value" (onClick)="copy('test@test.com')"></p-button>
+        </div>
+        <div class="flex gap-2 align-items-center">Password:
+          <b>Pass123</b>
+          <p-button icon="pi pi-copy" styleClass="p-button-rounded p-button-text copy-action text-white-alpha-70 " pTooltip="Copy value" (onClick)="copy('Pass123')"></p-button>
+        </div>
       </div>
       <form (ngSubmit)="signInEmailAndPassword()" [formGroup]="form" class="flex flex-column gap-4">
         <div class="flex flex-column gap-2">
