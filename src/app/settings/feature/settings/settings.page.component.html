@@ -1,36 +1,14 @@
-<div class="w-full h-full flex gap-2">
+<div class="w-full h-full flex gap-4">
   <!-- side bar -->
-  <div class="h-full w-2 p-fluid flex flex-column gap-4 p-fluid p-2 shadow-5">
-    <ng-container  class="text-red-400" *ngFor="let item of items">
-      <button pButton pRipple [label]="item.label ?? ''" [icon]="'pi ' + item.icon" class="text-left  p-button-text text-lg text-color-secondary" [routerLink]="item.routerLink" ></button>
+  <div class="h-full w-2 p-fluid flex flex-column gap-2 p-fluid shadow-5 bg-black-alpha-40 p-2 side-menu border-round" >
+    <ng-container *ngFor="let item of items">
+      <button pButton pRipple [label]="item.label ?? ''" [icon]="'pi ' + item.icon" class="text-left p-button-text text-lg text-color-secondary" [routerLink]="item.routerLink" ></button>
     </ng-container >
 
-        <!-- <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['']">
-          <i class="pi pi-home text-xl"></i>
-          <span class="font-medium text-xl">Home</span>
-        </a>
-        <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['expenses']" >
-          <i class="pi pi-list text-xl"></i>
-          <span class="font-medium text-xl">Expenses</span>
-        </a>
-        <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['summary']" >
-          <i class="pi pi-chart-bar text-xl"></i>
-          <span class="font-medium text-xl">Summary</span>
-        </a>
-        <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['settings']" >
-          <i class="pi pi-wrench text-xl"></i>
-          <span class="font-medium text-xl">Settings</span>
-        </a>
-        <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['account']" >
-          <i class="pi pi-user text-xl"></i>
-          <span class="font-medium text-xl">Account</span>
-        </a> -->
-
-    <!-- <p-menu [model]="items" styleClass="w-full h-full" ></p-menu> -->
   </div>
   <!-- /side bar -->
-  <div class="main flex-grow-1">
-    <div class="shadow-3 p-4 border-round">
+  <div class="main flex-grow-1 pt-2">
+    <div class="shadow-3 p-4 border-round bg-black-alpha-40">
       <router-outlet></router-outlet>
     </div>
   </div>

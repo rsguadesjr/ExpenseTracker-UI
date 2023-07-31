@@ -125,4 +125,8 @@ export class SummaryService {
         );
     }
   }
+
+  clearCache() {
+    this.cache.clear();
+  }
 }

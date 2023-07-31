@@ -29,6 +29,8 @@ import {
 import { CategoryService } from './shared/data-access/category.service';
 import { SourceService } from './shared/data-access/source.service';
 import { SocialAuthService } from '@abacritt/angularx-social-login';
+import { ExpenseService } from './expenses/data-access/expense.service';
+import { SummaryService } from './summary/data-access/summary.service';
 
 @Component({
   selector: 'app-root',
@@ -58,6 +60,8 @@ export class AppComponent implements OnInit {
     private route: ActivatedRoute,
     private categoryService: CategoryService,
     private sourceService: SourceService,
+    private expenseService: ExpenseService,
+    private summaryService: SummaryService,
     private socialAuthService: SocialAuthService
   ) {
 
@@ -111,6 +115,17 @@ export class AppComponent implements OnInit {
         }
       })
 
+
+    combineLatest([
+      this.expenseService.getCreatedOrUpdateItem().pipe(startWith('')),
+      this.expenseService.getDeletedId().pipe(startWith(''))
+    ])
+    .pipe()
+    .subscribe(([latestData, id]) => {
+      if (latestData || id) {
+        this.summaryService.clearCache()
+      }
+    })
   }
 
   ngOnInit(): void {

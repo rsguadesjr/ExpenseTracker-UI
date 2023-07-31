@@ -166,7 +166,7 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
             }
           },
           error: (error) => {
-            console.log('[DEBUG] error', error)
+            console.log(error)
           }
         });
     }

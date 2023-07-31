@@ -204,7 +204,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   private getErrorMessage(e: any) {
-    console.log('[DEBUG] getErrorMessage', e)
     // firebase error
     if (typeof(e) === 'object') {
       if (e.name === 'FirebaseError') {

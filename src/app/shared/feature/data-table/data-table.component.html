@@ -1,4 +1,16 @@
-<p-table #dt [value]="rowData!" [tableStyle]="{ 'min-width': '50rem' }" [rowTrackBy]="trackBy" [sortField]="sortField" [sortOrder]="sortOrder" [loading]="showLoading">
+<p-table #dt
+  [value]="rowData!"
+  [tableStyle]="{ 'min-width': '50rem' }"
+  [rowTrackBy]="trackBy"
+  [sortField]="sortField"
+  [sortOrder]="sortOrder"
+  [loading]="showLoading"
+  [rows]="10"
+  [paginator]="true"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+  [rowsPerPageOptions]="[10, 20, 50]"
+  >
   <ng-template pTemplate="header">
     <tr>
       <ng-container  *ngFor="let col of columns">

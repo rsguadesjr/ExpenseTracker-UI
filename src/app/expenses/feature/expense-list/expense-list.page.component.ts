@@ -6,6 +6,7 @@ import {
   filter,
   map,
   Observable,
+  share,
   skip,
   startWith,
   Subject,
@@ -187,7 +188,8 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
       }),
       map((result) => {
         return result.data;
-      })
+      }),
+      share()
     );
 
 

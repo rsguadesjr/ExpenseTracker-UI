@@ -1,7 +1,7 @@
 <div class="text-2xl p-2 font-bold">Manage Reminders</div>
-<div class="flex flex-column lg:flex-row gap-2 lg:justify-content-between">
+<div class="flex flex-column lg:flex-row gap-4 lg:justify-content-between">
   <!-- col1 -->
-  <div class="flex flex-column-reverse gap-2 sm:flex-row lg:flex-column">
+  <div class="flex flex-column-reverse gap-4 sm:flex-row lg:flex-column">
     <div class="p-fluid border-round-md bg-black-alpha-40" style="background-color: red;">
       <p-calendar class="max-w-full" [(ngModel)]="calendarDate" [inline]="true" (onMonthChange)="onMonthChange($event)"
         (onSelect)="onSelectedDate($event)">
@@ -19,7 +19,7 @@
         </ng-template>
       </p-calendar>
     </div>
-    <div class="p-fluid border-round-md p-2 bg-black-alpha-40 flex-grow-1">
+    <div class="p-fluid border-round-md p-4 bg-black-alpha-40 flex-grow-1">
       <div class="mb-2 text-align-right font-bold text-xl">Upcoming reminders in 5 days</div>
         <div class="font-italic py-2" *ngIf="upcomingReminders.length === 0">No data</div>
         <div class="flex w-full align-items-center gap-1 mb-1 border-round bg-white-alpha-10 p-2 mb-1"

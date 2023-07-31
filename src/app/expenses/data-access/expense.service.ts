@@ -25,6 +25,10 @@ export class ExpenseService {
 
   private previousParam?: string;
 
+
+  deletedId$ = new Subject<string>();
+  latestData$ = new Subject<ExpenseDto>();
+
   constructor(private http: HttpClient, private afAuth: AngularFireAuth) {
     this.baseUrl = environment.API_BASE_URL + 'api/expenses';
 
@@ -67,17 +71,20 @@ export class ExpenseService {
     this.previousParam = JSON.stringify(params);
   }
 
-  hasExpensesLoaded() {
-    return this.initialLoadedDone$.value;
-  }
-
-
   getExpenseData(): Observable<ResponseData<Expense[]>> {
     return this.expenseData$;
   }
 
   getExpense(id: string): Observable<ExpenseDto> {
     return this.http.get<ExpenseDto>(`${this.baseUrl}/${id}`);
+  }
+
+  getCreatedOrUpdateItem() {
+    return this.latestData$.asObservable();
+  }
+
+  getDeletedId() {
+    return this.deletedId$.asObservable();
   }
 
   createExpense(data: ExpenseDto) {
@@ -87,6 +94,7 @@ export class ExpenseService {
                 tap(result => {
                   const updatedData =  [result, ...this.expenseData$.value.data];
                   this.expenseData$.next({ status: 'SUCCESS', data: updatedData });
+                  this.latestData$.next(result);
                 })
               );
   }
@@ -99,6 +107,7 @@ export class ExpenseService {
 
                   const updatedData =  [result, ...this.expenseData$.value.data.filter(x => x.id !== id)];
                   this.expenseData$.next({ status: 'SUCCESS', data: updatedData });
+                  this.latestData$.next(result);
                 })
               );
   }
@@ -116,6 +125,7 @@ export class ExpenseService {
                   tap(() => {
                     // update status only
                     this.expenseData$.next({ status: 'SUCCESS', data: updatedData });
+                    this.deletedId$.next(id);
                   }),
                   catchError((error) => {
                     // if error, add back the deleted entry

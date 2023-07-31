@@ -1,10 +1,10 @@
 
 <div class="text-2xl p-2 font-bold">Manage Expenses</div>
-<div class="flex flex-column lg:flex-row gap-2">
+<div class="flex flex-column lg:flex-row gap-4">
   <!-- col -->
   <div class="w-full lg:w-8 p-4 border-solid border-1 surface-border border-round-md bg-black-alpha-40 table-wrapper ">
-    <div [formGroup]="filterForm" class="flex mb-4  align-items-end">
-      <div class="flex gap-2 flex-grow-1  align-items-end">
+    <div [formGroup]="filterForm" class="flex flex-column sm:flex-row align-items-start sm:align-items-end mb-4 gap-2">
+      <div class="flex gap-2 align-items-end">
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="view">View</label>
           <p-dropdown formControlName="view" [options]="dateViewOptions" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
@@ -25,11 +25,15 @@
             <p-calendar #dateTo id="dateTo" formControlName="dateTo" dateFormat="dd-M-yy" [minDate]="filterForm.get('dateFrom')?.value"></p-calendar>
           </div>
         </ng-container>
-        <p-button icon="pi {{  (filterInProgress$ | async) ? 'pi-spin pi-spinner' : 'pi-search' }}"
-                  pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
-        <p-button icon="pi pi-filter-slash" pTooltip="Clear fields" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
       </div>
-      <p-button *access="['SuperAdmin', 'Admin', 'Standard']" icon="pi pi-plus" pTooltip="Create Expense" styleClass="p-button-rounded " (click)="addEntry()"></p-button>
+      <div class="flex gap-2  flex-grow-1 justify-content-between w-full">
+        <div class="flex flex-grow-1 gap-2 ">
+          <p-button icon="pi {{  (filterInProgress$ | async) ? 'pi-spin pi-spinner' : 'pi-search' }}"
+                    pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
+          <p-button icon="pi pi-filter-slash" pTooltip="Clear fields" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
+        </div>
+        <p-button *access="['SuperAdmin', 'Admin', 'Standard']" icon="pi pi-plus" pTooltip="Create Expense" tooltipPosition="left" styleClass="p-button-rounded " (click)="addEntry()"></p-button>
+      </div>
     </div>
     <ng-container *ngIf="expenseEntries$ | async as data; else noResult">
       <div class="flex gap-2 align-items-center py-2">
@@ -56,7 +60,7 @@
   <!-- /col -->
 
   <!-- col -->
-  <div class="w-full lg:w-4 flex flex-column md:flex-row lg:flex-column gap-2">
+  <div class="w-full lg:w-4 flex flex-column md:flex-row lg:flex-column gap-4">
     <div class="w-12 md:w-6 lg:w-12 p-fluid">
       <app-calendar-data
           [reminders]="(reminders$ | async) || []"
