@@ -28,7 +28,6 @@ import {
 } from 'rxjs';
 import { CategoryService } from './shared/data-access/category.service';
 import { SourceService } from './shared/data-access/source.service';
-import { SocialAuthService } from '@abacritt/angularx-social-login';
 import { ExpenseService } from './expenses/data-access/expense.service';
 import { SummaryService } from './summary/data-access/summary.service';
 
@@ -62,7 +61,6 @@ export class AppComponent implements OnInit {
     private sourceService: SourceService,
     private expenseService: ExpenseService,
     private summaryService: SummaryService,
-    private socialAuthService: SocialAuthService
   ) {
 
     this.validationMessagService.message$.subscribe((v) => {

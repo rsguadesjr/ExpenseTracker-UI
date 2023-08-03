@@ -17,7 +17,6 @@ import { ToastService } from './shared/utils/toast.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { GoogleLoginProvider, SocialAuthServiceConfig, SocialLoginModule } from '@abacritt/angularx-social-login';
 import { HeaderComponent } from './home/feature/header/header.component';
 import { SidebarComponent } from './home/feature/sidebar/sidebar.component';
 import { AccessDirective } from './shared/utils/access.directive';
@@ -34,7 +33,6 @@ export function tokenGetter() {
   imports: [
     BrowserModule,
     AppRoutingModule,
-    SocialLoginModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireAuthModule,
     PrimeNgModule,
@@ -61,27 +59,7 @@ export function tokenGetter() {
     MessageService,
     ToastService,
     DialogService,
-    ConfirmationService,
-    {
-      provide: 'SocialAuthServiceConfig',
-      useValue: {
-        autoLogin: false,
-        providers: [
-          {
-            id: GoogleLoginProvider.PROVIDER_ID,
-            provider: new GoogleLoginProvider(
-              environment.auth.googleClientId,
-              {
-                oneTapEnabled: false
-              }
-            ),
-          }
-        ],
-        onError: (err) => {
-          console.error(err);
-        }
-      } as SocialAuthServiceConfig,
-    }
+    ConfirmationService
   ],
   bootstrap: [AppComponent],
 })

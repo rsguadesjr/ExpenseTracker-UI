@@ -21,10 +21,6 @@ import { SignUpComponent } from 'src/app/login/feature/sign-up/sign-up.component
 import { FormValidation } from 'src/app/shared/utils/form-validation';
 import { MessagesModule } from 'primeng/messages';
 import { Message, MessageService } from 'primeng/api';
-import {
-  GoogleSigninButtonModule,
-  SocialAuthService,
-} from '@abacritt/angularx-social-login';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TooltipModule } from 'primeng/tooltip';
 
@@ -43,7 +39,6 @@ import { TooltipModule } from 'primeng/tooltip';
     SignUpComponent,
     RouterModule,
     MessagesModule,
-    GoogleSigninButtonModule,
     ProgressSpinnerModule,
     TooltipModule
   ],
@@ -69,9 +64,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private afAuth: AngularFireAuth,
     private router: Router,
     public authService: AuthService,
-    private route: ActivatedRoute,
-    private validationMessageService: ValidationMessageService,
-    private socialAuthService: SocialAuthService
+    private route: ActivatedRoute
   ) {
     this.form = new FormGroup({
       email: new FormControl('', [

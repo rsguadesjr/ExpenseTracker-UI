@@ -10,5 +10,5 @@ export const environment = {
     appId: "1:476721190749:web:55f0f6df8d9ea206537ab4",
     measurementId: "G-2QFYGY9KJ9"
   },
-  API_BASE_URL: "http://localhost:5001/",
+  API_BASE_URL: "rsg-expensetracker.azurewebsites.net",
 };

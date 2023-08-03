@@ -15,10 +15,6 @@ export const environment = {
     measurementId: "G-2QFYGY9KJ9"
   },
   API_BASE_URL: "https://localhost:44387/",
-
-  auth: {
-    googleClientId: '476721190749-a1iafneed5dndqaoqk5l40mo3h6tpq1m.apps.googleusercontent.com'
-  }
 };
 
 /*
