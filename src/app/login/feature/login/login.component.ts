@@ -209,6 +209,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       }
     }
 
+    console.log('Error', e)
     return 'An unexpected error was encountered.';
   }
 
