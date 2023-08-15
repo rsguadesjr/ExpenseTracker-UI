@@ -1,9 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { AuthGuard } from 'src/app/core/utils/auth-guard';
+import { RoleGuard } from 'src/app/core/utils/role-guard';
 
 const routes: Routes = [
   {
     path: '',
+    canActivate: [AuthGuard],
     loadComponent: () =>
       import('../expense-list/expense-list.page.component').then(
         (m) => m.ExpenseListPageComponent
@@ -11,6 +14,8 @@ const routes: Routes = [
   },
   {
     path: 'new',
+    canActivate: [AuthGuard, RoleGuard],
+    data: { role: ['SuperAdmin', 'Admin', 'Standard', 'BasicExpense'] },
     loadComponent: () =>
       import('../expense-detail/expense-detail.page.component').then(
         (m) => m.ExpenseDetailComponent
@@ -18,6 +23,8 @@ const routes: Routes = [
   },
   {
     path: 'edit/:id',
+    canActivate: [AuthGuard, RoleGuard],
+    data: { role: ['SuperAdmin', 'Admin', 'Standard', 'BasicExpense'] },
     loadComponent: () =>
       import('../expense-detail/expense-detail.page.component').then(
         (m) => m.ExpenseDetailComponent

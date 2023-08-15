@@ -10,7 +10,6 @@ import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { PrimeNgModule } from './prime-ng.module';
 import { JwtHelperService, JwtModule, JWT_OPTIONS } from '@auth0/angular-jwt';
-import { AuthGuard } from './shared/data-access/auth-guard.service';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './shared/utils/auth-interceptor';
 import { ToastService } from './shared/utils/toast.service';
@@ -20,11 +19,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { HeaderComponent } from './home/feature/header/header.component';
 import { SidebarComponent } from './home/feature/sidebar/sidebar.component';
 import { AccessDirective } from './shared/utils/access.directive';
-
-export function tokenGetter() {
-  return localStorage.getItem("accessToken");
-}
-
+import { AuthGuard } from './core/utils/auth-guard';
+import { RoleGuard } from './core/utils/role-guard';
 
 @NgModule({
   declarations: [
@@ -37,14 +33,14 @@ export function tokenGetter() {
     AngularFireAuthModule,
     PrimeNgModule,
     BrowserAnimationsModule,
+    HttpClientModule,
     JwtModule.forRoot({
       config: {
-        tokenGetter: tokenGetter,
+        tokenGetter: () => localStorage.getItem("accessToken"),
         allowedDomains: [],
         disallowedRoutes: [],
       },
     }),
-    HttpClientModule,
     DynamicDialogModule,
     ConfirmDialogModule,
     HeaderComponent,
@@ -52,10 +48,10 @@ export function tokenGetter() {
     AccessDirective
   ],
   providers: [
-    { provide: JWT_OPTIONS, useValue: JWT_OPTIONS },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     JwtHelperService,
     AuthGuard,
+    RoleGuard,
     MessageService,
     ToastService,
     DialogService,

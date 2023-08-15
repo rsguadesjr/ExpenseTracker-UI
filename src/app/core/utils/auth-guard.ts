@@ -1,26 +1,18 @@
 import { Injectable } from '@angular/core';
 import {
-  ActivatedRoute,
   ActivatedRouteSnapshot,
   CanActivate,
-  Route,
   Router,
   RouterStateSnapshot,
-  UrlTree,
 } from '@angular/router';
-import { map, mergeMap, Observable, of, switchMap, take } from 'rxjs';
-import { AuthService } from './auth.service';
-import { JwtHelperService } from '@auth0/angular-jwt';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { map } from 'rxjs';
+import { AuthService } from 'src/app/shared/data-access/auth.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     public authService: AuthService,
     public router: Router,
-    private route: ActivatedRoute,
-    private jwtHelper: JwtHelperService,
-    private afAuth: AngularFireAuth
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {

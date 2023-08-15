@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
-import { map, take } from 'rxjs';
-import { AuthService } from './auth.service';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
+import { AuthService } from 'src/app/shared/data-access/auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,9 +8,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 export class AuthGuardLoggedIn implements CanActivate {
   constructor(
     public authService: AuthService,
-    public router: Router,
-    private route: ActivatedRoute,
-    private afAuth: AngularFireAuth
+    public router: Router
   ) {}
 
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {

@@ -1,8 +1,8 @@
-import { AuthGuardLoggedIn } from './shared/data-access/auth-guard-logged-in.service';
-import { AuthGuard } from './shared/data-access/auth-guard.service';
 import { LoginComponent } from './login/feature/login/login.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from './core/utils/auth-guard';
+import { AuthGuardLoggedIn } from './core/utils/auth-guard-logged-in';
 
 const routes: Routes = [
   {
@@ -75,6 +75,7 @@ const routes: Routes = [
   {
     path: 'account',
     canActivate: [AuthGuard],
+    data: { role: ['SuperAdmin', 'Admin', 'Standard'] },
     loadChildren: () =>
       import('./account/feature/account-shell/account-shell-routing.module').then(
         (m) => m.AccountShellRoutingModule

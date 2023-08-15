@@ -244,8 +244,9 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
             this.location.back();
           }
         },
-        error: (v) => {
-          this.messages = [{ severity: 'error', summary: 'Error', detail: 'An error occured while saving the entry' } ];
+        error: (error) => {
+          const message = error?.error?.statusCode === 400 ? error.error.message : 'An error occured while saving the entry';
+          this.messages = [{ severity: 'error', summary: 'Error', detail: message } ];
         }
       });
 
