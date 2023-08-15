@@ -12,7 +12,7 @@ import { ReminderFormComponent } from '../../../reminders/feature/reminder-form/
 import { take } from 'rxjs';
 import { ToastService } from '../../../shared/utils/toast.service';
 import { Expense } from 'src/app/expenses/model/expense.model';
-import { ExpenseDetailComponent } from 'src/app/expenses/feature/expense-detail/expense-detail.page.component';
+import { ExpenseDetailComponent } from 'src/app/expenses/feature/expense-detail/expense-detail.component';
 import { ExpenseDto } from 'src/app/expenses/model/expense-dto.model';
 import { ReminderType } from '../../../shared/enums/reminder-type';
 import { TooltipModule } from 'primeng/tooltip';

@@ -46,8 +46,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
     ChipsModule,
     MessagesModule
   ],
-  templateUrl: './expense-detail.page.component.html',
-  styleUrls: ['./expense-detail.page.component.scss'],
+  templateUrl: './expense-detail.component.html',
+  styleUrls: ['./expense-detail.component.scss'],
   providers: [],
 })
 export class ExpenseDetailComponent implements OnInit, OnDestroy {

@@ -30,6 +30,8 @@ import { CategoryService } from './shared/data-access/category.service';
 import { SourceService } from './shared/data-access/source.service';
 import { ExpenseService } from './expenses/data-access/expense.service';
 import { SummaryService } from './summary/data-access/summary.service';
+import { ExpenseDetailComponent } from './expenses/feature/expense-detail/expense-detail.component';
+import { DialogService } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-root',
@@ -61,6 +63,7 @@ export class AppComponent implements OnInit {
     private sourceService: SourceService,
     private expenseService: ExpenseService,
     private summaryService: SummaryService,
+    private dialogService: DialogService,
   ) {
 
     this.validationMessagService.message$.subscribe((v) => {
@@ -144,7 +147,19 @@ export class AppComponent implements OnInit {
   }
 
   newEntry() {
-    this.router.navigate(['/expenses', 'new']);
+    // this.router.navigate(['/expenses', 'new']);
+    const dialgoRef = this.dialogService.open(ExpenseDetailComponent, {
+      width: '420px',
+      header: 'Create',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      styleClass: 'component-dialog',
+      closeOnEscape: true,
+      data: {
+        isDialog: true
+      },
+
+    })
   }
 
   visibleChange(e: any) {

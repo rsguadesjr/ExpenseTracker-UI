@@ -13,6 +13,7 @@ import {
   map,
   mergeMap,
   of,
+  share,
   switchMap,
   take,
   tap,
@@ -42,6 +43,8 @@ import { CategoryService } from 'src/app/shared/data-access/category.service';
 import { SummaryFilter } from 'src/app/summary/model/summary-filter.model';
 import { BudgetService } from 'src/app/shared/data-access/budget.service';
 import { SummaryMainChartComponent } from 'src/app/summary/ui/summary-main-chart/summary-main-chart.component';
+import { TotalPerCategory } from 'src/app/shared/model/total-per-category.mode';
+import { TotalAmountPerCategoryPerDate } from 'src/app/summary/model/total-amount-per-category-per-date';
 
 @Component({
   selector: 'app-home',
@@ -54,31 +57,102 @@ import { SummaryMainChartComponent } from 'src/app/summary/ui/summary-main-chart
     ChartModule,
     SpeedDialModule,
     ExpensePerCategoryComponent,
-    SummaryMainChartComponent
+    SummaryMainChartComponent,
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent {
   filter$ = new BehaviorSubject<any>(null);
-  data$!: Observable<Expense[]>;
-  filterInProgress$ = new BehaviorSubject<boolean>(false);
-  selectedView$: Observable<string>;
 
+  filterInProgress$ = new BehaviorSubject<boolean>(false);
   date = new Date();
   view: string = 'month';
   dateRangeLabel = '';
 
-  perCategoryData$ = this.summaryService.getTotalAmountPerCategory(this.dateRange.startDate, this.dateRange.endDate);
-  totalExpenses$: Observable<number> = this. perCategoryData$.pipe(
-    map(v => {
-      return v.reduce((total, current) => total + current.total, 0)
+  selectedView$: Observable<string> = this.route.queryParamMap.pipe(
+    map((v) => {
+      const view = v.get('view')?.toLowerCase();
+      return view && ['day', 'week', 'month', 'year'].includes(view)
+        ? view
+        : 'month';
     })
   );
 
-  chartData$ =  combineLatest([
+  data$: Observable<Expense[]> = this.expenseService
+    .getExpenseData()
+    .pipe(map((x) => x.data.slice(0, 10)));
+
+  totalExpenses$: Observable<number> = this.expenseService
+    .getExpenseData()
+    .pipe(
+      map((v) => {
+        const items = v.data;
+        return items.reduce((total, current) => total + current.amount, 0);
+      })
+    );
+
+  // perCategoryData$: Observable<TotalPerCategory[]> = this.summaryService
+  //   .getTotalAmountPerCategory(this.dateRange.startDate, this.dateRange.endDate)
+  //   .pipe(share());
+  perCategoryData$: Observable<TotalPerCategory[]> = combineLatest([
     this.categoryService.getCategories(),
-    this.summaryService.getTotalAmountPerCategoryPerDate(this.dateRange.startDate, this.dateRange.endDate),
+    this.expenseService.getExpenseData(),
+  ]).pipe(
+    map(([categories, v]) => {
+      const items = v.data;
+      const data = categories.map((cat) => {
+        const totalPerCategory = items
+          .filter((x) => x.categoryId == cat.id)
+          .reduce((total, current) => total + current.amount, 0);
+        return <TotalPerCategory>{
+          total: totalPerCategory,
+          categoryId: cat.id,
+          category: cat.name,
+        };
+      });
+
+      return data
+        .filter((x) => x.total > 0)
+        .sort((a, b) => (a.total < b.total ? 0 : -1));
+    })
+  );
+
+  perDateTotal$ = this.expenseService.getExpenseData().pipe(
+    map((v) => v.data),
+    map((items) => {
+      const dates = Array.from(new Set(items.map((x) => x.expenseDate)));
+      const result: TotalAmountPerCategoryPerDate[] = [];
+
+      dates.forEach((date) => {
+        const itemsPerDate = items.filter((x) => x.expenseDate == date);
+        const categorIds = Array.from(
+          new Set(itemsPerDate.map((x) => x.categoryId))
+        );
+
+        categorIds.forEach((id) => {
+          const total = itemsPerDate
+            .filter((x) => x.categoryId == id)
+            .reduce((total, current) => total + current.amount, 0);
+          const data: TotalAmountPerCategoryPerDate = {
+            total,
+            expenseDate: date,
+            categoryId: id,
+            category:
+              itemsPerDate.find((x) => x.categoryId == id)?.category ?? '',
+          };
+
+          result.push(data);
+        });
+      });
+
+      return result;
+    })
+  );
+
+  chartData$ = combineLatest([
+    this.categoryService.getCategories(),
+    this.perDateTotal$,
     this.budgetService.getBudgets(),
   ]).pipe(
     map(([categories, data, budgets]) => {
@@ -87,10 +161,10 @@ export class HomeComponent {
         startDate: startOfMonth(this.date),
         endDate: endOfMonth(this.date),
         breakdown: false,
-        categoryIds: categories.map(x => x.id),
-        showBudget: false
-      }
-      return { categories, data, filter, budgets }
+        categoryIds: categories.map((x) => x.id),
+        showBudget: false,
+      };
+      return { categories, data, filter, budgets: [] };
     })
   );
 
@@ -103,29 +177,13 @@ export class HomeComponent {
     private categoryService: CategoryService,
     private budgetService: BudgetService
   ) {
-
-
-    // get the data
-    this.data$ = this.expenseService.getExpenseData()
-                                    .pipe(map(x => x.data.slice(0, 10)));
-
     // trigger api call, this will only trigger once since we are only displaying the top 10 latest transactions
     this.expenseService.initExpenses({
       dateFrom: this.dateRange.startDate,
       dateTo: this.dateRange.endDate,
       pageNumber: 0,
       totalRows: 9999, //this.rowsPerPage,
-    })
-
-    // capture route query changes
-    this.selectedView$ = this.route.queryParamMap.pipe(
-      map((v) => {
-        const view = v.get('view')?.toLowerCase();
-        return view && ['day', 'week', 'month', 'year'].includes(view)
-          ? view
-          : 'month';
-      })
-    );
+    });
   }
 
   editEntry(expense: any) {
@@ -149,7 +207,6 @@ export class HomeComponent {
     this.router.navigate(['/expenses', 'new']);
   }
 
-
   /**
    * set to month
    */
@@ -157,6 +214,6 @@ export class HomeComponent {
     return {
       startDate: startOfMonth(this.date).toISOString(),
       endDate: endOfMonth(this.date).toISOString(),
-    }
+    };
   }
 }

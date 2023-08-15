@@ -7,7 +7,7 @@
     <div class="flex flex-column px-2 py-1  align-items-end gap-2">
       <div class="flex gap-2 align-items-center">
         <span class="text-xl font-semibold">&#x20B1;</span>
-        <span class="text-xl font-bold">{{ expense.amount }}</span>
+        <span class="text-xl font-bold">{{ expense.amount | number: '0.0' }}</span>
       </div>
       <div class="text-sm text-300"> {{ expense.expenseDate | date: 'dd-MMM' }}</div>
     </div>

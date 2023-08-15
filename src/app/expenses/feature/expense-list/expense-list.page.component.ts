@@ -53,7 +53,7 @@ import {
 } from 'date-fns';
 import { SumPipe } from 'src/app/shared/utils/sum.pipe';
 import { DialogService } from 'primeng/dynamicdialog';
-import { ExpenseDetailComponent } from '../expense-detail/expense-detail.page.component';
+import { ExpenseDetailComponent } from '../expense-detail/expense-detail.component';
 import { ConfirmationService } from 'primeng/api';
 import { ToastService } from 'src/app/shared/utils/toast.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -318,9 +318,8 @@ export class ExpenseListPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  // TODO: decide if this will be page navigation or will just open a modal
+
   addEntry() {
-    // this.router.navigate(['expenses', 'new']);
     const dialgoRef = this.dialogService.open(ExpenseDetailComponent, {
       width: '420px',
       header: 'Create',

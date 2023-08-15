@@ -17,7 +17,7 @@ const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { role: ['SuperAdmin', 'Admin', 'Standard', 'BasicExpense'] },
     loadComponent: () =>
-      import('../expense-detail/expense-detail.page.component').then(
+      import('../expense-detail/expense-detail.component').then(
         (m) => m.ExpenseDetailComponent
       ),
   },
@@ -26,7 +26,7 @@ const routes: Routes = [
     canActivate: [AuthGuard, RoleGuard],
     data: { role: ['SuperAdmin', 'Admin', 'Standard', 'BasicExpense'] },
     loadComponent: () =>
-      import('../expense-detail/expense-detail.page.component').then(
+      import('../expense-detail/expense-detail.component').then(
         (m) => m.ExpenseDetailComponent
       ),
   },
