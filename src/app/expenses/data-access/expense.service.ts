@@ -75,6 +75,10 @@ export class ExpenseService {
     return this.expenseData$;
   }
 
+  getExpenses(params: any): Observable<PaginatedList<Expense>> {
+    return this.http.post<PaginatedList<Expense>>(`${this.baseUrl}/GetExpenses`, params)
+  }
+
   getExpense(id: string): Observable<ExpenseDto> {
     return this.http.get<ExpenseDto>(`${this.baseUrl}/${id}`);
   }
