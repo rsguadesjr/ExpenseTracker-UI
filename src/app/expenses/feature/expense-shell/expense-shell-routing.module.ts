@@ -8,8 +8,8 @@ const routes: Routes = [
     path: '',
     canActivate: [AuthGuard],
     loadComponent: () =>
-      import('../expense-list/expense-list.page.component').then(
-        (m) => m.ExpenseListPageComponent
+      import('../expense-page/expense-page.component').then(
+        (m) => m.ExpensePageComponent
       ),
   },
   {

@@ -66,6 +66,11 @@ export class ReminderService {
     }
   }
 
+
+  getReminders(startDate: string, endDate: string) {
+    return  this.http.get<ReminderModel[]>(`${this.baseUrl}`, { params: { startDate: startDate || '', endDate: endDate || ''}});
+  }
+
   /**
    *
    * @returns the processed data that will be used in a calendar

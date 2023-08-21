@@ -26,6 +26,8 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { expenseReducer } from './state/expenses/expenses.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { ExpenseEffects } from './state/expenses/expenses.effects';
+import { reminderReducer } from './state/reminders/reminders.reducer';
+import { ReminderEffects } from './state/reminders/reminders.effects';
 
 @NgModule({
   declarations: [
@@ -51,7 +53,7 @@ import { ExpenseEffects } from './state/expenses/expenses.effects';
     HeaderComponent,
     SidebarComponent,
     AccessDirective,
-    StoreModule.forRoot({ expenses: expenseReducer }),
+    StoreModule.forRoot({ expenses: expenseReducer, reminders: reminderReducer }),
     StoreDevtoolsModule.instrument({
       maxAge: 25, // Retains last 25 states
       logOnly: !isDevMode(), // Restrict extension to log-only mode
@@ -59,7 +61,7 @@ import { ExpenseEffects } from './state/expenses/expenses.effects';
       trace: false, //  If set to true, will include stack trace for every dispatched action, so you can see it in trace tab jumping directly to that part of code
       traceLimit: 75, // maximum stack trace frames to be stored (in case trace option was provided as true)
     }),
-    EffectsModule.forRoot([ExpenseEffects])
+    EffectsModule.forRoot([ExpenseEffects, ReminderEffects])
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

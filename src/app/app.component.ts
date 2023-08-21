@@ -1,5 +1,5 @@
 import { AuthService } from './shared/data-access/auth.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import {
   ActivatedRoute,
@@ -32,6 +32,9 @@ import { ExpenseService } from './expenses/data-access/expense.service';
 import { SummaryService } from './summary/data-access/summary.service';
 import { ExpenseDetailComponent } from './expenses/feature/expense-detail/expense-detail.component';
 import { DialogService } from 'primeng/dynamicdialog';
+import { Store } from '@ngrx/store';
+import { loadReminders } from './state/reminders/reminders.action';
+import { endOfYear, startOfYear } from 'date-fns';
 
 @Component({
   selector: 'app-root',
@@ -50,6 +53,7 @@ export class AppComponent implements OnInit {
   showNewButton = false;
 
   queryParams$ = new BehaviorSubject<ParamMap | null>(null);
+  store = inject(Store);
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -108,11 +112,13 @@ export class AppComponent implements OnInit {
 
     this.authService.isAuthenticated$
       .pipe(
+        debounceTime(2000)
       )
       .subscribe(isAuth => {
         if (isAuth) {
           this.categoryService.initCategories();
           this.sourceService.initSources();
+          this.store.dispatch(loadReminders({ params: { startDate: startOfYear(new Date()).toISOString(), endDate: endOfYear(new Date()).toISOString() }}))
         }
       })
 

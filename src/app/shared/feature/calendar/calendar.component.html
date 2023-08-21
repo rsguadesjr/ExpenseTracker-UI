@@ -1,0 +1,15 @@
+<p-calendar class="app-calendar max-w-full" [(ngModel)]="date" [inline]="true" (onMonthChange)="onMonthChange($event)"
+  (onSelect)="onSelectDate($event)">
+  <ng-template pTemplate="date" let-date>
+    <div class="flex flex-column align-items-center justify-content-end">
+      <span class="p-1 text-xl">{{ date.day }}</span>
+      <div class="flex gap-2">
+        <ng-container *ngFor="let item of calendarData[(date.month + 1) + '' + date.day]">
+          <span *ngIf="item.dateKey == ((date.month + 1) + '' + date.day)" class="p-1 text-xs bg-cyan-800 border-round">
+            {{ item.value }}
+          </span>
+        </ng-container>
+      </div>
+    </div>
+  </ng-template>
+</p-calendar>

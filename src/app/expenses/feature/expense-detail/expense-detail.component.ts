@@ -114,7 +114,8 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.expense = this.dialogConfig.data?.expense;
-    this.isEdit = !!this.expense;
+    this.isEdit = this.dialogConfig.data?.isEdit;
+
 
     if (this.expense) {
       this.form.patchValue({

@@ -1,5 +1,5 @@
 import { createReducer, on } from "@ngrx/store";
-import { addExpense, addExpenseError, addExpenseSuccess, deleteExpense, loadExpenses, loadExpensesError, loadExpensesSuccess, updateExpense, updateExpenseError, updateExpenseSuccess } from "./expenses.action";
+import { addExpense, addExpenseError, addExpenseSuccess, deleteExpense, deleteExpenseError, deleteExpenseSuccess, loadExpenses, loadExpensesError, loadExpensesSuccess, updateExpense, updateExpenseError, updateExpenseSuccess } from "./expenses.action";
 
 export interface ExpenseState {
   expenses: any[];
@@ -31,6 +31,7 @@ export const expenseReducer = createReducer(
 
   on(addExpenseSuccess, (state, { data }) => ({
     ...state,
+    expenses: [data, ...state.expenses],
     selectedExpense: data,
     savingStatus: 'success' as const
   })),
@@ -42,12 +43,12 @@ export const expenseReducer = createReducer(
   })),
   /* #endregion */
 
+
   /* #region Update Operation */
   on(updateExpense, (state, { data }) => ({
     ...state,
     savingStatus: 'in-progress' as const
   })),
-
 
   on(updateExpenseSuccess, (state, { data }) => {
     const expenses = [...state.expenses];
@@ -65,12 +66,26 @@ export const expenseReducer = createReducer(
   })),
   /* #endregion */
 
+
   /* #region Delete Operation */
   on(deleteExpense, (state, { id }) => ({
     ...state,
-    expenses: state.expenses.filter(x => x.id !== id)
+    savingStatus: 'in-progress' as const
+  })),
+
+  on(deleteExpenseSuccess, (state, { id }) => ({
+    ...state,
+    expenses: state.expenses.filter(x => x.id !== id),
+    savingStatus: 'success' as const
+  })),
+
+  on(deleteExpenseError, (state, { error }) => ({
+    ...state,
+    error,
+    savingStatus: 'error' as const
   })),
   /* #endregion*/
+
 
   /* #region Load Operation */
   on(loadExpenses, (state) => ({

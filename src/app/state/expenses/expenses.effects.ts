@@ -8,6 +8,7 @@ import {
   addExpenseError,
   addExpenseSuccess,
   deleteExpense,
+  deleteExpenseSuccess,
   loadExpenses,
   loadExpensesError,
   loadExpensesSuccess,
@@ -36,47 +37,42 @@ export class ExpenseEffects {
     )
   );
 
-
   addExpense$ = createEffect(() =>
     this.actions$.pipe(
       ofType(addExpense),
       switchMap(({ data }) =>
-        this.expenseService
-          .createExpense(data)
-          .pipe(
-            map((result) => addExpenseSuccess({ data: result })),
+        this.expenseService.createExpense(data).pipe(
+          map((result) => addExpenseSuccess({ data: result })),
 
-            catchError((error) => of(addExpenseError({ error })))
-          )
+          catchError((error) => of(addExpenseError({ error })))
+        )
       )
     )
   );
 
-
   updateExpense$ = createEffect(() =>
-  this.actions$.pipe(
-    ofType(updateExpense),
-    switchMap(({ data }) => {
-      console.log(data)
-      return this.expenseService
-        .updateExpense(data.id, data)
-        .pipe(
+    this.actions$.pipe(
+      ofType(updateExpense),
+      switchMap(({ data }) => {
+        return this.expenseService.updateExpense(data.id, data).pipe(
           map((result) => updateExpenseSuccess({ data: result })),
 
           catchError((error) => of(updateExpenseError({ error })))
-        )
-    }
+        );
+      })
     )
-  )
-);
+  );
 
   deleteExpense$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(deleteExpense),
-      switchMap(({ id }) =>
-        this.expenseService.deleteExpense(id)
+      this.actions$.pipe(
+        ofType(deleteExpense),
+        switchMap(({ id }) => {
+          return this.expenseService.deleteExpense(id).pipe(
+            map(() => deleteExpenseSuccess({ id })),
+
+            catchError((error) => of(updateExpenseError({ error })))
+          );
+        })
       )
-    ),
-    { dispatch: false }
   );
 }
