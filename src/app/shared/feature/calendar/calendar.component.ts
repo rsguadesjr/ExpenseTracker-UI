@@ -47,7 +47,7 @@ export class CalendarComponent {
   }
 
   @Output() selectDate = new EventEmitter<Date>();
-  @Output() selectMonth = new EventEmitter<{ year: number, month: number}>();
+  @Output() monthChange = new EventEmitter<{ year: number, month: number}>();
 
   onSelectDate(e: any) {
     this.selectDate.emit(this.date);
@@ -55,6 +55,6 @@ export class CalendarComponent {
 
   onMonthChange({ year, month } : { year: number, month: number }) {
     this.month = new Date(year, month - 1);
-    this.selectMonth.emit({ year, month: month - 1 });
+    this.monthChange.emit({ year, month: month - 1 });
   }
 }

@@ -118,7 +118,7 @@ export class AppComponent implements OnInit {
         if (isAuth) {
           this.categoryService.initCategories();
           this.sourceService.initSources();
-          this.store.dispatch(loadReminders({ params: { startDate: startOfYear(new Date()).toISOString(), endDate: endOfYear(new Date()).toISOString() }}))
+          this.store.dispatch(loadReminders({ params: { startDate: '', endDate: '' }}))
         }
       })
 

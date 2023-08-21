@@ -5,8 +5,8 @@ const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('../reminder-dashboard/reminder-dashboard.page.component').then(
-        (m) => m.ReminderDashboardPageComponent
+      import('../reminder-page/reminder-page.component').then(
+        (m) => m.ReminderPageComponent
       ),
   },
 ];

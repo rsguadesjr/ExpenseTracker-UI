@@ -15,3 +15,13 @@ export const selectFormattedReminders = (params: any) => createSelector(
   selectReminders,
   (state: ReminderState) => ReminderHelper.process(state.reminders, params)
 )
+
+export const selectDistinctFormattedReminders = (params: any) => createSelector(
+  selectReminders,
+  (state: ReminderState) => ReminderHelper.distinctReminders(state.reminders, params)
+)
+
+export const savingStatus = createSelector(
+  selectReminders,
+  (state: ReminderState) => state.savingStatus
+)

@@ -1,6 +1,6 @@
 <div class="form xl:w-4 lg:w-5 md:w-7 m-auto">
   <p-card styleClass="bg-black-alpha-40 px-2">
-    <form [formGroup]="form">
+    <form *ngIf="form" [formGroup]="form">
       <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
 
       <div class="flex flex-column gap-2">
@@ -51,7 +51,7 @@
             </div>
             <div class="flex flex-column gap-2 p-fluid">
               <label htmlFor="form-category">Category</label>
-              <p-dropdown id="form-category" formControlName="category" [options]="categories"
+              <p-dropdown id="form-category" formControlName="category" [options]="(categories$ | async) || []"
                 optionLabel="name" class="w-100"></p-dropdown>
               <small class="text-red-400" *ngFor="let error of validationErrors['category']">{{ error }}</small>
             </div>
@@ -71,7 +71,7 @@
             </div> -->
             <div class="flex flex-column gap-2 p-fluid">
               <label htmlFor="form-source">Source</label>
-              <p-dropdown id="form-source" formControlName="source" [options]="sources"
+              <p-dropdown id="form-source" formControlName="source" [options]="(sources$ | async) || []"
                 optionLabel="name" ></p-dropdown>
               <small class="text-red-400" *ngFor="let error of validationErrors['source']">{{ error }}</small>
             </div>
@@ -87,11 +87,11 @@
         </div>
       </div>
     </form>
-    <div class="flex flex-row justify-content-end gap-2 mt-4">
+    <div class="flex flex-row justify-content-end gap-2 mt-4" *ngIf="savingStatus$ | async; let status">
       <p-button label="Cancel" (click)="cancel()" icon="pi pi-times"></p-button>
-      <ng-container *ngIf="processState$ | async; let state">
-        <p-button label="Submit" [icon]="state === 'LOADING' ? 'pi pi-spin pi-spinner' : 'pi pi-check' " [disabled]="state === 'LOADING'" styleClass="p-button-success" (click)="submit()"></p-button>
-      </ng-container>
+
+      <button *ngIf="status !== 'in-progress'" pButton pRipple label="Submit" class="p-button-success" (click)="submit()"></button>
+      <button *ngIf="status === 'in-progress'" pButton pRipple label="Saving..." class="p-button-success" icon="pi pi-spin pi-spinner"></button>
     </div>
   </p-card>
 </div>

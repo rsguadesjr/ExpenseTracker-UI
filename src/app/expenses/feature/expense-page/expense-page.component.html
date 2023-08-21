@@ -65,17 +65,9 @@
                     [month]="(calendarMonth$ | async)!"
                   [items]="(calendarItems$ | async) ?? []"
                   (selectDate)="selectDate($event)"
-                  (selectMonth)="selectMonth($event)"
+                  (monthChange)="monthChange($event)"
       >
       </app-calendar>
-      <!-- <app-calendar-data
-          [reminders]="(reminders$ | async) || []"
-          [dailyTotalSummary]="(dailyTotal$ | async) || []"
-          (applySelectedDate)="applyDateFilter($event)"
-          (monthChange)="onMonthChange($event)"
-          [startDate]="(calendarDateRange$ | async)?.dateFrom!"
-          [endDate]="(calendarDateRange$ | async)?.dateTo!">
-      </app-calendar-data> -->
       <div class=" border-solid border-1 surface-border border-round-md p-4 bg-black-alpha-40" *ngIf="selectedDateReminders$ | async; let reminders">
 
         <div class="mb-2">Reminders:</div>
@@ -83,8 +75,6 @@
         <div class="flex w-full align-items-center gap-1 mb-1 border-round surface-50 p-2 mb-1" *ngFor="let reminder of reminders">
           <span class="mr-2 flex-grow-1">{{ reminder.subject }}</span>
           <ng-container *access="['SuperAdmin', 'Admin', 'Standard']">
-            <!-- <p-button icon="pi pi-pencil" pTooltip="Edit Reminder" styleClass="p-button-rounded p-button-outlined p-button-sm p-button-secondary reminder-action" (click)="editReminder(reminder)"></p-button>
-            <p-button icon="pi pi-trash" pTooltip="Delete Reminder" styleClass="p-button-rounded p-button-outlined p-button-sm p-button-danger reminder-action" (click)="removeReminder(reminder)"></p-button> -->
             <p-button icon="pi pi-plus" pTooltip="Create Expense" tooltipPosition="left" styleClass="p-button-rounded p-button-outlined p-button-sm p-button-help reminder-action" (click)="createExpense(reminder)"></p-button>
           </ng-container>
         </div>
@@ -94,7 +84,6 @@
     <div class="w-12 md:w-6 lg:w-12 border-solid border-1 surface-border border-round-md p-4 bg-black-alpha-40">
       <div class="flex gap-2 align-items-center justify-content-between">
         <span class="text-2xl">Categories</span>
-        <!-- <div class="font-italic text-sm" *ngIf="filter$ | async as filter">(filtered data from {{ filter.dateFrom | date: 'MMM-dd-yyy'}} to {{ filter.dateTo | date: 'MMM-dd-yyy'}})</div> -->
       </div>
       <app-expense-per-category *ngIf="categorizedExpenses$ | async as items" [items]="items"></app-expense-per-category>
     </div>

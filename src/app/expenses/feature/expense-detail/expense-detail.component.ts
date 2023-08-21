@@ -70,7 +70,7 @@ import { savingStatus } from 'src/app/state/expenses/expenses.selector';
   providers: [],
 })
 export class ExpenseDetailComponent implements OnInit, OnDestroy {
-  private ngUnsubscribe$ = new Subject<unknown>();
+  private unsubscribe$ = new Subject<unknown>();
   private store = inject(Store);
   private categoryService = inject(CategoryService);
   private sourceService = inject(SourceService);
@@ -131,7 +131,7 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
     this.savingStatus$
       .pipe(
         skip(1),
-        takeUntil(this.ngUnsubscribe$)
+        takeUntil(this.unsubscribe$)
       )
       .subscribe((status) => {
         if (status === 'success') {
@@ -141,8 +141,8 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.ngUnsubscribe$.next(null);
-    this.ngUnsubscribe$.complete();
+    this.unsubscribe$.next(null);
+    this.unsubscribe$.complete();
   }
 
   submit() {

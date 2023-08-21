@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, Optional } from '@angular/core';
+import { Component, OnDestroy, OnInit, Optional, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, FormGroupName, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
@@ -8,7 +8,7 @@ import { Message } from 'primeng/api';
 import { FormValidation } from '../../../shared/utils/form-validation';
 import { CategoryService } from '../../../shared/data-access/category.service';
 import { SourceService } from '../../../shared/data-access/source.service';
-import { Observable, Subject, combineLatest, map, take, takeUntil } from 'rxjs';
+import { Observable, Subject, combineLatest, map, skip, take, takeUntil } from 'rxjs';
 import { Option } from '../../../shared/model/option.model';
 import { DropdownModule } from 'primeng/dropdown';
 import { format, parseISO, startOfDay } from 'date-fns';
@@ -21,6 +21,9 @@ import { ReminderType } from '../../../shared/enums/reminder-type';
 import { ReminderRequestModel } from '../../../shared/model/reminder-request-model';
 import { ToastService } from '../../../shared/utils/toast.service';
 import { ReminderService } from '../../data-access/reminder.service';
+import { Store } from '@ngrx/store';
+import { savingStatus } from 'src/app/state/reminders/reminders.selector';
+import { addReminder, updateReminder } from 'src/app/state/reminders/reminders.action';
 
 @Component({
   selector: 'app-reminder-form',
@@ -41,12 +44,17 @@ import { ReminderService } from '../../data-access/reminder.service';
   styleUrls: ['./reminder-form.component.scss']
 })
 export class ReminderFormComponent implements OnInit, OnDestroy {
-  private ngUnsubscribe$ = new Subject<unknown>();
-  form: FormGroup;
+  private unsubscribe$ = new Subject<void>();
+  private store = inject(Store);
+  private categoryService = inject(CategoryService);
+  private sourceService = inject(SourceService);
+  private dialogConfig = inject(DynamicDialogConfig);
+  private dialogRef = inject(DynamicDialogRef);
+  private reminderService = inject(ReminderService);
 
-  isEdit: boolean;
-  categories: Option[] = [];
-  sources: Option[] = [];
+  form!: FormGroup;
+
+  isEdit: boolean = false;
   types: Option[] = [
     { id: undefined, name: '' },
     { id: ReminderType.OneTime, name: 'One Time' },
@@ -59,18 +67,14 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
   validationErrors: { [key: string]: string[] } = {};
 
   processState$ = this.reminderService.getProcessState();
+  savingStatus$ = this.store.select(savingStatus);
 
-  constructor(
-    @Optional() public dialogConfig: DynamicDialogConfig,
-    @Optional() private dialogRef: DynamicDialogRef,
-    private categoryService: CategoryService,
-    private sourceService: SourceService,
-    private reminderService: ReminderService,
-    private toastService: ToastService) {
+  categories$ = this.categoryService.getCategories();
+  sources$ = this.sourceService.getSources();
 
-
-    this.isEdit = dialogConfig.data.isEdit;
-    const reminder = dialogConfig.data.reminder as ReminderModel;
+  ngOnInit() {
+    this.isEdit = this.dialogConfig.data.isEdit;
+    const reminder = this.dialogConfig.data.reminder as ReminderModel;
     const type = this.types.find(x => x.id == reminder.type);
     this.form = new FormGroup({
       id: new FormControl(reminder.id),
@@ -87,28 +91,8 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
       date: new FormControl({ value: format(reminder.date, 'dd-MMM-yyyy'), disabled: true }), // readonly
     });
 
-    combineLatest([
-      this.categoryService.getCategories().pipe(map(opt => [{ id: undefined, name: '' }, ...opt])),
-      this.sourceService.getSources().pipe(map(opt => [{ id: undefined, name: '' }, ...opt]))
-    ])
-    .pipe(takeUntil(this.ngUnsubscribe$))
-    .subscribe(([categories, sources]) => {
-      this.categories = categories;
-      this.sources = sources;
-
-      if (reminder.categoryId) {
-        this.form.get('category')?.setValue(categories.find(x => x.id == reminder.categoryId))
-      }
-
-      if (reminder.sourceId) {
-        this.form.get('source')?.setValue(sources.find(x => x.id == reminder.sourceId))
-      }
-    })
-  }
-
-  ngOnInit() {
     this.form.get('type')?.valueChanges
-      .pipe(takeUntil(this.ngUnsubscribe$))
+      .pipe(takeUntil(this.unsubscribe$))
       .subscribe(v => {
         if (v?.id == ReminderType.OneTime) {
           this.form.get('endDate')?.setValue(this.form.get('startDate')?.value, { emitEvent: false });
@@ -119,11 +103,23 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
       });
 
     this.form.get('type')?.updateValueAndValidity();
+
+
+    this.savingStatus$
+      .pipe(
+        skip(1),
+        takeUntil(this.unsubscribe$)
+      )
+      .subscribe((status) => {
+        if (status === 'success') {
+          this.dialogRef.close({});
+        }
+      });
   }
 
   ngOnDestroy(): void {
-    this.ngUnsubscribe$.next(null);
-    this.ngUnsubscribe$.complete();
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   cancel() {
@@ -154,19 +150,10 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
       type: formValue('type')?.id,
     };
 
-    let submit$ = this.isEdit
-                  ? this.reminderService.updateReminder(formValue('id'), reminder)
-                  : this.reminderService.createReminder(reminder);
-    submit$
-      .pipe(take(1))
-      .subscribe({
-        next: (v) => {
-          this.toastService.showSuccess(`${this.isEdit ? 'Updated entry' : 'Created new entry'}`);
-          this.dialogRef.close();
-        },
-        error: (v) => {
-          this.messages = [{ severity: 'error', summary: 'Error', detail: 'An error occured while saving the entry' } ];
-        }
-      });
+    if (this.isEdit) {
+      this.store.dispatch(updateReminder({ data: reminder }));
+    } else {
+      this.store.dispatch(addReminder({ data: reminder }));
+    }
   }
 }

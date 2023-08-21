@@ -3,23 +3,15 @@
   <!-- col1 -->
   <div class="flex flex-column-reverse gap-4 sm:flex-row lg:flex-column">
     <div class="p-fluid border-round-md bg-black-alpha-40" style="background-color: red;">
-      <p-calendar class="max-w-full" [(ngModel)]="calendarDate" [inline]="true" (onMonthChange)="onMonthChange($event)"
-        (onSelect)="onSelectedDate($event)">
-        <ng-template pTemplate="date" let-date>
-          <div class="w-full h-full flex flex-column justify-content-start align-items-center">
-            <span class="p-1 text-xl">{{ date.day }}</span>
-            <div class="flex gap-2" *ngIf="calendarData$ | async; let calendarData" >
-              <span
-                *ngIf="calendarData[date.year + '-' + decimalPipe.transform((date.month + 1), '2.0') + '-' + decimalPipe.transform(date.day, '2.0')]; let data"
-                class="p-1 text-xs bg-yellow-800 border-round">
-                {{ data }}
-              </span>
-            </div>
-          </div>
-        </ng-template>
-      </p-calendar>
+      <app-calendar [date]="calendarDate"
+          [month]="(calendarMonth$ | async)!"
+          [items]="(calendarItems$ | async) ?? []"
+          (selectDate)="selectDate($event)"
+          (monthChange)="monthChange($event)"
+    >
+    </app-calendar>
     </div>
-    <div class="p-fluid border-round-md p-4 bg-black-alpha-40 flex-grow-1">
+    <div class="p-fluid border-round-md p-4 bg-black-alpha-40 flex-grow-1" *ngIf="upcomingReminders$ | async; let upcomingReminders">
       <div class="mb-2 text-align-right font-bold text-xl">Upcoming reminders in 5 days</div>
         <div class="font-italic py-2" *ngIf="upcomingReminders.length === 0">No data</div>
         <div class="flex w-full align-items-center gap-1 mb-1 border-round bg-white-alpha-10 p-2 mb-1"
@@ -30,11 +22,6 @@
             <i *ngIf="reminder.remainingDays === 1"> is Tomorrow</i>
             <i *ngIf="reminder.remainingDays! > 1"> is in {{ reminder.remainingDays }} Days</i>
           </span>
-          <ng-container *access="['SuperAdmin', 'Admin', 'Standard']">
-            <p-button icon="pi pi-plus" pTooltip="Create Expense" tooltipPosition="left"
-              styleClass="p-button-rounded p-button-outlined p-button-sm p-button-help reminder-action"
-              (click)="createExpense(reminder)"></p-button>
-          </ng-container>
         </div>
     </div>
   </div>
@@ -46,8 +33,7 @@
       <p-button *access="['SuperAdmin', 'Admin', 'Standard']" icon="pi pi-plus" pTooltip="Create Expense" styleClass="p-button-rounded " (click)="onCreate()"></p-button>
     </div>
     <app-data-table [data]="reminders$ | async" [columns]="columns" (editSelected)="onEdit($event)"
-      (deleteSelected)="onDelete($event)" sortField="earliestDate" [sortOrder]="-1"
-      [showLoading]="(showLoading$ | async) ?? false"></app-data-table>
+      (deleteSelected)="onDelete($event)" sortField="earliestDate" [sortOrder]="-1"></app-data-table>
   </div>
   <!-- /col2 -->
 </div>

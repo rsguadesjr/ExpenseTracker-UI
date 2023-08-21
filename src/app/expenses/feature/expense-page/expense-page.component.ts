@@ -142,23 +142,6 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
 
   monthOptions: Option[] = [];
   calendarDate = new Date();
-
-  // toggleViewStateOptions: Option[] = [
-  //   { name: 'Compact', id: 'compact' },
-  //   { name: 'Table', id: 'table' },
-  // ];
-  // toggleViewValue = 'table';
-
-  // categories: Option[] = [
-  //   { id: '', name: '' },
-  //   { id: 1, name: 'Bills' },
-  //   { id: 2, name: 'Foods' },
-  // ];
-  // filterForm!: FormGroup;
-  // filter$ = new BehaviorSubject<any>(undefined);
-  // expenseEntries$!: Observable<Expense[]>;
-  // filterInProgress$ = new BehaviorSubject<boolean>(false);
-  // totalPerCategory$!: Observable<TotalPerCategory[]>;
   selectedDate$ = new BehaviorSubject<Date>(new Date());
   calendarMonth$ = new BehaviorSubject<Date>(new Date());
   filteredItems$ = new BehaviorSubject<Expense[] | null>(null);
@@ -220,14 +203,6 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
     })
   );
 
-  // reminders$ = combineLatest([
-  //   this.selectedDate$,
-  //   this.reminderService.getTansformedData().pipe(map(data => data.data))
-  // ]).pipe(
-  //   map(([date, reminders]) => {
-  //     return reminders.filter(r => isSameDay(date, r.date));
-  //   })
-  // )
 
   filterForm = new FormGroup({
     view: new FormControl('month'),
@@ -433,7 +408,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
     this.selectedDate$.next(date);
   }
 
-  selectMonth({ year, month }: { year: number; month: number }) {
+  monthChange({ year, month }: { year: number; month: number }) {
     this.calendarMonth$.next(new Date(year, month));
   }
 
