@@ -28,11 +28,15 @@ import { EffectsModule } from '@ngrx/effects';
 import { ExpenseEffects } from './state/expenses/expenses.effects';
 import { reminderReducer } from './state/reminders/reminders.reducer';
 import { ReminderEffects } from './state/reminders/reminders.effects';
+import { CategoryEffects } from './state/categories/categories.effects';
+import { SourceEffects } from './state/sources/sources.effects';
+import { BudgetEffects } from './state/budgets/budget.effects';
+import { categoryReducer } from './state/categories/categories.reducer';
+import { sourceReducer } from './state/sources/sources.reducer';
+import { budgetReducer } from './state/budgets/budget.reducer';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-  ],
+  declarations: [AppComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -43,7 +47,7 @@ import { ReminderEffects } from './state/reminders/reminders.effects';
     HttpClientModule,
     JwtModule.forRoot({
       config: {
-        tokenGetter: () => localStorage.getItem("accessToken"),
+        tokenGetter: () => localStorage.getItem('accessToken'),
         allowedDomains: [],
         disallowedRoutes: [],
       },
@@ -53,7 +57,13 @@ import { ReminderEffects } from './state/reminders/reminders.effects';
     HeaderComponent,
     SidebarComponent,
     AccessDirective,
-    StoreModule.forRoot({ expenses: expenseReducer, reminders: reminderReducer }),
+    StoreModule.forRoot({
+      expenses: expenseReducer,
+      reminders: reminderReducer,
+      categories: categoryReducer,
+      sources: sourceReducer,
+      budgets: budgetReducer,
+    }),
     StoreDevtoolsModule.instrument({
       maxAge: 25, // Retains last 25 states
       logOnly: !isDevMode(), // Restrict extension to log-only mode
@@ -61,7 +71,13 @@ import { ReminderEffects } from './state/reminders/reminders.effects';
       trace: false, //  If set to true, will include stack trace for every dispatched action, so you can see it in trace tab jumping directly to that part of code
       traceLimit: 75, // maximum stack trace frames to be stored (in case trace option was provided as true)
     }),
-    EffectsModule.forRoot([ExpenseEffects, ReminderEffects])
+    EffectsModule.forRoot([
+      ExpenseEffects,
+      ReminderEffects,
+      CategoryEffects,
+      SourceEffects,
+      BudgetEffects,
+    ]),
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
@@ -71,7 +87,7 @@ import { ReminderEffects } from './state/reminders/reminders.effects';
     MessageService,
     ToastService,
     DialogService,
-    ConfirmationService
+    ConfirmationService,
   ],
   bootstrap: [AppComponent],
 })

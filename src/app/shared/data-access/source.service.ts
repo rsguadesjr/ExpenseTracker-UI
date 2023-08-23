@@ -23,28 +23,32 @@ export class SourceService {
   }
 
   getSources(): Observable<SourceResponseModel[]> {
-    return this.sources$;
+    return this.http.get<SourceResponseModel[]>(this.baseUrl);
   }
 
 
   create(data: any) {
-    return this.http.post<any>(`${this.baseUrl}`, data)
-              .pipe(
-                tap(result => {
-                  this.sources$.next([result, ...this.sources$.value]);
-                })
-              );
+    return this.http.post<any>(`${this.baseUrl}`, data);
+              // .pipe(
+              //   tap(result => {
+              //     this.sources$.next([result, ...this.sources$.value]);
+              //   })
+              // );
   }
 
   update(data: any) {
     return this.http.put<any>(`${this.baseUrl}/${data.id}`, data)
-              .pipe(
-                tap(result => {
-                  const current = this.sources$.value;
-                  const index = this.sources$.value.findIndex(x => x.id == data.id);
-                  current[index] = result;
-                  this.sources$.next([...current]);
-                })
-              );
+              // .pipe(
+              //   tap(result => {
+              //     const current = this.sources$.value;
+              //     const index = this.sources$.value.findIndex(x => x.id == data.id);
+              //     current[index] = result;
+              //     this.sources$.next([...current]);
+              //   })
+              // );
+  }
+
+  delete(id: any) {
+    return this.http.delete(`${this.baseUrl}/${id}`)
   }
 }

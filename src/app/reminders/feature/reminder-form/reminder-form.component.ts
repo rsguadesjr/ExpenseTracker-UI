@@ -24,6 +24,8 @@ import { ReminderService } from '../../data-access/reminder.service';
 import { Store } from '@ngrx/store';
 import { savingStatus } from 'src/app/state/reminders/reminders.selector';
 import { addReminder, updateReminder } from 'src/app/state/reminders/reminders.action';
+import { selectAllActiveCategories } from 'src/app/state/categories/categories.selector';
+import { selectAllActiveSources } from 'src/app/state/sources/sources.selector';
 
 @Component({
   selector: 'app-reminder-form',
@@ -46,8 +48,6 @@ import { addReminder, updateReminder } from 'src/app/state/reminders/reminders.a
 export class ReminderFormComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
   private store = inject(Store);
-  private categoryService = inject(CategoryService);
-  private sourceService = inject(SourceService);
   private dialogConfig = inject(DynamicDialogConfig);
   private dialogRef = inject(DynamicDialogRef);
   private reminderService = inject(ReminderService);
@@ -68,9 +68,8 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
 
   processState$ = this.reminderService.getProcessState();
   savingStatus$ = this.store.select(savingStatus);
-
-  categories$ = this.categoryService.getCategories();
-  sources$ = this.sourceService.getSources();
+  categories$ = this.store.select(selectAllActiveCategories);
+  sources$ = this.store.select(selectAllActiveSources);
 
   ngOnInit() {
     this.isEdit = this.dialogConfig.data.isEdit;

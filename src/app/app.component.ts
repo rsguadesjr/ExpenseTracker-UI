@@ -35,6 +35,8 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { Store } from '@ngrx/store';
 import { loadReminders } from './state/reminders/reminders.action';
 import { endOfYear, startOfYear } from 'date-fns';
+import { loadCategories } from './state/categories/categories.action';
+import { loadSources } from './state/sources/sources.action';
 
 @Component({
   selector: 'app-root',
@@ -116,8 +118,10 @@ export class AppComponent implements OnInit {
       )
       .subscribe(isAuth => {
         if (isAuth) {
-          this.categoryService.initCategories();
-          this.sourceService.initSources();
+          // this.categoryService.initCategories();
+          // this.sourceService.initSources();
+          this.store.dispatch(loadCategories());
+          this.store.dispatch(loadSources());
           this.store.dispatch(loadReminders({ params: { startDate: '', endDate: '' }}))
         }
       })

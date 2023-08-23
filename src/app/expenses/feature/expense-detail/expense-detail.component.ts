@@ -48,6 +48,8 @@ import {
   updateExpense,
 } from 'src/app/state/expenses/expenses.action';
 import { savingStatus } from 'src/app/state/expenses/expenses.selector';
+import { selectAllActiveCategories } from 'src/app/state/categories/categories.selector';
+import { selectAllActiveSources } from 'src/app/state/sources/sources.selector';
 
 @Component({
   selector: 'app-expense-detail',
@@ -72,8 +74,6 @@ import { savingStatus } from 'src/app/state/expenses/expenses.selector';
 export class ExpenseDetailComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<unknown>();
   private store = inject(Store);
-  private categoryService = inject(CategoryService);
-  private sourceService = inject(SourceService);
   private dialogConfig = inject(DynamicDialogConfig);
   private dialogRef = inject(DynamicDialogRef);
 
@@ -84,22 +84,12 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
 
   savingStatus$ = this.store.select(savingStatus);
 
-  categories$ = this.categoryService.getCategories().pipe(
-    map((cat) => {
-      const activeList = cat
-        .filter((c) => c.isActive)
-        .sort((a, b) => a.order - b.order);
-      return [{ id: null, name: '' }, ...activeList];
-    })
+  categories$ = this.store.select(selectAllActiveCategories) .pipe(
+    map((data) => [{ id: null, name: '' }, ...data])
   );
 
-  sources$ = this.sourceService.getSources().pipe(
-    map((cat) => {
-      const activeList = cat
-        .filter((c) => c.isActive)
-        .sort((a, b) => a.order - b.order);
-      return [{ id: null, name: '' }, ...activeList];
-    })
+  sources$ = this.store.select(selectAllActiveSources).pipe(
+    map((data) => [{ id: null, name: '' }, ...data])
   );
 
   form = new FormGroup({
