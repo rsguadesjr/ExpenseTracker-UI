@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { CategoryService } from 'src/app/shared/data-access/category.service';
 import { Observable, map, take } from 'rxjs';
@@ -15,7 +15,7 @@ import { ToastService } from 'src/app/shared/utils/toast.service';
 import { AccessDirective } from 'src/app/shared/utils/access.directive';
 
 @Component({
-  selector: 'app-settings-budget.page',
+  selector: 'app-settings-budget',
   standalone: true,
   imports: [
     CommonModule,
@@ -23,11 +23,16 @@ import { AccessDirective } from 'src/app/shared/utils/access.directive';
     DataTableComponent,
     AccessDirective
   ],
-  templateUrl: './settings-budget.page.component.html',
-  styleUrls: ['./settings-budget.page.component.scss'],
+  templateUrl: './settings-budget.component.html',
+  styleUrls: ['./settings-budget.component.scss'],
   providers: [DecimalPipe]
 })
-export class SettingsBudgetPageComponent {
+export class SettingsBudgetComponent {
+  budgetService = inject(BudgetService);
+  dialogService = inject(DialogService);
+  confirmationService = inject(ConfirmationService);
+  toastService = inject(ToastService);
+  decimalPipe = inject(DecimalPipe);
 
   monthlyBudget = [
     { month: -1, year: -1, budget: 0 },
@@ -53,18 +58,9 @@ export class SettingsBudgetPageComponent {
     })))
   );
 
-  constructor(private budgetService: BudgetService,
-              private dialogService: DialogService,
-              private confirmationService: ConfirmationService,
-              private toastService: ToastService,
-              private decimalPipe: DecimalPipe) {
-
-    this.budgetService.initBudgets();
-  }
-
 
   onEdit(item: any) {
-    const dialgoRef = this.dialogService.open(SettingsBudgetFormComponent, {
+    this.dialogService.open(SettingsBudgetFormComponent, {
       width: '420px',
       header: 'Update',
       contentStyle: { overflow: 'auto' },
@@ -74,18 +70,11 @@ export class SettingsBudgetPageComponent {
       data: {
         ...item
       },
-
-    })
-
-    dialgoRef.onClose.pipe(take(1))
-    .subscribe((result) => {
-      if (result) {
-      }
-    })
+    });
   }
 
   onCreate() {
-    const dialgoRef = this.dialogService.open(SettingsBudgetFormComponent, {
+    this.dialogService.open(SettingsBudgetFormComponent, {
       width: '420px',
       header: 'Create',
       contentStyle: { overflow: 'auto' },
@@ -96,13 +85,7 @@ export class SettingsBudgetPageComponent {
         isActive: true
       },
 
-    })
-
-    dialgoRef.onClose.pipe(take(1))
-    .subscribe((result) => {
-      if (result) {
-      }
-    })
+    });
   }
 
   onDelete(item: BudgetResult & { monthText: string, yearText: string }) {

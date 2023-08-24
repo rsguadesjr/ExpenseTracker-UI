@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
 import { Message } from 'primeng/api';
@@ -8,10 +8,12 @@ import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessagesModule } from 'primeng/messages';
-import { finalize, take, tap } from 'rxjs';
 import { SourceService } from 'src/app/shared/data-access/source.service';
 import { FormValidation } from 'src/app/shared/utils/form-validation';
-import { ToastService } from 'src/app/shared/utils/toast.service';
+import { Store } from '@ngrx/store';
+import { addSource, updateSource } from 'src/app/state/sources/sources.action';
+import { savingStatus } from 'src/app/state/sources/sources.selector';
+import { filter, skip, take } from 'rxjs';
 
 @Component({
   selector: 'app-settings-source-form',
@@ -29,29 +31,28 @@ import { ToastService } from 'src/app/shared/utils/toast.service';
   templateUrl: './settings-source-form.component.html',
   styleUrls: ['./settings-source-form.component.scss']
 })
-export class SettingsSourceFormComponent {
-  form!: FormGroup;
-  id?: string;
+export class SettingsSourceFormComponent implements OnInit {
+  private dialogConfig = inject(DynamicDialogConfig);
+  private dialogRef = inject(DynamicDialogRef);
+  private store = inject(Store);
 
   messages: Message[] = [];
   validationErrors: { [key: string]: string[] } = {};
-  saveInProgress = false;
+  id?: string;
 
-  constructor(
-    public dialogConfig: DynamicDialogConfig,
-    private dialogRef: DynamicDialogRef,
-    private sourceService: SourceService,
-    private toastService: ToastService
-  ) {
+  savingStatus$ = this.store.select(savingStatus);
 
-    this.form = new FormGroup({
-      name: new FormControl(null, FormValidation.requiredValidator('Name is required')),
-      description: new FormControl(null),
-      isActive: new FormControl(true)
-    })
+  form: FormGroup = new FormGroup({
+    name: new FormControl(null, FormValidation.requiredValidator('Name is required')),
+    description: new FormControl(null),
+    isActive: new FormControl(true)
+  })
 
-    if (dialogConfig.data) {
-      const data = dialogConfig.data;
+  ngOnInit(): void {
+    this.form
+
+    if (this.dialogConfig.data) {
+      const data = this.dialogConfig.data;
       this.id = data.id;
       this.form.patchValue({
         name: data.name,
@@ -60,8 +61,15 @@ export class SettingsSourceFormComponent {
       })
     }
 
-  }
 
+    this.savingStatus$.pipe(
+      skip(1),
+      filter((v) => v === 'success'),
+      take(1)
+    ).subscribe(() => {
+      this.dialogRef.close();
+    })
+  }
 
   cancel() {
     this.dialogRef.close();
@@ -73,10 +81,9 @@ export class SettingsSourceFormComponent {
     this.validationErrors = FormValidation.getFormValidationErrors(this.form);
     this.messages = [];
 
-    if (this.form.invalid || this.saveInProgress)
+    if (this.form.invalid)
       return
 
-    this.saveInProgress = true;
     const data = {
       id: this.id,
       name: this.form.get('name')?.value,
@@ -84,25 +91,9 @@ export class SettingsSourceFormComponent {
       isActive: this.form.get('isActive')?.value
     }
 
-    let submit$ = this.id
-                  ? this.sourceService.update(data)
-                  : this.sourceService.create(data);
-
-    submit$
-      .pipe(
-        take(1),
-        finalize(() => this.saveInProgress = false)
-      )
-      .subscribe({
-        next: (result) => {
-          if (result) {
-            this.toastService.showSuccess(`${this.id ? 'Updated Successfully' : 'Created Successfuly'}`)
-            this.dialogRef.close(result);
-          }
-        },
-        error: (v) => {
-          this.messages = [{ severity: 'error', summary: 'Error', detail: 'An error occured while saving the entry' } ];
-        }
-      })
+    if (this.id)
+      this.store.dispatch(updateSource({ data }))
+    else
+      this.store.dispatch(addSource({ data }))
   }
 }

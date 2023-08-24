@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Table, TableModule } from 'primeng/table';
 import { DataTableColumn } from '../../model/data-table-column';
@@ -18,10 +26,10 @@ import { AccessDirective } from '../../utils/access.directive';
     ProgressBarModule,
     ProgressSpinnerModule,
     ToastModule,
-    AccessDirective
+    AccessDirective,
   ],
   templateUrl: './data-table.component.html',
-  styleUrls: ['./data-table.component.scss']
+  styleUrls: ['./data-table.component.scss'],
 })
 export class DataTableComponent {
   @ViewChild(Table) dt?: Table;
@@ -33,23 +41,23 @@ export class DataTableComponent {
   rowData?: any[];
   @Input() set data(value: any[] | null) {
     if (value) {
+      // TODO: check behavior when removing setTimeout
       setTimeout(() => {
         this.rowData = value.map((row: any, i: number) => {
-          row.__data = {};
+          const obj = Object.assign({}, row);
+          obj.__data = {};
 
           for (const col of this._columns) {
             if (col.formatValue) {
-              row.__data[col.field] = col.formatValue(row, i);
-            }
-            else if(col.html) {
-              row.__data[col.field] = col.html(row, i);
-            }
-            else {
-              row.__data[col.field] = row[col.field];
+              obj.__data[col.field] = col.formatValue(obj, i);
+            } else if (col.html) {
+              obj.__data[col.field] = col.html(obj, i);
+            } else {
+              obj.__data[col.field] = obj[col.field];
             }
           }
 
-          return row;
+          return obj;
         });
 
         this.cdr.detectChanges();
@@ -63,8 +71,8 @@ export class DataTableComponent {
       this._columns = cols.map((d: any, i) => {
         // set width
         if (!d.width) {
-          const percentage = (1/cols.length) * 100;
-          d.width = `${percentage.toFixed(2)}%`
+          const percentage = (1 / cols.length) * 100;
+          d.width = `${percentage.toFixed(2)}%`;
         }
 
         return d;
@@ -79,9 +87,7 @@ export class DataTableComponent {
   @Output() editSelected = new EventEmitter();
   @Output() deleteSelected = new EventEmitter();
 
-  constructor(private cdr: ChangeDetectorRef) {
-
-  }
+  constructor(private cdr: ChangeDetectorRef) {}
 
   editItem(item: any) {
     this.editSelected.emit(item);
@@ -92,6 +98,6 @@ export class DataTableComponent {
   }
 
   trackBy(index: number, item: any) {
-    return item.id // O index
+    return item.id; // O index
   }
 }

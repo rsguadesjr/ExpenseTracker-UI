@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -9,7 +9,7 @@ import { Message } from 'primeng/api';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ToastService } from 'src/app/shared/utils/toast.service';
 import { BudgetService } from 'src/app/shared/data-access/budget.service';
-import { take, finalize } from 'rxjs';
+import { take, finalize, filter, skip } from 'rxjs';
 import { FormValidation } from 'src/app/shared/utils/form-validation';
 import { ButtonModule } from 'primeng/button';
 import { InputSwitchModule } from 'primeng/inputswitch';
@@ -19,6 +19,9 @@ import { Option } from 'src/app/shared/model/option.model';
 import { format } from 'date-fns';
 import { BudgetRequest } from '../../model/budget-request';
 import { BudgetResult } from 'src/app/shared/model/budget-result';
+import { Store } from '@ngrx/store';
+import { savingStatus } from 'src/app/state/budgets/budget.selector';
+import { addBudget, updateBudget } from 'src/app/state/budgets/budgets.action';
 
 @Component({
   selector: 'app-settings-budget-form',
@@ -38,49 +41,41 @@ import { BudgetResult } from 'src/app/shared/model/budget-result';
   templateUrl: './settings-budget-form.component.html',
   styleUrls: ['./settings-budget-form.component.scss']
 })
-export class SettingsBudgetFormComponent {
-  form!: FormGroup;
-  id?: number;
+export class SettingsBudgetFormComponent implements OnInit {
+  private dialogConfig = inject(DynamicDialogConfig);
+  private dialogRef = inject(DynamicDialogRef);
+  private store = inject(Store);
+
+
+  monthOptions: Option[] = [ { id: -1, name: 'Any' } ];
+  yearOptions: Option[] = [ { id: -1, name: 'Any' }];
 
   messages: Message[] = [];
   validationErrors: { [key: string]: string[] } = {};
-  saveInProgress = false;
+  id?: number;
+  savingStatus$ = this.store.select(savingStatus);
 
-  monthOptions: Option[] = [ { id: -1, name: 'Any' } ];
-  yearOptions: Option[] = [ { id: -1, name: 'Any' }]
+  form: FormGroup = new FormGroup({
+    amount: new FormControl(null, FormValidation.minNumberValidator(1, 'Please enter minimum amount')),
+    month: new FormControl(),
+    year: new FormControl(),
+    isActive: new FormControl(),
+    budgetCategories: new FormArray([])
+  })
 
-  constructor(
-    public dialogConfig: DynamicDialogConfig,
-    private dialogRef: DynamicDialogRef,
-    private budgetService: BudgetService,
-    private categoryService: CategoryService,
-    private toastService: ToastService
-  ) {
 
-    const data = dialogConfig.data as BudgetResult;
+  ngOnInit() {
+    const data = this.dialogConfig.data as BudgetResult;
     this.id = data.id;
 
-    this.form = new FormGroup({
-      amount: new FormControl(data?.amount ?? 0, FormValidation.minNumberValidator(1, 'Please enter minimum amount')),
-      month: new FormControl(data?.month ? this.monthOptions.find(x => x.id == data.month) : this.monthOptions[0]),
-      year: new FormControl(data?.year ? this.yearOptions.find(x => x.id == data.year) : this.yearOptions[0]),
-      isActive: new FormControl(data?.isActive),
-      budgetCategories: new FormArray([])
-    })
-
-    this.categoryService.getCategories()
-      .pipe(take(1))
-      .subscribe(result => {
-        result.forEach(category => {
-          const currentCategory = data.budgetCategories?.find(x => x.categoryId == category.id);
-          const budgetCategoryFormGroup = new FormGroup({
-            categoryId: new FormControl(category.id),
-            category: new FormControl(category.name),
-            amount: new FormControl(currentCategory?.amount ?? 0)
-          });
-          (this.form.get('budgetCategories') as FormArray).push(budgetCategoryFormGroup)
-        })
+    if (data) {
+      this.form.patchValue({
+        amount: data.amount,
+        month: data.month,
+        year: data.year,
+        isActive: data.isActive
       })
+    }
 
     const currentYear = new Date().getFullYear();
     const months = new Array(12).fill(0).map((x,i) => ({
@@ -97,6 +92,15 @@ export class SettingsBudgetFormComponent {
       name: year.toString()
     }) as Option)
     this.yearOptions = [...this.yearOptions, ...years];
+
+
+    this.savingStatus$.pipe(
+      skip(1),
+      filter((v) => v === 'success'),
+      take(1)
+    ).subscribe(() => {
+      this.dialogRef.close();
+    })
   }
 
   get budgetCategoriesArray() {
@@ -121,10 +125,9 @@ export class SettingsBudgetFormComponent {
       return;
     }
 
-    if (this.form.invalid || this.saveInProgress)
+    if (this.form.invalid)
       return
 
-    this.saveInProgress = true;
     const data: BudgetRequest = {
       id: this.id,
       month: this.form.get('month')?.value?.id,
@@ -136,26 +139,11 @@ export class SettingsBudgetFormComponent {
         categoryId: x.categoryId
       }))
     }
-    let submit$ = this.id
-                  ? this.budgetService.update(data)
-                  : this.budgetService.create(data);
 
-    submit$
-      .pipe(
-        take(1),
-        finalize(() => this.saveInProgress = false)
-      )
-      .subscribe({
-        next: (result) => {
-          if (result) {
-            this.toastService.showSuccess(`${this.id ? 'Updated Successfully' : 'Created Successfully'}`)
-            this.dialogRef.close(result);
-          }
-        },
-        error: (v) => {
-          this.messages = [{ severity: 'error', summary: 'Error', detail: 'An error occured while saving the entry' } ];
-        }
-      })
+    if (this.id)
+      this.store.dispatch(updateBudget({ data }));
+    else
+      this.store.dispatch(addBudget({ data }));
   }
 
   validateCategoryAmount() {

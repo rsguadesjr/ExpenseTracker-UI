@@ -12,22 +12,22 @@ const routes: Routes = [
       {
         path: 'category',
         loadComponent: () =>
-          import('../settings-category/settings-category.page.component').then(
-            (m) => m.SettingsCategoryPageComponent
+          import('../settings-category/settings-category.component').then(
+            (m) => m.SettingsCategoryComponent
           )
       },
       {
         path: 'source',
         loadComponent: () =>
-          import('../settings-source/settings-source.page.component').then(
-            (m) => m.SettingsSourcePageComponent
+          import('../settings-source/settings-source.component').then(
+            (m) => m.SettingsSourceComponent
           )
       },
       {
         path: 'budget',
         loadComponent: () =>
-          import('../settings-budget/settings-budget.page.component').then(
-            (m) => m.SettingsBudgetPageComponent
+          import('../settings-budget/settings-budget.component').then(
+            (m) => m.SettingsBudgetComponent
           )
       },
       {

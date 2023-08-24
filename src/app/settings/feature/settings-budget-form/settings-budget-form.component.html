@@ -51,9 +51,10 @@
       </div>
     </div>
   </form>
-  <div class="flex flex-row justify-content-end gap-2 mt-4">
+  <div class="flex flex-row justify-content-end gap-2 mt-4" *ngIf="savingStatus$ | async; let status">
     <button pButton pRipple label="Cancel" (click)="cancel()"></button>
-    <button pButton pRipple [label]="saveInProgress ? 'Saving...' : 'Submit'"
-      [icon]="saveInProgress ? 'pi pi-spin pi-spinner' : ''" class="p-button-success" (click)="submit()"></button>
+
+    <button *ngIf="status !== 'in-progress'" pButton pRipple label="Submit" class="p-button-success" (click)="submit()"></button>
+    <button *ngIf="status === 'in-progress'" pButton pRipple label="Saving..." class="p-button-success" icon="pi pi-spin pi-spinner"></button>
   </div>
 </p-card>

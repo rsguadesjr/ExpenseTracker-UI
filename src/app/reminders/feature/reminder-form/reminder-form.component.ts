@@ -1,14 +1,12 @@
-import { Component, OnDestroy, OnInit, Optional, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, FormGroupName, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { MessagesModule } from 'primeng/messages';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Message } from 'primeng/api';
 import { FormValidation } from '../../../shared/utils/form-validation';
-import { CategoryService } from '../../../shared/data-access/category.service';
-import { SourceService } from '../../../shared/data-access/source.service';
-import { Observable, Subject, combineLatest, map, skip, take, takeUntil } from 'rxjs';
+import { Subject, filter, map, skip, take, takeUntil } from 'rxjs';
 import { Option } from '../../../shared/model/option.model';
 import { DropdownModule } from 'primeng/dropdown';
 import { format, parseISO, startOfDay } from 'date-fns';
@@ -19,7 +17,6 @@ import { MessageModule } from 'primeng/message';
 import { ReminderModel } from '../../../shared/model/reminder-model';
 import { ReminderType } from '../../../shared/enums/reminder-type';
 import { ReminderRequestModel } from '../../../shared/model/reminder-request-model';
-import { ToastService } from '../../../shared/utils/toast.service';
 import { ReminderService } from '../../data-access/reminder.service';
 import { Store } from '@ngrx/store';
 import { savingStatus } from 'src/app/state/reminders/reminders.selector';
@@ -56,7 +53,7 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
 
   isEdit: boolean = false;
   types: Option[] = [
-    { id: undefined, name: '' },
+    { id: null, name: '' },
     { id: ReminderType.OneTime, name: 'One Time' },
     { id: ReminderType.Daily, name: 'Daily' },
     { id: ReminderType.Weekly, name: 'Weekly' },
@@ -66,10 +63,13 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
   messages: Message[] = [];
   validationErrors: { [key: string]: string[] } = {};
 
-  processState$ = this.reminderService.getProcessState();
   savingStatus$ = this.store.select(savingStatus);
-  categories$ = this.store.select(selectAllActiveCategories);
-  sources$ = this.store.select(selectAllActiveSources);
+  categories$ = this.store.select(selectAllActiveCategories).pipe(
+    map(data => [{ id: null, name: '' }, ...data])
+  );
+  sources$ = this.store.select(selectAllActiveSources).pipe(
+    map(data => [{ id: null, name: '' }, ...data])
+  );;
 
   ngOnInit() {
     this.isEdit = this.dialogConfig.data.isEdit;
@@ -104,16 +104,13 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
     this.form.get('type')?.updateValueAndValidity();
 
 
-    this.savingStatus$
-      .pipe(
-        skip(1),
-        takeUntil(this.unsubscribe$)
-      )
-      .subscribe((status) => {
-        if (status === 'success') {
-          this.dialogRef.close({});
-        }
-      });
+    this.savingStatus$.pipe(
+      skip(1),
+      filter((v) => v === 'success'),
+      take(1)
+    ).subscribe(() => {
+      this.dialogRef.close();
+    })
   }
 
   ngOnDestroy(): void {

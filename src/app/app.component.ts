@@ -37,6 +37,7 @@ import { loadReminders } from './state/reminders/reminders.action';
 import { endOfYear, startOfYear } from 'date-fns';
 import { loadCategories } from './state/categories/categories.action';
 import { loadSources } from './state/sources/sources.action';
+import { loadBudgets } from './state/budgets/budgets.action';
 
 @Component({
   selector: 'app-root',
@@ -102,41 +103,18 @@ export class AppComponent implements OnInit {
     });
 
 
-    // this.authService.user$
-    // .subscribe({
-    //   next: (user) => {
-    //     if (user) {
-    //       this.categoryService.initCategories();
-    //       this.sourceService.initSources();
-    //     }
-    //   }
-    // })
-
     this.authService.isAuthenticated$
       .pipe(
-        debounceTime(2000)
+        // debounceTime(2000)
       )
       .subscribe(isAuth => {
         if (isAuth) {
-          // this.categoryService.initCategories();
-          // this.sourceService.initSources();
           this.store.dispatch(loadCategories());
           this.store.dispatch(loadSources());
-          this.store.dispatch(loadReminders({ params: { startDate: '', endDate: '' }}))
+          this.store.dispatch(loadReminders({ params: { startDate: '', endDate: '' }}));
+          this.store.dispatch(loadBudgets());
         }
       })
-
-
-    combineLatest([
-      this.expenseService.getCreatedOrUpdateItem().pipe(startWith('')),
-      this.expenseService.getDeletedId().pipe(startWith(''))
-    ])
-    .pipe()
-    .subscribe(([latestData, id]) => {
-      if (latestData || id) {
-        this.summaryService.clearCache()
-      }
-    })
   }
 
   ngOnInit(): void {

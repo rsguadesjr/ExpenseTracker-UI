@@ -91,6 +91,7 @@ import {
 } from 'src/app/shared/feature/calendar/calendar.component';
 import { ReminderType } from 'src/app/shared/enums/reminder-type';
 import { selectFormattedReminders } from 'src/app/state/reminders/reminders.selector';
+import { DropdownModule } from 'primeng/dropdown';
 
 @Component({
   selector: 'app-expense-list-page',
@@ -99,24 +100,15 @@ import { selectFormattedReminders } from 'src/app/state/reminders/reminders.sele
     CommonModule,
     DataViewModule,
     ButtonModule,
-    TagModule,
-    FormsModule,
     ReactiveFormsModule,
-    ToolbarModule,
     CalendarModule,
-    PaginatorModule,
+    DropdownModule,
     ExpenseListComponent,
-    SelectButtonModule,
     ExpenseTableViewComponent,
-    TabViewModule,
     ExpensePerCategoryComponent,
-    CardModule,
-    BadgeModule,
     SumPipe,
     ConfirmDialogModule,
-    ReminderCalendarComponent,
     DecimalPipe,
-    CalendarDataComponent,
     TooltipModule,
     AccessDirective,
     CalendarComponent,
@@ -128,6 +120,12 @@ import { selectFormattedReminders } from 'src/app/state/reminders/reminders.sele
 })
 export class ExpensePageComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
+  private summaryService = inject(SummaryService);
+  private dateParamService = inject(DateParamService);
+  private dialogService = inject(DialogService);
+  private confirmationService = inject(ConfirmationService);
+  private decimalPipe = inject(DecimalPipe);
+  private cdr = inject(ChangeDetectorRef);
   private store = inject(Store);
 
   rowsPerPage: number = 10;
@@ -211,24 +209,6 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
     month: new FormControl(),
     category: new FormControl(),
   });
-
-  constructor(
-    private router: Router,
-    private expenseService: ExpenseService,
-    private route: ActivatedRoute,
-    private summaryService: SummaryService,
-    private dateParamService: DateParamService,
-    private validationMessageService: ValidationMessageService,
-    private sumPipe: SumPipe,
-    private dialogService: DialogService,
-    private confirmationService: ConfirmationService,
-    private toastService: ToastService,
-    private reminderService: ReminderService,
-    public decimalPipe: DecimalPipe,
-    private cdr: ChangeDetectorRef
-  ) {
-
-  }
 
   ngOnInit() {
     this.initMonthOptions();

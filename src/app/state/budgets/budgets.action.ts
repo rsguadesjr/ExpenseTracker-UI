@@ -50,8 +50,7 @@ export const deleteBudgetError = createAction(
 
 /* #region Load Operation */
 export const loadBudgets = createAction(
-  '[Budget Page] Load Budgets',
-  props<{ params: any }>()
+  '[Budget Page] Load Budgets'
 )
 export const loadBudgetsSuccess = createAction(
   '[Budget API] Load Budgets Success',

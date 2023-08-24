@@ -1,40 +1,25 @@
-import { ExpenseService } from '../../data-access/expense.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule, Location } from '@angular/common';
-import { Component, OnDestroy, OnInit, Optional, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {
-  FormBuilder,
   FormControl,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
-  Validators,
 } from '@angular/forms';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
-import { Expense } from '../../model/expense.model';
 import {
   map,
-  take,
-  BehaviorSubject,
-  switchMap,
-  of,
-  forkJoin,
-  Observable,
   takeUntil,
   Subject,
-  combineLatest,
   skip,
+  filter,
+  take,
 } from 'rxjs';
 import { CalendarModule } from 'primeng/calendar';
 import { ExpenseDto } from '../../model/expense-dto.model';
-import { ToastService } from 'src/app/shared/utils/toast.service';
-import { ValidationMessageService } from 'src/app/shared/utils/validation-message.service';
-import { CategoryService } from 'src/app/shared/data-access/category.service';
-import { SourceService } from 'src/app/shared/data-access/source.service';
-import { Option } from 'src/app/shared/model/option.model';
-import { parseISO, startOfDay } from 'date-fns';
+import { startOfDay } from 'date-fns';
 import { CardModule } from 'primeng/card';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ChipsModule } from 'primeng/chips';
@@ -118,16 +103,13 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
       });
     }
 
-    this.savingStatus$
-      .pipe(
-        skip(1),
-        takeUntil(this.unsubscribe$)
-      )
-      .subscribe((status) => {
-        if (status === 'success') {
-          this.dialogRef.close({});
-        }
-      });
+    this.savingStatus$.pipe(
+      skip(1),
+      filter((v) => v === 'success'),
+      take(1)
+    ).subscribe(() => {
+      this.dialogRef.close();
+    })
   }
 
   ngOnDestroy() {

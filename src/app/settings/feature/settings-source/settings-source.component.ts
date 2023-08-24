@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { AccessDirective } from 'src/app/shared/utils/access.directive';
 
 @Component({
-  selector: 'app-settings-source.page',
+  selector: 'app-settings-source',
   standalone: true,
   imports: [
     CommonModule,
@@ -18,11 +18,11 @@ import { AccessDirective } from 'src/app/shared/utils/access.directive';
     ButtonModule,
     AccessDirective
   ],
-  templateUrl: './settings-source.page.component.html',
-  styleUrls: ['./settings-source.page.component.scss'],
+  templateUrl: './settings-source.component.html',
+  styleUrls: ['./settings-source.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SettingsSourcePageComponent {
+export class SettingsSourceComponent {
 
   data: any[] = [
     { id: 1, name: 'Cash', description: 'Cash Source', tags: [ 'tag1', 'tag2'] },
@@ -42,7 +42,7 @@ export class SettingsSourcePageComponent {
 
 
   onEdit(item: any) {
-    const dialgoRef = this.dialogService.open(SettingsSourceFormComponent, {
+    this.dialogService.open(SettingsSourceFormComponent, {
       width: '420px',
       header: 'Update',
       contentStyle: { overflow: 'auto' },
@@ -54,16 +54,10 @@ export class SettingsSourcePageComponent {
       },
 
     })
-
-    dialgoRef.onClose.pipe(take(1))
-    .subscribe((result) => {
-      if (result) {
-      }
-    })
   }
 
   onCreate() {
-    const dialgoRef = this.dialogService.open(SettingsSourceFormComponent, {
+    this.dialogService.open(SettingsSourceFormComponent, {
       width: '420px',
       header: 'Create',
       contentStyle: { overflow: 'auto' },
@@ -74,12 +68,6 @@ export class SettingsSourcePageComponent {
         isActive: true
       },
 
-    })
-
-    dialgoRef.onClose.pipe(take(1))
-    .subscribe((result) => {
-      if (result) {
-      }
     })
   }
 

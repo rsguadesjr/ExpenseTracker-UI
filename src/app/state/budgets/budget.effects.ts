@@ -27,7 +27,7 @@ export class BudgetEffects {
   loadBudgets$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadBudgets),
-      switchMap(({ params }) => {
+      switchMap(() => {
         return this.budgetService.getBudgets().pipe(
           map((result) => loadBudgetsSuccess({ data: result })),
 

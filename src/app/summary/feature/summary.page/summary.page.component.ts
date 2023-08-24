@@ -117,9 +117,6 @@ export class SummaryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.budgetService.initBudgets();
-
-
     this.chartData$ = this.filter$
       .pipe(
         filter((f) => !!f),
