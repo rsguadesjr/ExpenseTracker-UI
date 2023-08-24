@@ -6,7 +6,6 @@
       <app-calendar [date]="calendarDate"
           [month]="(calendarMonth$ | async)!"
           [items]="(calendarItems$ | async) ?? []"
-          (selectDate)="selectDate($event)"
           (monthChange)="monthChange($event)"
     >
     </app-calendar>

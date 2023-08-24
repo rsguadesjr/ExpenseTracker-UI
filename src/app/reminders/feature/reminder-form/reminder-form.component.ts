@@ -47,7 +47,6 @@ export class ReminderFormComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private dialogConfig = inject(DynamicDialogConfig);
   private dialogRef = inject(DynamicDialogRef);
-  private reminderService = inject(ReminderService);
 
   form!: FormGroup;
 

@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { Option } from '../model/option.model';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { CategoryResponseModel } from '../model/category-response.model';
 import { CategoryRequestModel } from '../model/category-request.model';
 

@@ -30,7 +30,7 @@
         <div class="flex flex-grow-1 gap-2 ">
           <p-button icon="pi {{  (filterInProgress$ | async) ? 'pi-spin pi-spinner' : 'pi-search' }}"
                     pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
-          <p-button icon="pi pi-filter-slash" pTooltip="Clear fields" styleClass="p-button-rounded " (click)="clearFilter()"></p-button>
+          <!-- <p-button icon="pi pi-filter-slash" pTooltip="Clear fields" styleClass="p-button-rounded " (click)="clearFilter()"></p-button> -->
         </div>
         <p-button *access="['SuperAdmin', 'Admin', 'Standard', 'BasicExpense']" icon="pi pi-plus" pTooltip="Create Expense" tooltipPosition="left" styleClass="p-button-rounded " (click)="addEntry()"></p-button>
       </div>
@@ -94,5 +94,3 @@
 <ng-template #defaultDay>
   <span class="py-2 text-xs">&nbsp;</span>
 </ng-template>
-
-<p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>

@@ -2,18 +2,12 @@ import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { GoogleAuthProvider, User, getIdTokenResult } from 'firebase/auth';
 import {
   BehaviorSubject,
-  Observable,
-  Subject,
   catchError,
-  combineLatest,
-  debounceTime,
   from,
   map,
   of,
-  startWith,
   switchMap,
   tap,
   throwError,

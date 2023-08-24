@@ -3,24 +3,16 @@ import {
   combineLatest,
   debounceTime,
   delay,
-  distinctUntilChanged,
-  filter,
   map,
-  Observable,
   of,
-  share,
   skip,
   startWith,
   Subject,
   switchMap,
   take,
   takeUntil,
-  tap,
 } from 'rxjs';
-import { ExpenseService } from '../../data-access/expense.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import {
-  FormsModule,
   FormGroup,
   ReactiveFormsModule,
   FormControl,
@@ -36,44 +28,28 @@ import {
 } from '@angular/core';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
 import { ExpenseResponseModel } from '../../model/expense-response.model';
-import { ToolbarModule } from 'primeng/toolbar';
 import { CalendarModule } from 'primeng/calendar';
-import { PaginatorModule } from 'primeng/paginator';
 import { ExpenseListComponent } from '../../ui/expense-list/expense-list.component';
-import { SelectButtonModule } from 'primeng/selectbutton';
 import { ExpenseTableViewComponent } from '../../ui/expense-table-view/expense-table-view.component';
-import { TabViewModule } from 'primeng/tabview';
 import { ExpensePerCategoryComponent } from '../../ui/expense-per-category/expense-per-category.component';
-import { TotalPerCategory } from 'src/app/shared/model/total-per-category.mode';
-import { CardModule } from 'primeng/card';
 import { DateParamService } from 'src/app/shared/utils/date-param.service';
 import { Option } from 'src/app/shared/model/option.model';
-import { ValidationMessageService } from 'src/app/shared/utils/validation-message.service';
-import { BadgeModule } from 'primeng/badge';
 import {
   addMonths,
-  endOfDay,
   endOfMonth,
   format,
   isSameDay,
-  startOfDay,
   startOfMonth,
 } from 'date-fns';
 import { SumPipe } from 'src/app/shared/utils/sum.pipe';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ExpenseDetailComponent } from '../expense-detail/expense-detail.component';
 import { ConfirmationService } from 'primeng/api';
-import { ToastService } from 'src/app/shared/utils/toast.service';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ReminderCalendarComponent } from 'src/app/shared/ui/reminder-calendar/reminder-calendar.component';
 import { ReminderModel } from 'src/app/shared/model/reminder-model';
-import { CalendarDataComponent } from 'src/app/expenses/feature/calendar-data/calendar-data.component';
-import { TotalPerDate } from 'src/app/shared/model/total-per-date';
 import { TooltipModule } from 'primeng/tooltip';
 import { AccessDirective } from 'src/app/shared/utils/access.directive';
-import { ReminderService } from 'src/app/reminders/data-access/reminder.service';
 import { SummaryService } from 'src/app/summary/data-access/summary.service';
 import { Store } from '@ngrx/store';
 import {
@@ -114,7 +90,7 @@ import { ExpenseRequestModel } from '../../model/expense-request.model';
     AccessDirective,
     CalendarComponent,
   ],
-  providers: [SumPipe, ConfirmationService, DecimalPipe],
+  providers: [SumPipe, DecimalPipe],
   templateUrl: './expense-page.component.html',
   styleUrls: ['./expense-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -369,7 +345,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
       'Do you want to delete this entry?',
       `Amount: ${expense.amount}`,
       `Date: ${format(new Date(expense.expenseDate), 'MMM/dd/yyyy')}`,
-      `Category: ${expense.category}`,
+      `Category: ${expense.category?.name}`,
       `Description: ${expense.description}`,
     ];
     this.confirmationService.confirm({

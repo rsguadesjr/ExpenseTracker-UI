@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { DataTableComponent } from 'src/app/shared/feature/data-table/data-table.component';
 import { DataTableColumn } from 'src/app/shared/model/data-table-column';
 import { AccessDirective } from 'src/app/shared/utils/access.directive';
-import { ReminderService } from '../../data-access/reminder.service';
 import {
   add,
   addDays,
@@ -18,25 +17,15 @@ import {
 } from 'date-fns';
 import {
   BehaviorSubject,
-  Observable,
   Subject,
-  combineLatest,
-  debounceTime,
   map,
-  startWith,
   switchMap,
-  take,
-  takeUntil,
-  takeWhile,
-  tap,
 } from 'rxjs';
 import { ReminderType } from 'src/app/shared/enums/reminder-type';
 import { ReminderModel } from 'src/app/shared/model/reminder-model';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ReminderFormComponent } from 'src/app/reminders/feature/reminder-form/reminder-form.component';
 import { ConfirmationService } from 'primeng/api';
-import { ToastService } from 'src/app/shared/utils/toast.service';
-import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import {
   selectDistinctFormattedReminders,
@@ -65,15 +54,10 @@ import {
   styleUrls: ['./reminder-page.component.scss'],
 })
 export class ReminderPageComponent implements OnInit, OnDestroy {
-  private ngUnsubscribe$ = new Subject();
-
-  reminderService = inject(ReminderService);
-  decimalPipe = inject(DecimalPipe);
-  dialogService = inject(DialogService);
-  confirmationService = inject(ConfirmationService);
-  toastService = inject(ToastService);
-  router = inject(Router);
-  store = inject(Store);
+  private unsubscribe$ = new Subject();
+  private dialogService = inject(DialogService);
+  private confirmationService = inject(ConfirmationService);
+  private store = inject(Store);
 
   columns: DataTableColumn[] = [
     { header: 'Subject', field: 'subject' },
@@ -190,15 +174,15 @@ export class ReminderPageComponent implements OnInit, OnDestroy {
   ngOnInit() {}
 
   ngOnDestroy(): void {
-    this.ngUnsubscribe$.next(null);
-    this.ngUnsubscribe$.complete();
+    this.unsubscribe$.next(null);
+    this.unsubscribe$.complete();
   }
 
   monthChange({ year, month }: { year: number; month: number }) {
     this.calendarMonth$.next(new Date(year, month));
   }
 
-  selectDate(e: any) {}
+  selectDate() {}
 
   onEdit(reminder: ReminderModel) {
     this.dialogService.open(ReminderFormComponent, {

@@ -1,18 +1,12 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChartModule } from 'primeng/chart';
 import { SummaryService } from '../../data-access/summary.service';
 import {
   addMonths,
   addYears,
-  differenceInMonths,
-  eachDayOfInterval,
   endOfMonth,
   endOfYear,
   format,
-  isSameDay,
-  isSameMonth,
-  monthsInYear,
   startOfMonth,
   startOfYear,
 } from 'date-fns';
@@ -21,11 +15,7 @@ import {
   Observable,
   Subject,
   combineLatest,
-  combineLatestAll,
-  debounceTime,
   filter,
-  finalize,
-  forkJoin,
   map,
   of,
   switchMap,

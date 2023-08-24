@@ -4,15 +4,10 @@
 
 
   <div class="container relative p-2 px-4">
-
     <p-toast key="global-toast"></p-toast>
-    <p-messages key="route-level-validation-message"></p-messages>
-    <p-messages [(value)]="validationMessages" [enableService]="false"></p-messages>
-
+    <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
 
     <router-outlet></router-outlet>
-
-    <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
   </div>
 
 

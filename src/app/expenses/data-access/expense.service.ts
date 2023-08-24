@@ -1,12 +1,10 @@
 import { environment } from './../../../environments/environment';
-import { BehaviorSubject, Observable, Subject, catchError, map, tap, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Injectable, inject } from '@angular/core';
 import { ExpenseResponseModel } from '../model/expense-response.model';
 import { HttpClient } from '@angular/common/http';
 import { ExpenseRequestModel } from '../model/expense-request.model';
 import { PaginatedList } from 'src/app/shared/model/paginated-list.model';
-import { ResponseData } from '../../shared/model/response-data';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 @Injectable({
   providedIn: 'root'

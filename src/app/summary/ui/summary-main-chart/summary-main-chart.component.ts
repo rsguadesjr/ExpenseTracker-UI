@@ -5,7 +5,6 @@ import { SummaryFilter } from '../../model/summary-filter.model';
 import { BudgetResult } from 'src/app/shared/model/budget-result';
 import { TotalAmountPerCategoryPerDate } from '../../model/total-amount-per-category-per-date';
 import { format, isSameMonth, eachDayOfInterval, isSameDay, getDaysInMonth } from 'date-fns';
-import { ChartData } from '../../model/chart-data';
 import { CategoryResponseModel } from 'src/app/shared/model/category-response.model';
 
 @Component({

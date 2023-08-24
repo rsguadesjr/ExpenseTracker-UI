@@ -15,7 +15,6 @@ import { GoogleAuthProvider } from 'firebase/auth';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, Subject, finalize, map } from 'rxjs';
 import { CardModule } from 'primeng/card';
-import { ValidationMessageService } from 'src/app/shared/utils/validation-message.service';
 import { TabViewModule } from 'primeng/tabview';
 import { SignUpComponent } from 'src/app/login/feature/sign-up/sign-up.component';
 import { FormValidation } from 'src/app/shared/utils/form-validation';
