@@ -12,6 +12,8 @@ import { ButtonModule } from 'primeng/button';
 import { AccessDirective } from 'src/app/shared/utils/access.directive';
 import { Store } from '@ngrx/store';
 import { selectAllCategories } from 'src/app/state/categories/categories.selector';
+import { CategoryResponseModel } from 'src/app/shared/model/category-response.model';
+import { CategoryRequestModel } from 'src/app/shared/model/category-request.model';
 
 @Component({
   selector: 'app-settings-category',
@@ -37,16 +39,8 @@ export class SettingsCategoryComponent {
     { header: 'Status', field: 'isActive', formatValue: (value) => value.isActive ? 'Active' : 'Inactive' }
   ];
 
-  // constructor(
-  //   private categoryService: CategoryService,
-  //   private dialogService: DialogService,
-  // ) {
-  //   // take only initial value
-  //   this.categoryService.initCategories();
-  //   this.categories$ = this.categoryService.getCategories();
-  // }
 
-  onEdit(item: any) {
+  onEdit(item: CategoryResponseModel) {
     this.dialogService.open(SettingsCategoryFormComponent, {
       width: '420px',
       header: 'Update',
@@ -55,8 +49,12 @@ export class SettingsCategoryComponent {
       styleClass: 'component-dialog',
       closeOnEscape: true,
       data: {
-        ...item
-      },
+        id: item.id,
+        description: item.description,
+        isActive: item.isActive,
+        name: item.name,
+        order: item.order
+      } as CategoryRequestModel,
     });
   }
 

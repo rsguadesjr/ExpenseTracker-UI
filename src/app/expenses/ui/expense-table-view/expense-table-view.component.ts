@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { Expense } from '../../model/expense.model';
 import { PaginatorModule } from 'primeng/paginator';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { TagModule } from 'primeng/tag';
@@ -12,6 +11,7 @@ import { BehaviorSubject, map, of } from 'rxjs';
 import { Option } from 'src/app/shared/model/option.model';
 import { SortPipe } from 'src/app/shared/utils/sort.pipe';
 import { AccessDirective } from 'src/app/shared/utils/access.directive';
+import { ExpenseResponseModel } from '../../model/expense-response.model';
 
 @Component({
   selector: 'app-expense-table-view',
@@ -31,40 +31,46 @@ import { AccessDirective } from 'src/app/shared/utils/access.directive';
   styleUrls: ['./expense-table-view.component.scss'],
 })
 export class ExpenseTableViewComponent {
-  items$ = new BehaviorSubject<Expense[]>([]);
-  @Input() set items(value: Expense[]) {
+  items$ = new BehaviorSubject<ExpenseResponseModel[]>([]);
+  @Input() set items(value: ExpenseResponseModel[]) {
     if (value) {
-      this.items$.next(value);
+      this.items$.next(value.map(v => Object.assign(v)));
     }
   }
 
   categories$ = this.items$.pipe(map(v => {
-    const value = v.map(x => x.category);
-    return Array.from(new Set(value)).map(x => ({ name: x } as Option));
+    return v.filter(
+      (exp, i) =>
+        exp.category != null &&
+        v.findIndex((e) => e.category.id === exp.category.id) === i
+    ).map(exp => exp.category);
   }))
 
   sources$ = this.items$.pipe(map(v => {
-    const value = v.map(x => x.source);
-    return Array.from(new Set(value)).map(x => ({ name: x } as Option));
+    return v.filter(
+      (exp, i) =>
+        exp.source != null &&
+        v.findIndex((e) => e.source.id === exp.source.id) === i
+    ).map(exp => exp.source);
   }))
 
   tags$ = this.items$.pipe(map(v => {
-    const value = v.reduce((acc: string[], obj: Expense) => {
+    const value = v.reduce((acc: string[], obj: ExpenseResponseModel) => {
       acc = [...acc, ...obj.tags!];
       return acc;
     }, [])
     return Array.from(new Set(value)).map(x => ({ name: x } as Option));
   }))
 
-  @Output() selected = new EventEmitter<Expense>();
-  @Output() delete = new EventEmitter<Expense>();
-  @Output() onFilterChange = new EventEmitter<Expense[]>();
+  @Output() selected = new EventEmitter<ExpenseResponseModel>();
+  @Output() delete = new EventEmitter<ExpenseResponseModel>();
+  @Output() onFilterChange = new EventEmitter<ExpenseResponseModel[]>();
 
-  editEntry(item: Expense) {
+  editEntry(item: ExpenseResponseModel) {
     this.selected.emit(item);
   }
 
-  deleteEntry(item: Expense) {
+  deleteEntry(item: ExpenseResponseModel) {
     this.delete.emit(item);
   }
 
@@ -76,15 +82,21 @@ export class ExpenseTableViewComponent {
       }
 
       if (Array.isArray(value)) {
-        return value.some((r: any) => filter.map(x => x.name).includes(r));
+        return value.some((r: any) => {
+          const lookup = r?.name ?? r;
+          return filter.map(x => x.name).includes(lookup)
+        });
       }
       else {
-        return filter.some(x => x.name == value);
+        return filter.some(x => {
+          const lookup = value?.name ?? value;
+          return x.name == lookup;
+        });
       }
     });
   }
 
-  onFilter({ filteredValue } : { filteredValue: Expense[] }) {
+  onFilter({ filteredValue } : { filteredValue: ExpenseResponseModel[] }) {
     this.onFilterChange.emit(filteredValue);
   }
 }

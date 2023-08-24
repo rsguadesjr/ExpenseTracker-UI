@@ -1,13 +1,12 @@
 import { Option } from 'src/app/shared/model/option.model';
-
-export interface Expense {
+export interface ExpenseResponseModel {
   id?: string | null;
-  categoryId: number;
-  category?: string;
+  category: Option;
   amount: number;
   expenseDate: any;
   description: string;
-  sourceId?: number;
-  source?: string;
+  source: Option;
   tags?: string[];
+  createdDate?: string;
+  modifiedDate?: string;
 }

@@ -14,6 +14,7 @@ import { Store } from '@ngrx/store';
 import { addSource, updateSource } from 'src/app/state/sources/sources.action';
 import { savingStatus } from 'src/app/state/sources/sources.selector';
 import { filter, skip, take } from 'rxjs';
+import { SourceRequestModel } from 'src/app/shared/model/source-request.model';
 
 @Component({
   selector: 'app-settings-source-form',
@@ -38,7 +39,7 @@ export class SettingsSourceFormComponent implements OnInit {
 
   messages: Message[] = [];
   validationErrors: { [key: string]: string[] } = {};
-  id?: string;
+  id: string | null = null;
 
   savingStatus$ = this.store.select(savingStatus);
 
@@ -89,7 +90,7 @@ export class SettingsSourceFormComponent implements OnInit {
       name: this.form.get('name')?.value,
       description: this.form.get('description')?.value,
       isActive: this.form.get('isActive')?.value
-    }
+    } as SourceRequestModel
 
     if (this.id)
       this.store.dispatch(updateSource({ data }))

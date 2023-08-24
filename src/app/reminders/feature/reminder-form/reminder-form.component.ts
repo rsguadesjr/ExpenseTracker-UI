@@ -16,7 +16,7 @@ import { ChipsModule } from 'primeng/chips';
 import { MessageModule } from 'primeng/message';
 import { ReminderModel } from '../../../shared/model/reminder-model';
 import { ReminderType } from '../../../shared/enums/reminder-type';
-import { ReminderRequestModel } from '../../../shared/model/reminder-request-model';
+import { ReminderRequestModel } from '../../../shared/model/reminder-request.model';
 import { ReminderService } from '../../data-access/reminder.service';
 import { Store } from '@ngrx/store';
 import { savingStatus } from 'src/app/state/reminders/reminders.selector';

@@ -1,9 +1,10 @@
 import { createReducer, on } from "@ngrx/store";
 import { addSource, addSourceError, addSourceSuccess, deleteSource, deleteSourceError, deleteSourceSuccess, loadSources, loadSourcesError, loadSourcesSuccess, updateSource, updateSourceError, updateSourceSuccess } from "./sources.action";
+import { SourceResponseModel } from "src/app/shared/model/source-response.model";
 
 export interface SourceState {
-  sources: any[];
-  selectedSource: any;
+  sources: SourceResponseModel[];
+  selectedSource: SourceResponseModel | null;
   error: string | null;
   loadingStatus: 'pending' | 'loading' | 'error' | 'success';
   savingStatus: 'pending' |'in-progress' | 'error' | 'success';

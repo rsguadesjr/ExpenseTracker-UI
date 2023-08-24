@@ -1,13 +1,15 @@
 import { createAction, props } from "@ngrx/store";
+import { ExpenseRequestModel } from "src/app/expenses/model/expense-request.model";
+import { ExpenseResponseModel } from "src/app/expenses/model/expense-response.model";
 
 /* #region Add Operation */
 export const addExpense = createAction(
   '[Expense Page] Add Expense',
-  props<{ data: any }>()
+  props<{ data: ExpenseRequestModel }>()
 )
 export const addExpenseSuccess = createAction(
   '[Expense API] Add Expense Success',
-  props<{ data: any }>()
+  props<{ data: ExpenseResponseModel }>()
 )
 export const addExpenseError = createAction(
   '[Expense API] Add Expense Error',
@@ -19,11 +21,11 @@ export const addExpenseError = createAction(
 /* #region Update Operation */
 export const updateExpense = createAction(
   '[Expense Page] Update Expense',
-  props<{ data: any }>()
+  props<{ data: ExpenseRequestModel }>()
 )
 export const updateExpenseSuccess = createAction(
   '[Expense API] Update Expense Success',
-  props<{ data: any }>()
+  props<{ data: ExpenseResponseModel }>()
 )
 export const updateExpenseError = createAction(
   '[Expense API] Update Expense Error',

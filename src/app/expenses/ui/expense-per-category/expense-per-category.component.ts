@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Expense } from '../../model/expense.model';
+import { ExpenseResponseModel } from '../../model/expense-response.model';
 import { TotalPerCategory } from 'src/app/shared/model/total-per-category.mode';
 import { ChartModule } from 'primeng/chart';
 

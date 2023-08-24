@@ -18,7 +18,7 @@ import {
   take,
 } from 'rxjs';
 import { CalendarModule } from 'primeng/calendar';
-import { ExpenseDto } from '../../model/expense-dto.model';
+import { ExpenseRequestModel } from '../../model/expense-request.model';
 import { startOfDay } from 'date-fns';
 import { CardModule } from 'primeng/card';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
@@ -125,7 +125,7 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
 
     if (this.form.valid) {
       const form = this.form.value;
-      const expense: ExpenseDto = {
+      const expense: ExpenseRequestModel = {
         id: this.isEdit ? this.expense.id : null,
         categoryId: form.categoryId!,
         amount: form.amount!,

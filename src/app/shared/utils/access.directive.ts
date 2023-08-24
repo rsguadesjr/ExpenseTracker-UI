@@ -14,7 +14,7 @@ export class AccessDirective {
 
   @Input() set access(allowedRoles: string[]) {
     const userData = this.authService.getUserData();
-
+    console.log('[DEBUG] userData', userData)
     let roles: string[] = [];
     if (userData && userData['Role']) {
       roles =

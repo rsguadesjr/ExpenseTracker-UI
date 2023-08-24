@@ -1,13 +1,15 @@
 import { createAction, props } from "@ngrx/store";
+import { SourceRequestModel } from "src/app/shared/model/source-request.model";
+import { SourceResponseModel } from "src/app/shared/model/source-response.model";
 
 /* #region Add Operation */
 export const addSource = createAction(
   '[Source Page] Add Source',
-  props<{ data: any }>()
+  props<{ data: SourceRequestModel }>()
 )
 export const addSourceSuccess = createAction(
   '[Source API] Add Source Success',
-  props<{ data: any }>()
+  props<{ data: SourceResponseModel }>()
 )
 export const addSourceError = createAction(
   '[Source API] Add Source Error',
@@ -19,11 +21,11 @@ export const addSourceError = createAction(
 /* #region Update Operation */
 export const updateSource = createAction(
   '[Source Page] Update Source',
-  props<{ data: any }>()
+  props<{ data: SourceRequestModel }>()
 )
 export const updateSourceSuccess = createAction(
   '[Source API] Update Source Success',
-  props<{ data: any }>()
+  props<{ data: SourceResponseModel }>()
 )
 export const updateSourceError = createAction(
   '[Source API] Update Source Error',
@@ -56,7 +58,7 @@ export const loadSources = createAction(
 
 export const loadSourcesSuccess = createAction(
   '[Source API] Load Sources Success',
-  props<{ data: any }>()
+  props<{ data: SourceResponseModel[] }>()
 )
 export const loadSourcesError = createAction(
   '[Source API] Load Sources Error',

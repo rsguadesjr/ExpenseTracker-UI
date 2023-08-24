@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaginatorModule } from 'primeng/paginator';
 import { ButtonModule } from 'primeng/button';
-import { Expense } from '../../model/expense.model';
+import { ExpenseResponseModel } from '../../model/expense-response.model';
 
 @Component({
   selector: 'app-expense-list',
@@ -12,7 +12,7 @@ import { Expense } from '../../model/expense.model';
   styleUrls: ['./expense-list.component.scss'],
 })
 export class ExpenseListComponent {
-  @Input() items: Expense[] = [];
+  @Input() items: ExpenseResponseModel[] = [];
 
   _totalRows!: number;
   @Input() set totalRows(value: number) {
@@ -31,7 +31,7 @@ export class ExpenseListComponent {
   }
 
   @Input() hidePagination = false;
-  @Output() selected = new EventEmitter<Expense>();
+  @Output() selected = new EventEmitter<ExpenseResponseModel>();
   @Output('onPageChange') pageChange = new EventEmitter<any>();
 
   editEntry(expense: any) {

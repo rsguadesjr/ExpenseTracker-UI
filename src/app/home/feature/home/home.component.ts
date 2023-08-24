@@ -22,6 +22,8 @@ import { loadExpenses } from 'src/app/state/expenses/expenses.action';
 import { DialogService } from 'primeng/dynamicdialog';
 import { ExpenseDetailComponent } from 'src/app/expenses/feature/expense-detail/expense-detail.component';
 import { selectAllCategories } from 'src/app/state/categories/categories.selector';
+import { ExpenseResponseModel } from 'src/app/expenses/model/expense-response.model';
+import { ExpenseRequestModel } from 'src/app/expenses/model/expense-request.model';
 
 @Component({
   selector: 'app-home',
@@ -91,7 +93,7 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  editEntry(expense: any) {
+  editEntry(expense: ExpenseResponseModel) {
     this.dialogService.open(ExpenseDetailComponent, {
       width: '420px',
       header: 'Create',
@@ -101,7 +103,16 @@ export class HomeComponent implements OnInit {
       closeOnEscape: true,
       data: {
         isDialog: true,
-        expense
+        isEdit: true,
+        expense: {
+          id: expense.id,
+          amount: expense.amount,
+          categoryId: expense.category?.id,
+          description: expense.description,
+          expenseDate: expense.expenseDate,
+          sourceId: expense.source?.id,
+          tags: expense.tags
+        } as ExpenseRequestModel,
       },
 
     })

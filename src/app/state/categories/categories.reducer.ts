@@ -1,9 +1,10 @@
 import { createReducer, on } from "@ngrx/store";
 import { addCategory, addCategoryError, addCategorySuccess, deleteCategory, deleteCategoryError, deleteCategorySuccess, loadCategories, loadCategoriesError, loadCategoriesSuccess, updateCategory, updateCategoryError, updateCategorySuccess } from "./categories.action";
+import { CategoryResponseModel } from "src/app/shared/model/category-response.model";
 
 export interface CategoryState {
-  categories: any[];
-  selectedCategory: any;
+  categories: CategoryResponseModel[];
+  selectedCategory: CategoryResponseModel | null;
   error: string | null;
   loadingStatus: 'pending' | 'loading' | 'error' | 'success';
   savingStatus: 'pending' |'in-progress' | 'error' | 'success';

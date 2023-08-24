@@ -7,11 +7,11 @@
       [tableStyle]="{ 'min-width': '50rem' }"
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
       [rowsPerPageOptions]="[10, 20, 50]"
-      [globalFilterFields]="['category', 'source', 'description', 'tags']"
+      [globalFilterFields]="['category.name', 'source.name', 'description', 'tags']"
       (onFilter)="onFilter($event)">
   <ng-template pTemplate="header">
       <tr>
-          <th pSortableColumn="category" style="width: 15%">
+          <th pSortableColumn="category.name" style="width: 15%">
             <div class="flex gap-2 align-items-center">
               Category
               <p-sortIcon field="category"></p-sortIcon>
@@ -42,7 +42,7 @@
               <p-columnFilter type="text" field="description" display="menu"></p-columnFilter>
             </div>
           </th>
-          <th pSortableColumn="source" style="width: 15%">
+          <th pSortableColumn="source.name" style="width: 15%">
             <div class="flex gap-2 align-items-center">
               Source
               <p-sortIcon field="source"></p-sortIcon>
@@ -91,11 +91,11 @@
   </ng-template>
   <ng-template pTemplate="body" let-item>
       <tr>
-          <td  styleClass="border-round-md">{{ item.category }}</td>
+          <td  styleClass="border-round-md">{{ item.category?.name }}</td>
           <td>{{ item.amount | number: '0.0' }}</td>
           <td>{{ item.expenseDate | date:'MM/dd/yy'}}</td>
           <td>{{ item.description }}</td>
-          <td>{{ item.source }}</td>
+          <td>{{ item.source?.name }}</td>
           <td>
             <div class="flex flex-wrap">
               <ng-container *ngFor="let tag of item.tags">

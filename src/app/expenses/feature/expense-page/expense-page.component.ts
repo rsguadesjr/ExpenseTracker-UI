@@ -37,7 +37,7 @@ import {
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
-import { Expense } from '../../model/expense.model';
+import { ExpenseResponseModel } from '../../model/expense-response.model';
 import { ToolbarModule } from 'primeng/toolbar';
 import { CalendarModule } from 'primeng/calendar';
 import { PaginatorModule } from 'primeng/paginator';
@@ -92,6 +92,7 @@ import {
 import { ReminderType } from 'src/app/shared/enums/reminder-type';
 import { selectFormattedReminders } from 'src/app/state/reminders/reminders.selector';
 import { DropdownModule } from 'primeng/dropdown';
+import { ExpenseRequestModel } from '../../model/expense-request.model';
 
 @Component({
   selector: 'app-expense-list-page',
@@ -142,7 +143,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   calendarDate = new Date();
   selectedDate$ = new BehaviorSubject<Date>(new Date());
   calendarMonth$ = new BehaviorSubject<Date>(new Date());
-  filteredItems$ = new BehaviorSubject<Expense[] | null>(null);
+  filteredItems$ = new BehaviorSubject<ExpenseResponseModel[] | null>(null);
   filterInProgress$ = new BehaviorSubject<boolean>(false);
 
   expenseEntries$ = this.store.select(selectAllExpenses);
@@ -339,7 +340,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
     });
   }
 
-  editEntry(expense: any) {
+  editEntry(expense: ExpenseResponseModel) {
     this.dialogService.open(ExpenseDetailComponent, {
       width: '420px',
       header: 'Create',
@@ -350,7 +351,15 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
       data: {
         isDialog: true,
         isEdit: true,
-        expense,
+        expense: {
+          id: expense.id,
+          amount: expense.amount,
+          categoryId: expense.category?.id,
+          description: expense.description,
+          expenseDate: expense.expenseDate,
+          sourceId: expense.source?.id,
+          tags: expense.tags
+        } as ExpenseRequestModel,
       },
     });
   }
@@ -379,7 +388,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
     this.rowsPerPage = event.rows;
   }
 
-  onFilterChange(data: Expense[]) {
+  onFilterChange(data: ExpenseResponseModel[]) {
     this.cdr.detectChanges();
   }
 

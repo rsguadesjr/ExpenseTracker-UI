@@ -6,7 +6,7 @@ import { ReminderModel } from '../../shared/model/reminder-model';
 import { ReminderType } from 'src/app/shared/enums/reminder-type';
 import { add, differenceInCalendarDays, differenceInDays, differenceInMonths, differenceInWeeks, differenceInYears, endOfMonth, parseISO, startOfMonth } from 'date-fns';
 import parse from 'date-fns/esm/parse';
-import { ReminderRequestModel } from 'src/app/shared/model/reminder-request-model';
+import { ReminderRequestModel } from 'src/app/shared/model/reminder-request.model';
 import { ResponseData } from 'src/app/shared/model/response-data';
 
 @Injectable({

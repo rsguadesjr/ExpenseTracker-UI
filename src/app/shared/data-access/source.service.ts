@@ -4,6 +4,7 @@ import { environment } from 'src/environments/environment';
 import { Option } from '../model/option.model';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { SourceResponseModel } from '../model/source-response.model';
+import { SourceRequestModel } from '../model/source-request.model';
 
 @Injectable({
   providedIn: 'root',
@@ -16,15 +17,15 @@ export class SourceService {
     return this.http.get<SourceResponseModel[]>(this.baseUrl);
   }
 
-  create(data: any) {
-    return this.http.post<any>(`${this.baseUrl}`, data);
+  create(data: SourceRequestModel) {
+    return this.http.post<SourceResponseModel>(`${this.baseUrl}`, data);
   }
 
-  update(data: any) {
-    return this.http.put<any>(`${this.baseUrl}/${data.id}`, data);
+  update(data: SourceRequestModel) {
+    return this.http.put<SourceResponseModel>(`${this.baseUrl}/${data.id}`, data);
   }
 
-  delete(id: any) {
+  delete(id: number) {
     return this.http.delete(`${this.baseUrl}/${id}`)
   }
 }

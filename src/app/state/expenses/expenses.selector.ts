@@ -7,11 +7,6 @@ import { TotalAmountPerCategoryPerDate } from 'src/app/summary/model/total-amoun
 
 export const selectExpenses = (state: AppState) => state.expenses;
 
-export const selectCurrentMonthExpenses = createSelector(
-  selectExpenses,
-  (state: ExpenseState) => state.currentMonthExpenses
-);
-
 export const selectAllExpenses = createSelector(
   selectExpenses,
   (state: ExpenseState) => state.expenses
@@ -35,14 +30,15 @@ export const categorizedExpenses = createSelector(
     const categories = expenses
       .filter(
         (exp, i) =>
-          expenses.findIndex((e) => e.categoryId === exp.categoryId) === i
+          exp.category != null &&
+          expenses.findIndex((e) => e.category.id === exp.category.id) === i
       )
-      .map((exp) => ({ id: exp.categoryId, name: exp.category }));
+      .map((exp) => ({ id: exp.category?.id, name: exp.category?.name }));
 
     return categories
       .map((category) => {
         const totalPerCategory = expenses
-          .filter((exp) => category.id === exp.categoryId)
+          .filter((exp) => category.id === exp.category.id)
           .reduce((total, current) => total + current.amount, 0);
         return <TotalPerCategory>{
           total: totalPerCategory,
@@ -63,9 +59,10 @@ export const dailyCategorizedExpenses = createSelector(
     const categories = expenses
       .filter(
         (exp, i) =>
-          expenses.findIndex((e) => e.categoryId === exp.categoryId) === i
+          exp.category != null &&
+          expenses.findIndex((e) => e.category.id === exp.category.id ) === i
       )
-      .map((exp) => ({ id: exp.categoryId, name: exp.category }));
+      .map((exp) => ({ id: exp.category.id , name: exp.category.name }));
 
     return dates
       .map((date) => {
@@ -77,7 +74,7 @@ export const dailyCategorizedExpenses = createSelector(
               category: category.name,
               expenseDate: date,
               total: dateExpenses
-                .filter((exp) => exp.categoryId == category.id)
+                .filter((exp) => exp.category.id == category.id)
                 .reduce((total, current) => total + current.amount, 0),
             }
         );

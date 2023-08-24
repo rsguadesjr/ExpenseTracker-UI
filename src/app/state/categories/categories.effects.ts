@@ -32,9 +32,8 @@ export class CategoryEffects {
           map((result) => loadCategoriesSuccess({ data: result })),
 
           catchError((error) => of(loadCategoriesError({ error })))
-        )
-      }
-      )
+        );
+      })
     )
   );
 
@@ -65,15 +64,15 @@ export class CategoryEffects {
   );
 
   deleteCategory$ = createEffect(() =>
-      this.actions$.pipe(
-        ofType(deleteCategory),
-        switchMap(({ id }) => {
-          return this.categoryService.delete(id).pipe(
-            map(() => deleteCategorySuccess({ id })),
+    this.actions$.pipe(
+      ofType(deleteCategory),
+      switchMap(({ id }) => {
+        return this.categoryService.delete(id).pipe(
+          map(() => deleteCategorySuccess({ id })),
 
-            catchError((error) => of(updateCategoryError({ error })))
-          );
-        })
-      )
+          catchError((error) => of(updateCategoryError({ error })))
+        );
+      })
+    )
   );
 }

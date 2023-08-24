@@ -54,7 +54,7 @@ export class ExpenseEffects {
     this.actions$.pipe(
       ofType(updateExpense),
       switchMap(({ data }) => {
-        return this.expenseService.updateExpense(data.id, data).pipe(
+        return this.expenseService.updateExpense(data).pipe(
           map((result) => updateExpenseSuccess({ data: result })),
 
           catchError((error) => of(updateExpenseError({ error })))

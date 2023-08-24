@@ -1,10 +1,10 @@
 import { createReducer, on } from "@ngrx/store";
 import { addExpense, addExpenseError, addExpenseSuccess, deleteExpense, deleteExpenseError, deleteExpenseSuccess, loadExpenses, loadExpensesError, loadExpensesSuccess, updateExpense, updateExpenseError, updateExpenseSuccess } from "./expenses.action";
+import { ExpenseResponseModel } from "src/app/expenses/model/expense-response.model";
 
 export interface ExpenseState {
-  expenses: any[];
-  currentMonthExpenses: any[];
-  selectedExpense: any,
+  expenses: ExpenseResponseModel[];
+  selectedExpense: ExpenseResponseModel | null,
   error: string | null;
   loadingStatus: 'pending' | 'loading' | 'error' | 'success';
   savingStatus: 'pending' |'in-progress' | 'error' | 'success';
@@ -13,7 +13,6 @@ export interface ExpenseState {
 export const initialState: ExpenseState = {
   expenses: [],
   selectedExpense: null,
-  currentMonthExpenses: [],
   error: null,
   loadingStatus: 'pending',
   savingStatus: 'pending'
@@ -24,7 +23,7 @@ export const expenseReducer = createReducer(
   initialState,
 
   /* #region Add Operation */
-  on(addExpense, (state, { data } ) => ({
+  on(addExpense, (state) => ({
     ...state,
     savingStatus: 'in-progress' as const
   })),

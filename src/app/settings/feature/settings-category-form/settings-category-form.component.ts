@@ -14,6 +14,7 @@ import { Store } from '@ngrx/store';
 import { addCategory, updateCategory } from 'src/app/state/categories/categories.action';
 import { savingStatus } from 'src/app/state/categories/categories.selector';
 import { filter, skip, take } from 'rxjs';
+import { CategoryRequestModel } from 'src/app/shared/model/category-request.model';
 
 @Component({
   selector: 'app-settings-category-form',
@@ -39,7 +40,7 @@ export class SettingsCategoryFormComponent implements OnInit {
 
   messages: Message[] = [];
   validationErrors: { [key: string]: string[] } = {};
-  id?: string;
+  id: string | null = null;
 
   savingStatus$ = this.store.select(savingStatus);
 
@@ -88,34 +89,14 @@ export class SettingsCategoryFormComponent implements OnInit {
       id: this.id,
       name: this.form.get('name')?.value,
       description: this.form.get('description')?.value,
-      isActive: this.form.get('isActive')?.value
-    }
+      isActive: this.form.get('isActive')?.value,
+    } as CategoryRequestModel
 
     if (this.id)
       this.store.dispatch(updateCategory({ data }));
     else
       this.store.dispatch(addCategory({ data }));
 
-    // let submit$ = this.id
-    //               ? this.categoryService.update(data)
-    //               : this.categoryService.create(data);
-
-    // submit$
-    //   .pipe(
-    //     take(1),
-    //     finalize(() => this.saveInProgress = false)
-    //   )
-    //   .subscribe({
-    //     next: (result) => {
-    //       if (result) {
-    //         this.toastService.showSuccess(`${this.id ? 'Updated Successfully' : 'Created Successfully'}`)
-    //         this.dialogRef.close(result);
-    //       }
-    //     },
-    //     error: (v) => {
-    //       this.messages = [{ severity: 'error', summary: 'Error', detail: 'An error occured while saving the entry' } ];
-    //     }
-    //   })
   }
 
 }
