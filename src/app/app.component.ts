@@ -9,11 +9,7 @@ import {
 import { MenuItem } from 'primeng/api/menuitem';
 import { Message } from 'primeng/api';
 import { ValidationMessageService } from './shared/utils/validation-message.service';
-import {
-  BehaviorSubject,
-  filter,
-  map,
-} from 'rxjs';
+import { BehaviorSubject, filter, map } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { loadReminders } from './state/reminders/reminders.action';
 import { loadCategories } from './state/categories/categories.action';
@@ -26,6 +22,11 @@ import { loadBudgets } from './state/budgets/budgets.action';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
+  private store = inject(Store);
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+
   title = 'ExpenseTracker';
   sidebarVisible: boolean = false;
 
@@ -35,57 +36,42 @@ export class AppComponent implements OnInit {
   showViewAllExpensesButton = false;
   showNewButton = false;
 
-  queryParams$ = new BehaviorSubject<ParamMap | null>(null);
-  store = inject(Store);
+  queryParams$ = this.route.queryParamMap;
+  view$ = this.route.queryParamMap.pipe(map((qp) => qp.get('view')));
 
-  constructor(
-    private router: Router,
-    public authService: AuthService,
-    private route: ActivatedRoute,
-  ) {
+  constructor() {}
 
-    this.route.queryParamMap.subscribe((v) => {
-      this.queryParams$.next(v);
-    });
-
-    const url$ = this.router.events.pipe(
-      filter((event) => {
-        return event instanceof NavigationEnd;
-      }),
-      map(() => router.url.split('?')[0])
-    );
-
-    url$.subscribe((url) => {
-      this.showNewButton = ['/'].includes(url);
-      this.showViewAllExpensesButton = ['/'].includes(url);
-      this.showActionButtons =
-        this.showNewButton && this.showViewAllExpensesButton;
-    });
-
-    this.authService.isAuthenticated$
+  ngOnInit() {
+    this.router.events
       .pipe(
-        // debounceTime(2000)
+        filter((event) => event instanceof NavigationEnd),
+        map(() => this.router.url.split('?')[0])
       )
-      .subscribe(isAuth => {
-        if (isAuth) {
-          this.store.dispatch(loadCategories());
-          this.store.dispatch(loadSources());
-          this.store.dispatch(loadReminders({ params: { startDate: '', endDate: '' }}));
-          this.store.dispatch(loadBudgets());
-        }
-      })
-  }
+      .subscribe((url) => {
+        this.showNewButton = ['/'].includes(url);
+        this.showViewAllExpensesButton = ['/'].includes(url);
+        this.showActionButtons =
+          this.showNewButton && this.showViewAllExpensesButton;
+      });
 
-  ngOnInit(): void {
-
+    this.authService.isAuthenticated$.pipe().subscribe((isAuth) => {
+      if (isAuth) {
+        this.store.dispatch(loadCategories());
+        this.store.dispatch(loadSources());
+        this.store.dispatch(
+          loadReminders({ params: { startDate: '', endDate: '' } })
+        );
+        this.store.dispatch(loadBudgets());
+      }
+    });
   }
 
   showSideBar() {
     this.sidebarVisible = true;
   }
 
-  viewExpenses() {
-    const view = this.queryParams$.value?.get('view');
+  viewExpenses(view: string) {
+    // const view = this.queryParams$.value?.get('view');
     this.router.navigate(['/expenses'], {
       queryParams: {
         view,
@@ -98,7 +84,6 @@ export class AppComponent implements OnInit {
   }
 
   visibleChange(e: any) {
-    console.log('[DEBUG] visibleChange', e)
+    console.log('[DEBUG] visibleChange', e);
   }
 }
-

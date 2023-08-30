@@ -9,14 +9,7 @@ import {
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
-import {
-  map,
-  takeUntil,
-  Subject,
-  skip,
-  filter,
-  take,
-} from 'rxjs';
+import { map, takeUntil, Subject, skip, filter, take } from 'rxjs';
 import { CalendarModule } from 'primeng/calendar';
 import { ExpenseRequestModel } from '../../model/expense-request.model';
 import { startOfDay } from 'date-fns';
@@ -37,7 +30,7 @@ import { selectAllActiveCategories } from 'src/app/state/categories/categories.s
 import { selectAllActiveSources } from 'src/app/state/sources/sources.selector';
 
 @Component({
-  selector: 'app-expense-detail',
+  selector: 'app-expense-form',
   standalone: true,
   imports: [
     CommonModule,
@@ -52,11 +45,11 @@ import { selectAllActiveSources } from 'src/app/state/sources/sources.selector';
     ChipsModule,
     MessagesModule,
   ],
-  templateUrl: './expense-detail.component.html',
-  styleUrls: ['./expense-detail.component.scss'],
+  templateUrl: './expense-form.component.html',
+  styleUrls: ['./expense-form.component.scss'],
   providers: [],
 })
-export class ExpenseDetailComponent implements OnInit, OnDestroy {
+export class ExpenseFormComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<unknown>();
   private store = inject(Store);
   private dialogConfig = inject(DynamicDialogConfig);
@@ -69,28 +62,41 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
 
   savingStatus$ = this.store.select(savingStatus);
 
-  categories$ = this.store.select(selectAllActiveCategories) .pipe(
-    map((data) => [{ id: null, name: '' }, ...data])
-  );
+  categories$ = this.store
+    .select(selectAllActiveCategories)
+    .pipe(map((data) => [{ id: null, name: '' }, ...data]));
 
-  sources$ = this.store.select(selectAllActiveSources).pipe(
-    map((data) => [{ id: null, name: '' }, ...data])
-  );
+  sources$ = this.store
+    .select(selectAllActiveSources)
+    .pipe(map((data) => [{ id: null, name: '' }, ...data]));
 
   form = new FormGroup({
-    categoryId: new FormControl<number | null>(null, FormValidation.requiredValidator('Category is required')),
-    amount: new FormControl<number | null>(null, [FormValidation.minNumberValidator(1, 'Amount must be greater than 0'), FormValidation.requiredValidator('Amount is required'),]),
-    date: new FormControl<Date>(startOfDay(new Date()),FormValidation.requiredValidator('Date is required')),
-    description: new FormControl<string>('', FormValidation.requiredValidator('Description is required')),
-    sourceId: new FormControl<number | null>(null, FormValidation.requiredValidator('Source is required')),
+    categoryId: new FormControl<number | null>(
+      null,
+      FormValidation.requiredValidator('Category is required')
+    ),
+    amount: new FormControl<number | null>(null, [
+      FormValidation.minNumberValidator(1, 'Amount must be greater than 0'),
+      FormValidation.requiredValidator('Amount is required'),
+    ]),
+    date: new FormControl<Date>(
+      startOfDay(new Date()),
+      FormValidation.requiredValidator('Date is required')
+    ),
+    description: new FormControl<string>(
+      '',
+      FormValidation.requiredValidator('Description is required')
+    ),
+    sourceId: new FormControl<number | null>(
+      null,
+      FormValidation.requiredValidator('Source is required')
+    ),
     tags: new FormControl<string[]>([]),
   });
-
 
   ngOnInit() {
     this.expense = this.dialogConfig.data?.expense;
     this.isEdit = this.dialogConfig.data?.isEdit;
-
 
     if (this.expense) {
       this.form.patchValue({
@@ -103,13 +109,15 @@ export class ExpenseDetailComponent implements OnInit, OnDestroy {
       });
     }
 
-    this.savingStatus$.pipe(
-      skip(1),
-      filter((v) => v === 'success'),
-      take(1)
-    ).subscribe(() => {
-      this.dialogRef.close();
-    })
+    this.savingStatus$
+      .pipe(
+        skip(1),
+        filter((v) => v === 'success'),
+        take(1)
+      )
+      .subscribe(() => {
+        this.dialogRef.close();
+      });
   }
 
   ngOnDestroy() {

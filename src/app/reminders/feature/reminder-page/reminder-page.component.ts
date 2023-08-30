@@ -15,12 +15,7 @@ import {
   startOfDay,
   startOfMonth,
 } from 'date-fns';
-import {
-  BehaviorSubject,
-  Subject,
-  map,
-  switchMap,
-} from 'rxjs';
+import { BehaviorSubject, Subject, map, switchMap } from 'rxjs';
 import { ReminderType } from 'src/app/shared/enums/reminder-type';
 import { ReminderModel } from 'src/app/shared/model/reminder-model';
 import { DialogService } from 'primeng/dynamicdialog';
@@ -126,30 +121,45 @@ export class ReminderPageComponent implements OnInit, OnDestroy {
     })
   );
 
-  upcomingReminders$ = this.store.select(
-    selectFormattedReminders({
-      startDate: startOfDay(this.calendarDate).toISOString(),
-      endDate: addDays(this.calendarDate, 25).toISOString(),
+  formattedReminders$ = this.calendarMonth$.pipe(
+    switchMap((month) => {
+      const startDate = startOfMonth(month).toISOString();
+      const endDate = endOfMonth(month).toISOString();
+      return this.store.select(
+        selectFormattedReminders({ startDate, endDate })
+      );
     })
-  ).pipe(
-    map((upcomingReminders) => {
-      let startDate = startOfDay(new Date()).getTime();
-      let endDate = add(startDate, { days: 5 }).getTime();
-      // filter data only within 5 days
-      let data = upcomingReminders.filter(d =>  {
-        let dateTime = startOfDay(d.date).getTime();
-        return dateTime >= startDate && dateTime <= endDate;
-      })
-      // add new property to hold the remaining days before the actual reminder
-      data = data.map(d => {
-        let interval =  eachDayOfInterval({ start: startDate, end: d.date })
-        let remainingDays = interval.length - 1;
-        return { ...d, remainingDays }
-      })
-      return data.sort((a, b) => a.date > b.date ? 1 : (a.date < b.date ? -1 : 0));
-  }))
+  );
 
-  calendarItems$ = this.reminders$.pipe(
+  upcomingReminders$ = this.store
+    .select(
+      selectFormattedReminders({
+        startDate: startOfDay(this.calendarDate).toISOString(),
+        endDate: addDays(this.calendarDate, 25).toISOString(),
+      })
+    )
+    .pipe(
+      map((upcomingReminders) => {
+        let startDate = startOfDay(new Date()).getTime();
+        let endDate = add(startDate, { days: 5 }).getTime();
+        // filter data only within 5 days
+        let data = upcomingReminders.filter((d) => {
+          let dateTime = startOfDay(d.date).getTime();
+          return dateTime >= startDate && dateTime <= endDate;
+        });
+        // add new property to hold the remaining days before the actual reminder
+        data = data.map((d) => {
+          let interval = eachDayOfInterval({ start: startDate, end: d.date });
+          let remainingDays = interval.length - 1;
+          return { ...d, remainingDays };
+        });
+        return data.sort((a, b) =>
+          a.date > b.date ? 1 : a.date < b.date ? -1 : 0
+        );
+      })
+    );
+
+  calendarItems$ = this.formattedReminders$.pipe(
     map((reminders) => {
       // calendar items for reminders
       const dates = reminders
@@ -169,7 +179,6 @@ export class ReminderPageComponent implements OnInit, OnDestroy {
       return [reminderItem];
     })
   );
-
 
   ngOnInit() {}
 
@@ -246,5 +255,4 @@ export class ReminderPageComponent implements OnInit, OnDestroy {
     // }
     // this.router.navigate(['/expenses', 'new'], { queryParams: { data: JSON.stringify(expenseData) }})
   }
-
 }

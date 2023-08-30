@@ -4,7 +4,13 @@ import { ChartModule } from 'primeng/chart';
 import { SummaryFilter } from '../../model/summary-filter.model';
 import { BudgetResult } from 'src/app/shared/model/budget-result';
 import { TotalAmountPerCategoryPerDate } from '../../model/total-amount-per-category-per-date';
-import { format, isSameMonth, eachDayOfInterval, isSameDay, getDaysInMonth } from 'date-fns';
+import {
+  format,
+  isSameMonth,
+  eachDayOfInterval,
+  isSameDay,
+  getDaysInMonth,
+} from 'date-fns';
 import { CategoryResponseModel } from 'src/app/shared/model/category-response.model';
 
 @Component({
@@ -28,20 +34,22 @@ export class SummaryMainChartComponent {
   ) {
     if (!value || !value.filter) return;
 
-
     let result = value?.data ?? [];
     let budgets = value.budgets ?? [];
     const filter = value.filter;
-    const categories = value.categories?.filter(
-          (x) =>
-            x.isActive &&
-            (filter?.categoryIds?.length === 0 ||
-              filter?.categoryIds?.includes(x.id))
-        ) ?? [];
+    const categories =
+      value.categories?.filter(
+        (x) =>
+          x.isActive &&
+          (filter?.categoryIds?.length === 0 ||
+            filter?.categoryIds?.includes(x.id))
+      ) ?? [];
     const colors = this.getRGB(value.categories.length);
 
     if (value.categories.length > 0) {
-      result = result.filter(x => categories.findIndex(y => y.id == x.categoryId) != -1);
+      result = result.filter(
+        (x) => categories.findIndex((y) => y.id == x.categoryId) != -1
+      );
     }
 
     let labels: string[] = [];
@@ -49,39 +57,45 @@ export class SummaryMainChartComponent {
     let dates: Date[] = [];
     let compare: (dateLeft: Date, dateRight: Date) => boolean;
 
-
     if (filter?.view === 'annual') {
       // for annual, breakdown only to months
       compare = (date1, date2) => isSameMonth(date1, date2);
       const year = +format(filter.startDate, 'yyyy');
-      dates = new Array(12).fill(0).map((_,i)=> new Date(year, i));
-      labels = dates.map(date => format(date, 'MMM'));
-    }
-    else {
+      dates = new Array(12).fill(0).map((_, i) => new Date(year, i));
+      labels = dates.map((date) => format(date, 'MMM'));
+    } else {
       compare = (date1, date2) => isSameDay(date1, date2);
       dates = eachDayOfInterval({
         start: filter?.startDate ?? new Date(),
         end: filter?.endDate ?? new Date(),
       });
-      labels = dates.map(date => format(date, 'd'));
+      labels = dates.map((date) => format(date, 'd'));
     }
 
-
     // let categorized = false;
-    let groupings = filter.breakdown ? categories.map(x => ({ id: x.id, name: x.name })) : [{ id: null, name: 'Total' }];
+    let groupings = filter.breakdown
+      ? categories.map((x) => ({ id: x.id, name: x.name }))
+      : [{ id: null, name: 'Total' }];
 
     // group or categorized the data
-    let groupedData = groupings.map(group => {
+    let groupedData = groupings.map((group) => {
       // data per category/group
-      const perGroupData = result.filter((x) => !group.id || x.categoryId == group.id);
+      const perGroupData = result.filter(
+        (x) => !group.id || x.categoryId == group.id
+      );
       // total per date
       const data = dates.map((date) => {
-          const currentDateResult = perGroupData.filter((x) => compare(new Date(x.expenseDate), date));
-          const total = currentDateResult.reduce((total, curr) => total + curr.total, 0);
-          return { date, total }
+        const currentDateResult = perGroupData.filter((x) =>
+          compare(new Date(x.expenseDate), date)
+        );
+        const total = currentDateResult.reduce(
+          (total, curr) => total + curr.total,
+          0
+        );
+        return { date, total };
       });
 
-      return  { ...group, data }
+      return { ...group, data };
     });
 
     // convert the grouped/categorized data into datasets
@@ -92,70 +106,75 @@ export class SummaryMainChartComponent {
         label: gd.name,
         backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.5`,
         borderColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
-        data: gd.data.map(d => d.total),
+        data: gd.data.map((d) => d.total),
         borderWidth: 2,
         minBarLength: 3,
-      }
-    })
-
+      };
+    });
 
     const defaultBudget = budgets.find((x) => x.month === -1 && x.year === -1);
     // group or categorized the data
-    let budgetGroupData = groupings.map(group => {
+    let budgetGroupData = groupings.map((group) => {
       // total per date
       const data = dates.map((date) => {
-          let month = +format(date, 'M');
-          let year = +format(date, 'yyyy');
-          let budget = budgets.find(x => x.month == month && (x.year == year || x.year == -1))
-                          ?? defaultBudget;
-          let defaultBudgetAmount = budget?.amount ?? 0;
+        let month = +format(date, 'M');
+        let year = +format(date, 'yyyy');
+        let budget =
+          budgets.find(
+            (x) => x.month == month && (x.year == year || x.year == -1)
+          ) ?? defaultBudget;
+        let defaultBudgetAmount = budget?.amount ?? 0;
 
-          // if categories are selected, then get the total from the categorized budget instead of total budget
-          if (categories.length > 0 && categories.length < value.categories.length) {
-            defaultBudgetAmount = budget?.budgetCategories
-                                    .filter(x => categories.findIndex(y => y.id == x.categoryId) != -1)
-                                    .reduce((total, current) => total + current.amount, 0) ?? 0;
-          }
+        // if categories are selected, then get the total from the categorized budget instead of total budget
+        if (
+          categories.length > 0 &&
+          categories.length < value.categories.length
+        ) {
+          defaultBudgetAmount =
+            budget?.budgetCategories
+              .filter(
+                (x) => categories.findIndex((y) => y.id == x.categoryId) != -1
+              )
+              .reduce((total, current) => total + current.amount, 0) ?? 0;
+        }
 
+        let bc = budget?.budgetCategories.find(
+          (bc) => bc.categoryId == group.id
+        );
+        let budgetLimit = bc?.amount ?? defaultBudgetAmount;
 
-          let bc = budget?.budgetCategories.find(bc => bc.categoryId == group.id);
-          let budgetLimit = bc?.amount ?? defaultBudgetAmount;
+        let total: number;
 
+        if (filter?.view === 'annual') {
+          total = budgetLimit;
+        } else {
+          let newDate = new Date(year, month);
+          let daysInMonth = getDaysInMonth(newDate);
+          total = budgetLimit / daysInMonth;
+        }
 
-          let total: number;
-
-          if (filter?.view === 'annual') {
-            total = budgetLimit;
-          }
-          else {
-            let newDate = new Date(year, month );
-            let daysInMonth = getDaysInMonth(newDate);
-            total = budgetLimit/daysInMonth;
-          }
-
-          return { date, total }
+        return { date, total };
       });
 
-      return  { ...group, data }
+      return { ...group, data };
     });
 
     let budgetDataSets = budgetGroupData.map((gd, i) => {
       const r = Math.ceil(Math.random() * 255);
       const g = Math.ceil(Math.random() * 255);
       const b = Math.ceil(Math.random() * 255);
-      const rgb = { r, g,b };
+      const rgb = { r, g, b };
       return {
         type: 'line',
         fill: true,
         label: `${gd.name} (Budget)`,
         backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.1)`,
         borderColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`,
-        data: gd.data.map(d => d.total),
+        data: gd.data.map((d) => d.total),
         borderWidth: 1,
         minBarLength: 3,
-      }
-    })
-
+      };
+    });
 
     this.data = {
       labels,
@@ -167,11 +186,9 @@ export class SummaryMainChartComponent {
   @Input() aspectRatio: number | undefined;
   @Input() showLegend: boolean = true;
 
-  constructor() {
-  }
+  constructor() {}
 
   ngOnInit() {
-
     const documentStyle = getComputedStyle(document.documentElement);
     const textColor = documentStyle.getPropertyValue('--text-color');
     const textColorSecondary = documentStyle.getPropertyValue(
@@ -188,7 +205,7 @@ export class SummaryMainChartComponent {
           labels: {
             color: textColor,
           },
-          display: this.showLegend
+          display: this.showLegend,
         },
       },
       scales: {
@@ -211,18 +228,15 @@ export class SummaryMainChartComponent {
           },
         },
       },
-      'onClick' : function (event: any, elements: any, chart: any) {
+      onClick: function (event: any, elements: any, chart: any) {
         if (elements[0]) {
-           const i = elements[0].index;
+          const i = elements[0].index;
         }
-      }
+      },
     };
   }
 
-
-  getBudgetDataset() {
-
-  }
+  getBudgetDataset() {}
 
   getRGB(total: number) {
     if (!total || total <= 0) return [];
@@ -256,12 +270,13 @@ export class SummaryMainChartComponent {
     }
   }
 
-
-  getChartData(result: TotalAmountPerCategoryPerDate[],
-              filter: SummaryFilter,
-              categories: CategoryResponseModel[],
-              labelFormat = 'd',
-              dateCompratorFn: Function) {
+  getChartData(
+    result: TotalAmountPerCategoryPerDate[],
+    filter: SummaryFilter,
+    categories: CategoryResponseModel[],
+    labelFormat = 'd',
+    dateCompratorFn: Function
+  ) {
     const dates = eachDayOfInterval({
       start: filter?.startDate ?? new Date(),
       end: filter?.endDate ?? new Date(),

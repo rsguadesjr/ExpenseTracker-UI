@@ -12,11 +12,7 @@ import {
   take,
   takeUntil,
 } from 'rxjs';
-import {
-  FormGroup,
-  ReactiveFormsModule,
-  FormControl,
-} from '@angular/forms';
+import { FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -44,7 +40,7 @@ import {
 } from 'date-fns';
 import { SumPipe } from 'src/app/shared/utils/sum.pipe';
 import { DialogService } from 'primeng/dynamicdialog';
-import { ExpenseDetailComponent } from '../expense-detail/expense-detail.component';
+import { ExpenseFormComponent } from '../expense-form/expense-form.component';
 import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ReminderModel } from 'src/app/shared/model/reminder-model';
@@ -178,7 +174,6 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
     })
   );
 
-
   filterForm = new FormGroup({
     view: new FormControl('month'),
     dateFrom: new FormControl(),
@@ -302,7 +297,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   clearFilter() {}
 
   addEntry(expense?: any) {
-    const dialgoRef = this.dialogService.open(ExpenseDetailComponent, {
+    const dialgoRef = this.dialogService.open(ExpenseFormComponent, {
       width: '420px',
       header: 'Create',
       contentStyle: { overflow: 'auto' },
@@ -317,7 +312,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   }
 
   editEntry(expense: ExpenseResponseModel) {
-    this.dialogService.open(ExpenseDetailComponent, {
+    this.dialogService.open(ExpenseFormComponent, {
       width: '420px',
       header: 'Create',
       contentStyle: { overflow: 'auto' },
@@ -334,7 +329,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
           description: expense.description,
           expenseDate: expense.expenseDate,
           sourceId: expense.source?.id,
-          tags: expense.tags
+          tags: expense.tags,
         } as ExpenseRequestModel,
       },
     });

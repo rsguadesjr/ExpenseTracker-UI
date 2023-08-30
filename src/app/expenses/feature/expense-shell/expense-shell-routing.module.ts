@@ -12,24 +12,6 @@ const routes: Routes = [
         (m) => m.ExpensePageComponent
       ),
   },
-  {
-    path: 'new',
-    canActivate: [AuthGuard, RoleGuard],
-    data: { role: ['SuperAdmin', 'Admin', 'Standard', 'BasicExpense'] },
-    loadComponent: () =>
-      import('../expense-detail/expense-detail.component').then(
-        (m) => m.ExpenseDetailComponent
-      ),
-  },
-  {
-    path: 'edit/:id',
-    canActivate: [AuthGuard, RoleGuard],
-    data: { role: ['SuperAdmin', 'Admin', 'Standard', 'BasicExpense'] },
-    loadComponent: () =>
-      import('../expense-detail/expense-detail.component').then(
-        (m) => m.ExpenseDetailComponent
-      ),
-  },
 ];
 
 @NgModule({

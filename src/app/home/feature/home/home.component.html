@@ -8,11 +8,15 @@
       </div>
     </div>
 
-    <div class=" flex-grow-1 bg-black-alpha-40 border-round p-4">
+    <div class="flex-grow-1 bg-black-alpha-40 border-round p-4">
       <div class="text-xl mb-2">Recent Transactions</div>
       <ng-container *ngIf="recentTransactions$ | async as expenses; else noResult">
         <app-expense-list [items]="expenses" (selected)="editEntry($event)" [hidePagination]="true"></app-expense-list>
       </ng-container>
+      <div class="flex justify-content-center pt-2">
+        <p-button label="View all transactions" styleClass="p-button-text p-button-info"
+          routerLink="/expenses"></p-button>
+      </div>
     </div>
   </div>
   <div class="flex flex-column gap-4 flex-grow-1">
@@ -25,7 +29,7 @@
     <div class="flex flex-column justify-content-start  flex-grow-1 bg-black-alpha-40 border-round p-3">
       <div class="text-xl mb-4">Total per category</div>
       <app-expense-per-category [items]="(categorizedExpenses$ | async) ?? []"
-          [hideTotal]="true"></app-expense-per-category>
+        [hideTotal]="true"></app-expense-per-category>
     </div>
   </div>
 </div>

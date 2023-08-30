@@ -7,6 +7,8 @@ import { MenuItem } from 'primeng/api';
 import { AuthService } from 'src/app/shared/data-access/auth.service';
 import { BadgeDirective, BadgeModule } from 'primeng/badge';
 import { map, of, switchMap } from 'rxjs';
+import { ExpenseFormComponent } from 'src/app/expenses/feature/expense-form/expense-form.component';
+import { DialogService } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-header',
@@ -17,6 +19,8 @@ import { map, of, switchMap } from 'rxjs';
   styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
+  dialogService = inject(DialogService);
+
   @Output() showSideBar = new EventEmitter();
 
   accountMenuItems: MenuItem[] = [
@@ -28,7 +32,7 @@ export class HeaderComponent {
     switchMap((isAuth) => {
       return isAuth ? this.authService.firebaseUser$ : of(null);
     })
-  )
+  );
 
   toggleSidebar() {
     this.showSideBar.emit(true);
@@ -36,5 +40,19 @@ export class HeaderComponent {
 
   signOut() {
     this.authService.signOut();
+  }
+
+  newEntry() {
+    this.dialogService.open(ExpenseFormComponent, {
+      width: '420px',
+      header: 'Create',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      styleClass: 'component-dialog',
+      closeOnEscape: true,
+      data: {
+        isDialog: true,
+      },
+    });
   }
 }

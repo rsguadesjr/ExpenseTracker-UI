@@ -1,5 +1,8 @@
 :host {
-  ::ng-deep  *[class*="pi pi-"] {
-     font-size: 1.75rem;;
+  .action-icons {
+    ::ng-deep *[class*="pi pi-"] {
+      font-size: 1.75rem;
+      ;
+    }
   }
 }
