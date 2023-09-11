@@ -10,22 +10,16 @@ import { AuthService } from 'src/app/shared/data-access/auth.service';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
-  constructor(
-    public authService: AuthService,
-    public router: Router,
-  ) {}
+  constructor(public authService: AuthService, public router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    if (!this.authService.isAuthenticated())
-      return false;
+    if (!this.authService.isAuthenticated()) return false;
 
-
-    const user = this.authService.getUserData();
+    const user = this.authService.getAuthData();
     const allowedRoles: string[] = route.data['role'] || [];
-    if (allowedRoles.find(x => user.Role.includes(x))) {
+    if (allowedRoles.find((x) => user?.role.includes(x))) {
       return true;
-    }
-    else {
+    } else {
       this.router.navigateByUrl('');
     }
 

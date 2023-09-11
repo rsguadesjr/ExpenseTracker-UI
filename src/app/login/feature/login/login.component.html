@@ -4,17 +4,19 @@
     <ng-template pTemplate="header">
       <div class="text-4xl py-4 w-full text-center">Expense Tracker</div>
     </ng-template>
-    <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
-    <div *ngIf="!socialLoginInProgress else socalLoginLoadingState">
+    <p-messages [value]="(errorMessage$ | async) || []" [enableService]="false" [closable]="true"></p-messages>
+    <div *ngIf="loginStatus$ | async; let status else socalLoginLoadingState">
       <div class="bg-yellow-900 text-white font-bold border-round mb-4 flex flex-column justify-content-center p-2">
         <div class="mb-2">For viewing purposes, please use the following credentials:</div>
         <div class="flex gap-2 align-items-center">Email:
-            <b>test@test.com</b>
-            <p-button icon="pi pi-copy" styleClass="p-button-rounded p-button-text copy-action text-white-alpha-70 " pTooltip="Copy value" (onClick)="copy('test@test.com')"></p-button>
+          <b>test@test.com</b>
+          <p-button icon="pi pi-copy" styleClass="p-button-rounded p-button-text copy-action text-white-alpha-70 "
+            pTooltip="Copy value" (onClick)="copy('test@test.com')"></p-button>
         </div>
         <div class="flex gap-2 align-items-center">Password:
           <b>Pass123</b>
-          <p-button icon="pi pi-copy" styleClass="p-button-rounded p-button-text copy-action text-white-alpha-70 " pTooltip="Copy value" (onClick)="copy('Pass123')"></p-button>
+          <p-button icon="pi pi-copy" styleClass="p-button-rounded p-button-text copy-action text-white-alpha-70 "
+            pTooltip="Copy value" (onClick)="copy('Pass123')"></p-button>
         </div>
       </div>
       <form (ngSubmit)="signInEmailAndPassword()" [formGroup]="form" class="flex flex-column gap-4">
@@ -30,8 +32,8 @@
           <small class="text-red-400" *ngFor="let error of validationErrors['password']">{{ error }}</small>
         </div>
         <div>
-          <p-button *ngIf="socialLoginInProgress || emailAndPasswordLoginInProgress; else emailPasswordLogin"
-            label="Signing in..." icon="pi pi-spin pi-spinner" styleClass="w-full"></p-button>
+          <p-button *ngIf="status === 'loading' else emailPasswordLogin" label="Signing in..."
+            icon="pi pi-spin pi-spinner" styleClass="w-full"></p-button>
           <ng-template #emailPasswordLogin>
             <p-button type="submit" label="Sign In" styleClass="w-full" (click)="signInEmailAndPassword()"></p-button>
           </ng-template>

@@ -1,7 +1,7 @@
 <div class="flex flex-column  md:flex-row justify-content-between gap-4 pt-2">
-  <div class="flex flex-column gap-4 md:w-4">
+  <div class="flex flex-column gap-4 md:w-4" *ngIf="user$ | async; let user">
     <div class="flex flex-column  bg-black-alpha-40 border-round p-4">
-      <div class="text-2xl mb-4">Hi user!</div>
+      <div class="text-2xl mb-4">Hi {{ user?.name }},</div>
       <div class="flex flex-column align-items-start">
         <div class="text-base">This is the total spending for the month of {{ date | date: 'MMMM' }}</div>
         <div class="text-6xl">{{ totalExpenses$ | async | number: '0.0' }}</div>

@@ -4,6 +4,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import {
   BehaviorSubject,
+  Observable,
   catchError,
   from,
   map,
@@ -16,6 +17,8 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { AuthRequestResult } from '../model/auth-request-result';
 import { EmailPasswordRegistration } from '../model/email-password-registration';
+import { AuthData } from 'src/app/core/models/auth-data';
+import firebase from 'firebase/compat/app';
 
 // TODO: actual token will have to come from the API,
 // after google authentication, the token will be used to login to API and the API will then send the actual token
@@ -27,7 +30,8 @@ export class AuthService {
 
   // firebaseToken$ = new BehaviorSubject<any>(null);
   firebaseUser$ = this.afAuth.authState;
-  isAuthenticated$ = new BehaviorSubject<boolean>(false);
+  fireAuthUser: firebase.User | null = null;
+  // isAuthenticated$ = new BehaviorSubject<boolean>(false);
 
   googleLoginInProgress$ = new BehaviorSubject<boolean>(false);
 
@@ -38,27 +42,14 @@ export class AuthService {
     private http: HttpClient
   ) {
     this.authUrl = environment.API_BASE_URL + 'api/Auth';
-    this.isAuthenticated$.next(this.isAuthenticated());
+    // this.isAuthenticated$.next(this.isAuthenticated());
+    this.afAuth.user.subscribe((user) => {
+      this.fireAuthUser = user;
+    });
   }
 
-  // /**
-  //  * Sign in to using gmail.
-  //  * After successful sign in, the token will be used to authenticate/login to ExpenseTracker API.
-  //  * The ExpenseTracker API will provide a new token which will be the one to use for all the succeeding calls
-  //  */
-  // public signInViaGoogle() {
-  //   this.googleLoginStatus(true);
-
-  //   this.afAuth
-  //     .signInWithRedirect(new GoogleAuthProvider())
-  //     .then((result) => {
-  //     })
-  //     .catch((error) => {
-  //     });
-  // }
-
-  public signInWithEmailAndPassword({ email, password } : { email: string, password: string }) {
-    return this.afAuth.signInWithEmailAndPassword(email, password)
+  public signInWithEmailAndPassword(email: string, password: string) {
+    return this.afAuth.signInWithEmailAndPassword(email, password);
   }
 
   /**
@@ -70,10 +61,12 @@ export class AuthService {
    */
   public signOut() {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
     this.afAuth.signOut();
-    this.isAuthenticated$.next(false);
-    const state = this.router.routerState.snapshot;
-    this.router.navigate(['login'], { queryParams: { returnUrl: state?.url }});
+    // this.isAuthenticated$.next(false);
+    // const state = this.router.routerState.snapshot;
+    // this.router.navigate(['login'], { queryParams: { returnUrl: state?.url } });
   }
 
   /**
@@ -96,17 +89,15 @@ export class AuthService {
     });
   }
 
-
   /**
    *
    * @param token the token from firebase authentication, will be used to authenticate to the api
    * @param provider right now not needed, not sure if additional auth providers will be added
    * @returns a jwt token generated from the api
    */
-  public login(token: string, provider: string = '') {
+  public login(token: string) {
     return this.http.post<AuthRequestResult>(`${this.authUrl}/login`, {
       token,
-      provider,
     });
   }
 
@@ -114,11 +105,34 @@ export class AuthService {
    * will set the accessToken to the localStorage
    * and triggers the isAuthenticated$
    */
-  public setAuthData(authData: any) {
-    localStorage.setItem('accessToken', authData.token);
-    this.isAuthenticated$.next(this.isAuthenticated());
+  public setAuthData(token: string) {
+    localStorage.setItem('accessToken', token);
+
+    if (token) {
+      const decoded = this.jwtHelper.decodeToken(token);
+      const user = {} as any;
+      Object.keys(decoded).forEach((key) => {
+        let newKey = key;
+        if (['Email', 'Name', 'PhotoUrl', 'Role', 'UserId'].includes(key)) {
+          newKey = key.charAt(0).toLowerCase() + key.slice(1);
+        }
+        user[newKey] = decoded[key];
+      });
+
+      localStorage.setItem('user', JSON.stringify(user));
+    }
   }
 
+  public getAuthData(): AuthData | null {
+    const accessToken = localStorage.getItem('accessToken');
+    const user = localStorage.getItem('user');
+    if (user) {
+      const userData = JSON.parse(user);
+      return { ...userData, accessToken };
+    }
+
+    return null;
+  }
 
   /**
    * helper method to return if accessToken is present and not yet expired
@@ -137,55 +151,17 @@ export class AuthService {
     return localStorage.getItem('accessToken');
   }
 
-
-  /**
-   *
-   * @returns the user data from the decoded token
-   */
-  public getUserData() {
-    if (this.isAuthenticated())
-      return this.jwtHelper.decodeToken(this.getAccessToken()!);
-
-    return null;
-  }
-
-  /**
-   * If current token has expired, will have to refetch token from firebase
-   * and revalidate the token to the api to get a new jwt token
-   * @returns
-   */
-  public refreshToken() {
-    return this.firebaseUser$.pipe(
+  public refreshToken(): Observable<string> {
+    return this.afAuth.user.pipe(
       switchMap((user) => {
         if (user) {
           return from(user.getIdTokenResult()).pipe(
-            map((idTokenResult) => idTokenResult?.token)
+            switchMap((idTokenResult) => this.login(idTokenResult.token)),
+            map((authData) => authData.token)
           );
         }
-        return of('');
-      }),
-      switchMap((token) => {
-        if (token) {
-          return this.login(token).pipe(
-            tap((result) => {
-              this.setAuthData(result);
-            }),
-            map(() => true),
-            catchError((error) => {
-              this.signOut();
-              return throwError(() => error);
-            })
-          );
-        }
-        return of(false);
-      }),
-      // if unable to fetch the new token
-      // then logout
-      catchError((error) => {
-        this.signOut();
-        return throwError(() => error);
+        return throwError(() => '');
       })
     );
   }
-
 }

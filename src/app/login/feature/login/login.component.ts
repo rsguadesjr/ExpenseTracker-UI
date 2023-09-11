@@ -2,7 +2,7 @@ import { AuthService } from './../../../shared/data-access/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { CheckboxModule } from 'primeng/checkbox';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormControl,
@@ -13,7 +13,15 @@ import {
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, Subject, finalize, map } from 'rxjs';
+import {
+  Observable,
+  Subject,
+  filter,
+  finalize,
+  map,
+  take,
+  takeUntil,
+} from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { TabViewModule } from 'primeng/tabview';
 import { SignUpComponent } from 'src/app/login/feature/sign-up/sign-up.component';
@@ -22,6 +30,9 @@ import { MessagesModule } from 'primeng/messages';
 import { Message, MessageService } from 'primeng/api';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TooltipModule } from 'primeng/tooltip';
+import { Store } from '@ngrx/store';
+import { login } from 'src/app/state/auth/auth.action';
+import { error, loginStatus } from 'src/app/state/auth/auth.selector';
 
 @Component({
   selector: 'app-login',
@@ -39,54 +50,73 @@ import { TooltipModule } from 'primeng/tooltip';
     RouterModule,
     MessagesModule,
     ProgressSpinnerModule,
-    TooltipModule
+    TooltipModule,
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   providers: [MessageService],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  private ngUnsubscribe$ = new Subject<unknown>();
+  private unsubscribe$ = new Subject<unknown>();
+  private afAuth = inject(AngularFireAuth);
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private store = inject(Store);
 
-  form: FormGroup;
   socialLoginInProgress = false;
-
-  tabIndex = 0;
-
-  validationErrors: { [key: string]: string[] } = {};
   emailAndPasswordLoginInProgress = false;
+  validationErrors: { [key: string]: string[] } = {};
   messages: Message[] = [];
 
-  showSocialLogin$: Observable<boolean>;
+  showSocialLogin$: Observable<boolean> = this.route.queryParamMap.pipe(
+    map((v) => v.get('socialLogin') == 'true')
+  );
 
-  constructor(
-    private afAuth: AngularFireAuth,
-    private router: Router,
-    public authService: AuthService,
-    private route: ActivatedRoute
-  ) {
-    this.form = new FormGroup({
-      email: new FormControl('', [
-        FormValidation.matchRegexValidator(
-          /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-          'Enter a valid email'
-        ),
-        FormValidation.requiredValidator('Email is required'),
-      ]),
-      password: new FormControl('', [
-        FormValidation.requiredValidator('Password is required'),
-      ]),
+  loginStatus$ = this.store.select(loginStatus);
+  errorMessage$ = this.store.select(error).pipe(
+    map((e) =>
+      !e
+        ? []
+        : [
+            {
+              severity: 'error',
+              summary: 'Error',
+              detail: e,
+            },
+          ]
+    )
+  );
+
+  form: FormGroup = new FormGroup({
+    email: new FormControl('', [
+      FormValidation.matchRegexValidator(
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        'Enter a valid email'
+      ),
+      FormValidation.requiredValidator('Email is required'),
+    ]),
+    password: new FormControl('', [
+      FormValidation.requiredValidator('Password is required'),
+    ]),
+  });
+
+  ngOnInit() {
+    // Navigate to url after login success
+    this.loginStatus$.pipe(takeUntil(this.unsubscribe$)).subscribe((status) => {
+      if (status === 'success') {
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+        this.router.navigateByUrl(returnUrl);
+      } else if (status === 'error') {
+        this.socialLoginInProgress = false;
+        this.emailAndPasswordLoginInProgress = false;
+      }
     });
-
-    this.showSocialLogin$ = this.route.queryParamMap
-      .pipe(map((v) => v.get('socialLogin') == 'true'))
   }
 
-  ngOnInit(): void {}
-
-  ngOnDestroy(): void {
-    this.ngUnsubscribe$.next(null);
-    this.ngUnsubscribe$.complete();
+  ngOnDestroy() {
+    this.unsubscribe$.next(null);
+    this.unsubscribe$.complete();
   }
 
   forgotPassword() {}
@@ -96,120 +126,32 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.form.updateValueAndValidity();
     this.validationErrors = FormValidation.getFormValidationErrors(this.form);
 
-    if (this.form.invalid)
-      return
-
-    this.messages = [];
-    const data = {
-      email: this.form.get('email')?.value,
-      password: this.form.get('password')?.value,
-    };
+    if (this.form.invalid) return;
 
     this.emailAndPasswordLoginInProgress = true;
-    try {
-      const result = await this.authService.signInWithEmailAndPassword(data);
-      const idToken = await result?.user?.getIdToken();
-      if (idToken) {
-        this.authService
-          .login(idToken, 'Google')
-          .pipe(finalize(() => (this.emailAndPasswordLoginInProgress = false)))
-          .subscribe({
-            next: (result) => {
-              this.authService.setAuthData(result);
-              const returnUrl =
-                this.route.snapshot.queryParams['returnUrl'] || '/';
-              this.router.navigateByUrl(returnUrl);
-            },
-            error: (e) => {
-              this.messages = [
-                {
-                  severity: 'error',
-                  summary: 'Error',
-                  detail: this.getErrorMessage(e),
-                },
-              ];
-              this.authService.signOut();
-            },
-          });
-      }
-    } catch (e) {
-      this.messages = [
-        {
-          severity: 'error',
-          summary: 'Error',
-          detail: this.getErrorMessage(e),
-        },
-      ];
-      this.emailAndPasswordLoginInProgress = false;
+    const email = this.form.get('email')?.value;
+    const password = this.form.get('password')?.value;
+    const result = await this.authService.signInWithEmailAndPassword(
+      email,
+      password
+    );
+    const idToken = await result?.user?.getIdToken();
+
+    if (idToken) {
+      this.store.dispatch(login({ idToken: idToken }));
     }
   }
 
   async signInGoogle() {
-    // clear messages first
-    this.messages = [];
-
-    try {
-      const result = await this.afAuth.signInWithPopup(
-        new GoogleAuthProvider()
-      );
-
-      this.socialLoginInProgress = true;
-      const idToken = await result?.user?.getIdToken();
-      if (idToken) {
-        this.authService
-          .login(idToken, 'Google')
-          .pipe(finalize(() => (this.socialLoginInProgress = false)))
-          .subscribe({
-            next: (result) => {
-              this.authService.setAuthData(result);
-              const returnUrl =
-                this.route.snapshot.queryParams['returnUrl'] || '/';
-              this.router.navigateByUrl(returnUrl);
-            },
-            error: (e) => {
-              this.messages = [
-                {
-                  severity: 'error',
-                  summary: 'Error',
-                  detail: this.getErrorMessage(e),
-                },
-              ];
-              this.authService.signOut();
-            },
-          });
-      }
-    } catch (e) {
-      this.messages = [
-        {
-          severity: 'error',
-          summary: 'Error',
-          detail: this.getErrorMessage(e),
-        },
-      ];
-      this.socialLoginInProgress = false;
+    const result = await this.afAuth.signInWithPopup(new GoogleAuthProvider());
+    this.socialLoginInProgress = true;
+    const idToken = await result?.user?.getIdToken();
+    if (idToken) {
+      this.store.dispatch(login({ idToken: idToken }));
     }
-
   }
 
   copy(value: string) {
     navigator.clipboard.writeText(value);
   }
-
-  private getErrorMessage(e: any) {
-    // firebase error
-    if (typeof(e) === 'object') {
-      if (e.name === 'FirebaseError') {
-        let message = e.message?.replace('Firebase:', '')?.replace(`(${e.code}).`, '')
-        return message;
-      }
-
-      if (typeof(e.error) === 'string') {
-        return e.error;
-      }
-    }
-
-    console.log('Error', e)
-    return 'An unexpected error was encountered.';
-  }
-
 }

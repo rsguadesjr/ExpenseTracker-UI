@@ -13,13 +13,11 @@ export class AccessDirective {
   ) {}
 
   @Input() set access(allowedRoles: string[]) {
-    const userData = this.authService.getUserData();
+    const userData = this.authService.getAuthData();
     let roles: string[] = [];
-    if (userData && userData['Role']) {
+    if (userData?.role) {
       roles =
-        typeof userData['Role'] === 'string'
-          ? [userData['Role']]
-          : userData['Role'];
+        typeof userData.role === 'string' ? [userData.role] : userData.role;
     }
 
     if (roles.some((r) => allowedRoles.includes(r))) {

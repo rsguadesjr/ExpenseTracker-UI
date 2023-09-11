@@ -20,12 +20,12 @@ export class SummaryService {
   constructor(private http: HttpClient, private authService: AuthService) {
     this.baseUrl = environment.API_BASE_URL + 'api/Summary';
 
-    authService.isAuthenticated$.subscribe((isAuth) => {
-      if (!isAuth) {
-        this.dailyTotal$.next([]);
-        this.cache.clear();
-      }
-    });
+    // authService.isAuthenticated$.subscribe((isAuth) => {
+    //   if (!isAuth) {
+    //     this.dailyTotal$.next([]);
+    //     this.cache.clear();
+    //   }
+    // });
   }
 
   getTotalAmountPerCategory(

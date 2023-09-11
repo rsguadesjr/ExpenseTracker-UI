@@ -30,6 +30,7 @@ import {
 import { ReminderModel } from 'src/app/shared/model/reminder-model';
 import { ReminderType } from 'src/app/shared/enums/reminder-type';
 import { AccessDirective } from 'src/app/shared/utils/access.directive';
+import { user } from 'src/app/state/auth/auth.selector';
 
 @Component({
   selector: 'app-home',
@@ -57,6 +58,7 @@ export class HomeComponent implements OnInit {
   categorizedExpenses$ = this.store.select(categorizedExpenses);
   dailyCategorizedExpenses$ = this.store.select(dailyCategorizedExpenses);
   savingInProgress$ = this.store.select(savingStatus);
+  user$ = this.store.select(user);
 
   recentTransactions$ = this.expenses$.pipe(
     map((expenses) => expenses.slice(0, 10))
@@ -109,7 +111,7 @@ export class HomeComponent implements OnInit {
       tags: data.tags,
     } as ExpenseRequestModel;
 
-    this.showExpenseModal({ title: 'Create', expense, isEdit: false });
+    this.showExpenseModal({ title: 'Create', expense, isEdit: true });
   }
 
   createExpense(reminder: ReminderModel) {

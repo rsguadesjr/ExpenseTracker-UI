@@ -9,6 +9,9 @@ import { BadgeDirective, BadgeModule } from 'primeng/badge';
 import { map, of, switchMap } from 'rxjs';
 import { ExpenseFormComponent } from 'src/app/expenses/feature/expense-form/expense-form.component';
 import { DialogService } from 'primeng/dynamicdialog';
+import { Store } from '@ngrx/store';
+import { logout } from 'src/app/state/auth/auth.action';
+import { user } from 'src/app/state/auth/auth.selector';
 
 @Component({
   selector: 'app-header',
@@ -19,7 +22,9 @@ import { DialogService } from 'primeng/dynamicdialog';
   styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
-  dialogService = inject(DialogService);
+  private dialogService = inject(DialogService);
+  private authService = inject(AuthService);
+  private store = inject(Store);
 
   @Output() showSideBar = new EventEmitter();
 
@@ -27,19 +32,20 @@ export class HeaderComponent {
     { label: 'Logout', command: () => this.signOut() },
   ];
 
-  authService = inject(AuthService);
-  authenticated$ = this.authService.isAuthenticated$.pipe(
-    switchMap((isAuth) => {
-      return isAuth ? this.authService.firebaseUser$ : of(null);
-    })
-  );
+  user$ = this.store.select(user);
+  // authenticated$ = this.authService.isAuthenticated$.pipe(
+  //   switchMap((isAuth) => {
+  //     return isAuth ? this.authService.firebaseUser$ : of(null);
+  //   })
+  // );
 
   toggleSidebar() {
     this.showSideBar.emit(true);
   }
 
   signOut() {
-    this.authService.signOut();
+    // this.authService.signOut();
+    this.store.dispatch(logout());
   }
 
   newEntry() {

@@ -1,140 +1,89 @@
 import {
   HttpErrorResponse,
-  HttpEvent,
   HttpHandler,
   HttpInterceptor,
   HttpRequest,
-  HttpResponse,
   HttpStatusCode,
 } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { JwtHelperService } from '@auth0/angular-jwt';
+import { Injectable, inject } from '@angular/core';
 import {
-  Observable,
+  BehaviorSubject,
   catchError,
-  from,
-  lastValueFrom,
-  map,
+  filter,
   switchMap,
-  tap,
+  take,
   throwError,
 } from 'rxjs';
 import { AuthService } from '../data-access/auth.service';
-import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { loginSuccess } from 'src/app/state/auth/auth.action';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  retry = true;
+  private authService = inject(AuthService);
+  private store = inject(Store);
 
-  constructor(
-    private jwtHelper: JwtHelperService,
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  private isRefreshing = false;
+  private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(
+    null
+  );
+
   intercept(req: HttpRequest<any>, next: HttpHandler) {
-    // // Get the auth token from the service.
-    // const accessToken = localStorage.getItem('accessToken');
-    if (req.url.toLowerCase().includes('api/auth/login')) {
-      return next.handle(req.clone()).pipe(
+    let authReq = req;
+    let token = this.authService.getAccessToken();
+    if (token) {
+      authReq = this.addTokenHeader(req, token);
+    }
+
+    return next.handle(authReq).pipe(
+      catchError((httpErrorResponse: HttpErrorResponse) => {
+        if (
+          !req.url.toLowerCase().includes('api/auth/login') &&
+          httpErrorResponse.status === HttpStatusCode.Unauthorized
+        ) {
+          return this.handle401Error(authReq, next);
+        }
+
+        return throwError(() => httpErrorResponse);
+      })
+    );
+  }
+
+  private handle401Error(req: HttpRequest<any>, next: HttpHandler) {
+    if (!this.isRefreshing) {
+      this.isRefreshing = true;
+      this.refreshTokenSubject.next(null);
+
+      return this.authService.refreshToken().pipe(
+        switchMap((token) => {
+          this.isRefreshing = false;
+
+          this.authService.setAuthData(token);
+          const user = this.authService.getAuthData();
+          this.store.dispatch(loginSuccess({ user }));
+
+          this.refreshTokenSubject.next(token);
+          return next.handle(this.addTokenHeader(req, token));
+        }),
         catchError((error) => {
+          this.isRefreshing = false;
+
           this.authService.signOut();
           return throwError(() => error);
         })
-      )
+      );
     }
 
-
-
-    let request = req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${this.authService.getAccessToken() ?? ''}`),
-    });
-    return next.handle(request).pipe(
-      map((event: HttpEvent<any>) => {
-        return event;
-      }),
-      catchError(
-        (
-          httpErrorResponse: HttpErrorResponse,
-          _: Observable<HttpEvent<any>>
-        ) => {
-
-          if (httpErrorResponse.status === HttpStatusCode.Unauthorized) {
-            return from(this.authService.refreshToken()).pipe(
-              switchMap(() => {
-                let request = req.clone({
-                  headers: req.headers.set('Authorization', `Bearer ${this.authService.getAccessToken() ?? ''}`),
-                });
-                return next.handle(request).pipe(
-                  catchError((error) => {
-                    this.authService.signOut();
-                    return throwError(() => error);
-                  })
-                )
-              }),
-              catchError((error) => {
-                this.authService.signOut();
-                return throwError(() => error);
-              })
-            )
-          }
-
-          return throwError(() => httpErrorResponse);
-        }
-      )
-    )
-
-    // return from(this.handle(req, next)).pipe(
-    //   map((event: HttpEvent<any>) => {
-    //     return event;
-    //   }),
-    //   catchError(
-    //     (
-    //       httpErrorResponse: HttpErrorResponse,
-    //       _: Observable<HttpEvent<any>>
-    //     ) => {
-    //       if (httpErrorResponse.status === HttpStatusCode.Unauthorized) {
-    //         const test = from(this.authService.refreshToken())
-
-    //         // if (this.retry) {
-    //         //   this.retry = !this.retry;
-    //         //   return from(this.handle(req, next, true))
-    //         //           .pipe(
-    //         //             catchError((
-    //         //               httpErrorResponse: HttpErrorResponse,
-    //         //               _: Observable<HttpEvent<any>>
-    //         //             )  => {
-    //         //               return throwError(() => httpErrorResponse);
-    //         //             })
-    //         //           )
-    //         // } else {
-    //         //   this.retry = !this.retry;
-    //         //   // this.authService.signOut();
-    //         // }
-    //       }
-    //       return throwError(() => httpErrorResponse);
-    //     }
-    //   )
-    // );
+    return this.refreshTokenSubject.pipe(
+      filter((token) => !!token),
+      take(1),
+      switchMap((token) => next.handle(this.addTokenHeader(req, token)))
+    );
   }
 
-
-  // private async handle(req: HttpRequest<any>, next: HttpHandler, forceRetry?: boolean) {
-  //   // Get the auth token from the service.
-  //   let accessToken: string = localStorage.getItem('accessToken') || '';
-
-  //   if (!accessToken || (accessToken && this.jwtHelper.isTokenExpired(accessToken)) || forceRetry) {
-  //     accessToken = await this.authService.firebaseUser$?.value?.getIdToken(true);
-  //     localStorage.setItem('accessToken', accessToken ?? '');
-  //   }
-
-  //   // Clone the request and replace the original headers with
-  //   // cloned headers, updated with the authorization.
-  //   const authReq = req.clone({
-  //     headers: req.headers.set('Authorization', `Bearer ${accessToken ?? ''}`),
-  //   });
-
-  //   // send cloned request with header to the next handler.
-  //   return await lastValueFrom(next.handle(authReq));
-  // }
-
+  private addTokenHeader(request: HttpRequest<any>, token: string) {
+    return request.clone({
+      headers: request.headers.set('Authorization', `Bearer ${token}`),
+    });
+  }
 }

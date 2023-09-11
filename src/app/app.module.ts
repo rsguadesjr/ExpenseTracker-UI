@@ -34,6 +34,8 @@ import { BudgetEffects } from './state/budgets/budget.effects';
 import { categoryReducer } from './state/categories/categories.reducer';
 import { sourceReducer } from './state/sources/sources.reducer';
 import { budgetReducer } from './state/budgets/budget.reducer';
+import { authReducer } from './state/auth/auth.reducer';
+import { AuthEffects } from './state/auth/auth.effects';
 
 @NgModule({
   declarations: [AppComponent],
@@ -63,6 +65,7 @@ import { budgetReducer } from './state/budgets/budget.reducer';
       categories: categoryReducer,
       sources: sourceReducer,
       budgets: budgetReducer,
+      auth: authReducer,
     }),
     StoreDevtoolsModule.instrument({
       maxAge: 25, // Retains last 25 states
@@ -77,6 +80,7 @@ import { budgetReducer } from './state/budgets/budget.reducer';
       CategoryEffects,
       SourceEffects,
       BudgetEffects,
+      AuthEffects,
     ]),
   ],
   providers: [

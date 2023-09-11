@@ -17,9 +17,7 @@ const routes: Routes = [
     path: '',
     canActivate: [AuthGuard],
     loadComponent: () =>
-      import('./home/feature/home/home.component').then(
-        (m) => m.HomeComponent
-      ),
+      import('./home/feature/home/home.component').then((m) => m.HomeComponent),
   },
   {
     path: 'login',
@@ -46,7 +44,6 @@ const routes: Routes = [
   //       (m) => m.ForgotPasswordComponent
   //     ),
   // },
-
 
   {
     path: 'sign-up',
@@ -77,9 +74,9 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: { role: ['SuperAdmin', 'Admin', 'Standard'] },
     loadChildren: () =>
-      import('./account/feature/account-shell/account-shell-routing.module').then(
-        (m) => m.AccountShellRoutingModule
-      ),
+      import(
+        './account/feature/account-shell/account-shell-routing.module'
+      ).then((m) => m.AccountShellRoutingModule),
   },
   {
     path: 'settings',
@@ -96,6 +93,14 @@ const routes: Routes = [
       import('./reminders/feature/reminder-shell/reminder-shell.module').then(
         (m) => m.ReminderShellModule
       ),
+  },
+  {
+    path: 'home',
+    redirectTo: '',
+  },
+  {
+    path: '**',
+    redirectTo: '',
   },
 ];
 
