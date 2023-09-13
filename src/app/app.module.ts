@@ -36,6 +36,7 @@ import { sourceReducer } from './state/sources/sources.reducer';
 import { budgetReducer } from './state/budgets/budget.reducer';
 import { authReducer } from './state/auth/auth.reducer';
 import { AuthEffects } from './state/auth/auth.effects';
+import { DecimalPipe } from '@angular/common';
 
 @NgModule({
   declarations: [AppComponent],
@@ -92,6 +93,7 @@ import { AuthEffects } from './state/auth/auth.effects';
     ToastService,
     DialogService,
     ConfirmationService,
+    DecimalPipe,
   ],
   bootstrap: [AppComponent],
 })

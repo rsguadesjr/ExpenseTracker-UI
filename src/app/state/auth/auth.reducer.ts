@@ -1,5 +1,11 @@
 import { createReducer, on } from '@ngrx/store';
-import { login, loginError, loginSuccess, logout } from './auth.action';
+import {
+  login,
+  loginError,
+  loginSuccess,
+  loginWithEmailAndPassword,
+  logout,
+} from './auth.action';
 import { AuthData } from 'src/app/core/models/auth-data';
 
 export interface AuthState {
@@ -23,7 +29,7 @@ export const authReducer = createReducer(
   })),
 
   on(loginSuccess, (state, { user }) => {
-    return { ...state, loginStatus: 'success' as const, user };
+    return { ...state, error: null, loginStatus: 'success' as const, user };
   }),
 
   on(loginError, (state, { error }) => ({
@@ -35,5 +41,10 @@ export const authReducer = createReducer(
   on(logout, (state) => ({
     ...state,
     user: null,
+  })),
+
+  on(loginWithEmailAndPassword, (state) => ({
+    ...state,
+    loginStatus: 'loading' as const,
   }))
 );

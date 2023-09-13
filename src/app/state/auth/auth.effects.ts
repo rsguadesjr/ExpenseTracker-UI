@@ -7,6 +7,7 @@ import {
   login,
   loginError,
   loginSuccess,
+  loginWithEmailAndPassword,
   logout,
   refreshAuth,
 } from './auth.action';
@@ -31,6 +32,33 @@ export class AuthEffects {
             this.authService.setAuthData(result.token);
             const user = this.authService.getAuthData();
             return loginSuccess({ user });
+          }),
+          catchError((error) => {
+            const errorMsg = AuthHelper.getMessage(error);
+            return of(loginError({ error: errorMsg }));
+          })
+        );
+      })
+    )
+  );
+
+  loginWithEmailAndPassword$ = createEffect(() =>
+    this.action$.pipe(
+      ofType(loginWithEmailAndPassword),
+      switchMap(({ email, password }) => {
+        return from(
+          this.authService.signInWithEmailAndPassword(email, password)
+        ).pipe(
+          switchMap((result) => {
+            if (result?.user) {
+              return from(result.user?.getIdToken()).pipe(
+                map((idToken) => {
+                  return login({ idToken });
+                })
+              );
+            }
+
+            return of();
           }),
           catchError((error) => {
             const errorMsg = AuthHelper.getMessage(error);

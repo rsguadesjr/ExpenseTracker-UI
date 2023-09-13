@@ -50,8 +50,8 @@ import { user } from 'src/app/state/auth/auth.selector';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  store = inject(Store);
-  dialogService = inject(DialogService);
+  private store = inject(Store);
+  private dialogService = inject(DialogService);
   date = new Date();
 
   expenses$ = this.store.select(selectAllExpenses);

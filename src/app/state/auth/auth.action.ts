@@ -6,6 +6,11 @@ export const login = createAction(
   props<{ idToken: string }>()
 );
 
+export const loginWithEmailAndPassword = createAction(
+  '[Auth Page] Login with Email and Password',
+  props<{ email: string; password: string }>()
+);
+
 export const loginSuccess = createAction(
   '[Auth API] Login Success',
   props<{ user: AuthData | null }>()

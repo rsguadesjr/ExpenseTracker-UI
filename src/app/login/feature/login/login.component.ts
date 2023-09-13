@@ -13,15 +13,7 @@ import {
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import {
-  Observable,
-  Subject,
-  filter,
-  finalize,
-  map,
-  take,
-  takeUntil,
-} from 'rxjs';
+import { Observable, Subject, map, takeUntil } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { TabViewModule } from 'primeng/tabview';
 import { SignUpComponent } from 'src/app/login/feature/sign-up/sign-up.component';
@@ -31,7 +23,10 @@ import { Message, MessageService } from 'primeng/api';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TooltipModule } from 'primeng/tooltip';
 import { Store } from '@ngrx/store';
-import { login } from 'src/app/state/auth/auth.action';
+import {
+  login,
+  loginWithEmailAndPassword,
+} from 'src/app/state/auth/auth.action';
 import { error, loginStatus } from 'src/app/state/auth/auth.selector';
 
 @Component({
@@ -57,15 +52,13 @@ import { error, loginStatus } from 'src/app/state/auth/auth.selector';
   providers: [MessageService],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  private unsubscribe$ = new Subject<unknown>();
+  private unsubscribe$ = new Subject<void>();
   private afAuth = inject(AngularFireAuth);
   private router = inject(Router);
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   private store = inject(Store);
 
-  socialLoginInProgress = false;
-  emailAndPasswordLoginInProgress = false;
   validationErrors: { [key: string]: string[] } = {};
   messages: Message[] = [];
 
@@ -107,19 +100,14 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (status === 'success') {
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
         this.router.navigateByUrl(returnUrl);
-      } else if (status === 'error') {
-        this.socialLoginInProgress = false;
-        this.emailAndPasswordLoginInProgress = false;
       }
     });
   }
 
   ngOnDestroy() {
-    this.unsubscribe$.next(null);
+    this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
-
-  forgotPassword() {}
 
   async signInEmailAndPassword() {
     this.form.markAllAsTouched();
@@ -128,23 +116,13 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     if (this.form.invalid) return;
 
-    this.emailAndPasswordLoginInProgress = true;
     const email = this.form.get('email')?.value;
     const password = this.form.get('password')?.value;
-    const result = await this.authService.signInWithEmailAndPassword(
-      email,
-      password
-    );
-    const idToken = await result?.user?.getIdToken();
-
-    if (idToken) {
-      this.store.dispatch(login({ idToken: idToken }));
-    }
+    this.store.dispatch(loginWithEmailAndPassword({ email, password }));
   }
 
   async signInGoogle() {
     const result = await this.afAuth.signInWithPopup(new GoogleAuthProvider());
-    this.socialLoginInProgress = true;
     const idToken = await result?.user?.getIdToken();
     if (idToken) {
       this.store.dispatch(login({ idToken: idToken }));

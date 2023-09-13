@@ -1,4 +1,3 @@
-
 <div class="text-2xl p-2 font-bold">Manage Expenses</div>
 <div class="flex flex-column lg:flex-row gap-4">
   <!-- col -->
@@ -7,46 +6,49 @@
       <div class="flex gap-2 align-items-end">
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="view">View</label>
-          <p-dropdown formControlName="view" [options]="dateViewOptions" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
+          <p-dropdown formControlName="view" [options]="dateViewOptions" optionLabel="name" optionValue="id"
+            class="w-100"></p-dropdown>
         </div>
-        <ng-container *ngIf="filterForm.value.view === 'month'" >
-          <div class="flex flex-column gap-2 p-fluid w-15rem" >
+        <ng-container *ngIf="filterForm.value.view === 'month'">
+          <div class="flex flex-column gap-2 p-fluid w-15rem">
             <label htmlFor="view">Month</label>
-            <p-dropdown formControlName="month" [options]="monthOptions" optionLabel="name" optionValue="id" class="w-100"></p-dropdown>
+            <p-dropdown formControlName="month" [options]="monthOptions" optionLabel="name" optionValue="id"
+              class="w-100"></p-dropdown>
           </div>
         </ng-container>
-        <ng-container *ngIf="filterForm.value.view !== 'month'" >
+        <ng-container *ngIf="filterForm.value.view !== 'month'">
           <div class="flex flex-column gap-2 p-fluid">
             <label htmlFor="dateFrom">Date From</label>
-            <p-calendar #dateFrom id="dateFrom" formControlName="dateFrom" dateFormat="dd-M-yy" [maxDate]="filterForm.get('dateTo')?.value" (onSelect)="dateTo?.showOverlay()"></p-calendar>
+            <p-calendar #dateFrom id="dateFrom" formControlName="dateFrom" dateFormat="dd-M-yy"
+              [maxDate]="filterForm.get('dateTo')?.value" (onSelect)="dateTo?.showOverlay()"></p-calendar>
           </div>
           <div class="flex flex-column gap-2 p-fluid">
             <label htmlFor="dateTo">Date To</label>
-            <p-calendar #dateTo id="dateTo" formControlName="dateTo" dateFormat="dd-M-yy" [minDate]="filterForm.get('dateFrom')?.value"></p-calendar>
+            <p-calendar #dateTo id="dateTo" formControlName="dateTo" dateFormat="dd-M-yy"
+              [minDate]="filterForm.get('dateFrom')?.value"></p-calendar>
           </div>
         </ng-container>
       </div>
       <div class="flex gap-2  flex-grow-1 justify-content-between w-full">
         <div class="flex flex-grow-1 gap-2 ">
           <p-button icon="pi {{  (filterInProgress$ | async) ? 'pi-spin pi-spinner' : 'pi-search' }}"
-                    pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
+            pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
           <!-- <p-button icon="pi pi-filter-slash" pTooltip="Clear fields" styleClass="p-button-rounded " (click)="clearFilter()"></p-button> -->
         </div>
-        <p-button *access="['SuperAdmin', 'Admin', 'Standard', 'BasicExpense']" icon="pi pi-plus" pTooltip="Create Expense" tooltipPosition="left" styleClass="p-button-rounded " (click)="addEntry()"></p-button>
+        <p-button *access="['SuperAdmin', 'Admin', 'Standard', 'BasicExpense']" icon="pi pi-plus"
+          pTooltip="Create Expense" tooltipPosition="left" styleClass="p-button-rounded "
+          (click)="addEntry()"></p-button>
       </div>
     </div>
     <ng-container *ngIf="expenseEntries$ | async as data; else noResult">
       <div class="flex gap-2 align-items-center py-2">
-        <span>Total spent for this period:</span>
-        <span class="text-xl border-round bg-cyan-800 p-2 font-bold">{{ ((filteredItems$ | async) ?? data) | sum: 'amount' | number: '0.0'}}</span>
+        <span>Total spent for this period: </span>
+        <span class="text-xl border-round bg-cyan-800 p-2 font-bold">{{ filteredEntries$ | async | sum: 'amount' |
+          number: '0.0'}}</span>
       </div>
-      <div class="card" *ngIf="data.length > 0; else noResult">
-        <app-expense-table-view
-          [items]="data"
-          (selected)="editEntry($event)"
-          (delete)="deleteEntry($event)"
-          (onPageChange)="onPageChange($event)"
-          (onFilterChange)="onFilterChange($event)"></app-expense-table-view>
+      <div class="card">
+        <app-expense-table-view [items]="data" (selected)="editEntry($event)" (delete)="deleteEntry($event)"
+          (onPageChange)="onPageChange($event)" (onFilterChange)="onFilterChange($event)"></app-expense-table-view>
       </div>
     </ng-container>
 
@@ -61,21 +63,21 @@
   <!-- col -->
   <div class="w-full lg:w-4 flex flex-column md:flex-row lg:flex-column gap-4">
     <div class="w-12 md:w-6 lg:w-12 p-fluid flex flex-column gap-4">
-      <app-calendar [date]="calendarDate"
-                    [month]="(calendarMonth$ | async)!"
-                  [items]="(calendarItems$ | async) ?? []"
-                  (selectDate)="selectDate($event)"
-                  (monthChange)="monthChange($event)"
-      >
+      <app-calendar [date]="calendarDate" [month]="(calendarMonth$ | async)!" [items]="(calendarItems$ | async) ?? []"
+        (selectDate)="selectDate($event)" (monthChange)="monthChange($event)">
       </app-calendar>
-      <div class=" border-solid border-1 surface-border border-round-md p-4 bg-black-alpha-40" *ngIf="selectedDateReminders$ | async; let reminders">
+      <div class=" border-solid border-1 surface-border border-round-md p-4 bg-black-alpha-40"
+        *ngIf="selectedDateReminders$ | async; let reminders">
 
         <div class="mb-2">Reminders:</div>
         <div class="font-italic py-2" *ngIf="reminders.length === 0">No data</div>
-        <div class="flex w-full align-items-center gap-1 mb-1 border-round surface-50 p-2 mb-1" *ngFor="let reminder of reminders">
+        <div class="flex w-full align-items-center gap-1 mb-1 border-round surface-50 p-2 mb-1"
+          *ngFor="let reminder of reminders">
           <span class="mr-2 flex-grow-1">{{ reminder.subject }}</span>
           <ng-container *access="['SuperAdmin', 'Admin', 'Standard']">
-            <p-button icon="pi pi-plus" pTooltip="Create Expense" tooltipPosition="left" styleClass="p-button-rounded p-button-outlined p-button-sm p-button-help reminder-action" (click)="createExpense(reminder)"></p-button>
+            <p-button icon="pi pi-plus" pTooltip="Create Expense" tooltipPosition="left"
+              styleClass="p-button-rounded p-button-outlined p-button-sm p-button-help reminder-action"
+              (click)="createExpense(reminder)"></p-button>
           </ng-container>
         </div>
       </div>
@@ -85,7 +87,8 @@
       <div class="flex gap-2 align-items-center justify-content-between">
         <span class="text-2xl">Categories</span>
       </div>
-      <app-expense-per-category *ngIf="categorizedExpenses$ | async as items" [items]="items"></app-expense-per-category>
+      <app-expense-per-category *ngIf="categorizedExpenses$ | async as items"
+        [items]="items"></app-expense-per-category>
     </div>
   </div>
   <!-- /col -->

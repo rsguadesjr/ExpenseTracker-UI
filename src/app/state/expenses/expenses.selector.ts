@@ -4,12 +4,18 @@ import { ExpenseState } from './expenses.reducer';
 import { state } from '@angular/animations';
 import { TotalPerCategory } from 'src/app/shared/model/total-per-category.mode';
 import { TotalAmountPerCategoryPerDate } from 'src/app/summary/model/total-amount-per-category-per-date';
+import { ExpenseResponseModel } from 'src/app/expenses/model/expense-response.model';
 
 export const selectExpenses = (state: AppState) => state.expenses;
 
 export const selectAllExpenses = createSelector(
   selectExpenses,
-  (state: ExpenseState) => state.expenses
+  (state: ExpenseState): ExpenseResponseModel[] => state.expenses
+);
+
+export const selectFilteredExpenses = createSelector(
+  selectExpenses,
+  (state: ExpenseState) => state.filteredExpenses
 );
 
 export const loadingStatus = createSelector(
@@ -20,7 +26,7 @@ export const loadingStatus = createSelector(
 export const savingStatus = createSelector(
   selectExpenses,
   (state: ExpenseState) => state.savingStatus
-)
+);
 
 // categorized expense / total amount per category
 export const categorizedExpenses = createSelector(
@@ -60,9 +66,9 @@ export const dailyCategorizedExpenses = createSelector(
       .filter(
         (exp, i) =>
           exp.category != null &&
-          expenses.findIndex((e) => e.category.id === exp.category.id ) === i
+          expenses.findIndex((e) => e.category.id === exp.category.id) === i
       )
-      .map((exp) => ({ id: exp.category.id , name: exp.category.name }));
+      .map((exp) => ({ id: exp.category.id, name: exp.category.name }));
 
     return dates
       .map((date) => {

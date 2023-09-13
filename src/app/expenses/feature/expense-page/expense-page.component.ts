@@ -52,9 +52,11 @@ import {
   categorizedExpenses,
   savingStatus,
   selectAllExpenses,
+  selectFilteredExpenses,
 } from 'src/app/state/expenses/expenses.selector';
 import {
   deleteExpense,
+  filterExpenses,
   loadExpenses,
 } from 'src/app/state/expenses/expenses.action';
 import {
@@ -115,10 +117,10 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   calendarDate = new Date();
   selectedDate$ = new BehaviorSubject<Date>(new Date());
   calendarMonth$ = new BehaviorSubject<Date>(new Date());
-  filteredItems$ = new BehaviorSubject<ExpenseResponseModel[] | null>(null);
   filterInProgress$ = new BehaviorSubject<boolean>(false);
-
   expenseEntries$ = this.store.select(selectAllExpenses);
+
+  filteredEntries$ = this.store.select(selectFilteredExpenses);
   categorizedExpenses$ = this.store.select(categorizedExpenses);
   savingStatus$ = this.store.select(savingStatus);
 
@@ -182,8 +184,13 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
     category: new FormControl(),
   });
 
+  testItems: any[] = [];
   ngOnInit() {
     this.initMonthOptions();
+
+    this.store.select(selectAllExpenses).subscribe((v) => {
+      this.testItems = [...v.slice().map((x) => Object.assign({}, x))];
+    });
 
     // initial trigger on load - delayed
     of()
@@ -360,6 +367,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   }
 
   onFilterChange(data: ExpenseResponseModel[]) {
+    this.store.dispatch(filterExpenses({ filteredItems: [...data] }));
     this.cdr.detectChanges();
   }
 

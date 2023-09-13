@@ -16,7 +16,7 @@ import {
 } from 'rxjs';
 import { AuthService } from '../data-access/auth.service';
 import { Store } from '@ngrx/store';
-import { loginSuccess } from 'src/app/state/auth/auth.action';
+import { loginSuccess, logout } from 'src/app/state/auth/auth.action';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -68,7 +68,7 @@ export class AuthInterceptor implements HttpInterceptor {
         catchError((error) => {
           this.isRefreshing = false;
 
-          this.authService.signOut();
+          this.store.dispatch(logout());
           return throwError(() => error);
         })
       );
