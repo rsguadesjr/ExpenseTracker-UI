@@ -17,6 +17,8 @@ import { loadSources } from './state/sources/sources.action';
 import { loadBudgets } from './state/budgets/budgets.action';
 import { autoLogin } from './state/auth/auth.action';
 import { isAuthenticated, token } from './state/auth/auth.selector';
+import { loadExpenses } from './state/expenses/expenses.action';
+import { endOfMonth, startOfMonth } from 'date-fns';
 
 @Component({
   selector: 'app-root',
@@ -28,6 +30,7 @@ export class AppComponent implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
+  private date = new Date();
 
   title = 'ExpenseTracker';
   sidebarVisible: boolean = false;
@@ -44,29 +47,6 @@ export class AppComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    // this.router.events
-    //   .pipe(
-    //     filter((event) => event instanceof NavigationEnd),
-    //     map(() => this.router.url.split('?')[0])
-    //   )
-    //   .subscribe((url) => {
-    //     this.showNewButton = ['/'].includes(url);
-    //     this.showViewAllExpensesButton = ['/'].includes(url);
-    //     this.showActionButtons =
-    //       this.showNewButton && this.showViewAllExpensesButton;
-    //   });
-
-    // this.authService.isAuthenticated$.pipe().subscribe((isAuth) => {
-    //   if (isAuth) {
-    //     this.store.dispatch(loadCategories());
-    //     this.store.dispatch(loadSources());
-    //     this.store.dispatch(
-    //       loadReminders({ params: { startDate: '', endDate: '' } })
-    //     );
-    //     this.store.dispatch(loadBudgets());
-    //   }
-    // });
-
     this.store.dispatch(autoLogin());
 
     this.store
@@ -80,6 +60,17 @@ export class AppComponent implements OnInit {
             loadReminders({ params: { startDate: '', endDate: '' } })
           );
           this.store.dispatch(loadBudgets());
+
+          this.store.dispatch(
+            loadExpenses({
+              params: {
+                dateFrom: startOfMonth(this.date),
+                dateTo: endOfMonth(this.date),
+                pageNumber: 0,
+                totalRows: 9999, //this.rowsPerPage,
+              },
+            })
+          );
         }
       });
   }

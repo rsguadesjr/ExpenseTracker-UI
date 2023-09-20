@@ -11,7 +11,7 @@ import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { PrimeNgModule } from './prime-ng.module';
 import { JwtHelperService, JwtModule, JWT_OPTIONS } from '@auth0/angular-jwt';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { AuthInterceptor } from './shared/utils/auth-interceptor';
+import { AuthInterceptor } from './core/interceptors/auth-interceptor';
 import { ToastService } from './shared/utils/toast.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogModule } from 'primeng/dynamicdialog';
@@ -37,6 +37,7 @@ import { budgetReducer } from './state/budgets/budget.reducer';
 import { authReducer } from './state/auth/auth.reducer';
 import { AuthEffects } from './state/auth/auth.effects';
 import { DecimalPipe } from '@angular/common';
+import { CacheInterceptor } from './core/interceptors/cache-interceptor';
 
 @NgModule({
   declarations: [AppComponent],
@@ -86,6 +87,7 @@ import { DecimalPipe } from '@angular/common';
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true },
     JwtHelperService,
     AuthGuard,
     RoleGuard,
