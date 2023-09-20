@@ -11,7 +11,7 @@ import {
   logout,
   refreshAuth,
 } from './auth.action';
-import { catchError, from, map, of, switchMap, tap } from 'rxjs';
+import { catchError, from, map, of, switchMap, tap, throwError } from 'rxjs';
 import { AuthHelper } from 'src/app/core/utils/auth-helper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthData } from 'src/app/core/models/auth-data';
@@ -26,12 +26,18 @@ export class AuthEffects {
   login$ = createEffect(() =>
     this.action$.pipe(
       ofType(login),
-      switchMap(({ idToken }) => {
+      switchMap(({ idToken, provider }) => {
         return this.authService.login(idToken).pipe(
           map((result) => {
-            this.authService.setAuthData(result.token);
-            const user = this.authService.getAuthData();
-            return loginSuccess({ user });
+            if (result.isAuthorized) {
+              this.authService.setAuthData(result.token);
+              const user = this.authService.getAuthData();
+              return loginSuccess({ user });
+            } else {
+              return loginError({
+                error: 'Unauthorized Access. Please contact admin for access.',
+              });
+            }
           }),
           catchError((error) => {
             const errorMsg = AuthHelper.getMessage(error);
@@ -53,7 +59,7 @@ export class AuthEffects {
             if (result?.user) {
               return from(result.user?.getIdToken()).pipe(
                 map((idToken) => {
-                  return login({ idToken });
+                  return login({ idToken, provider: 'Email' });
                 })
               );
             }

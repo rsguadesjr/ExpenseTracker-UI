@@ -5,7 +5,13 @@ import { combineLatest, map } from 'rxjs';
 import { ExpenseListComponent } from 'src/app/expenses/ui/expense-list/expense-list.component';
 import { ButtonModule } from 'primeng/button';
 import { ChartModule } from 'primeng/chart';
-import { startOfMonth, endOfMonth } from 'date-fns';
+import {
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  format,
+  isSameDay,
+} from 'date-fns';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { ExpensePerCategoryComponent } from 'src/app/expenses/ui/expense-per-category/expense-per-category.component';
 import { SummaryFilter } from 'src/app/summary/model/summary-filter.model';
@@ -23,14 +29,11 @@ import { selectAllCategories } from 'src/app/state/categories/categories.selecto
 import { ExpenseResponseModel } from 'src/app/expenses/model/expense-response.model';
 import { ExpenseRequestModel } from 'src/app/expenses/model/expense-request.model';
 import { ExpenseFormComponent } from 'src/app/expenses/feature/expense-form/expense-form.component';
-import {
-  selectAllReminders,
-  selectFormattedReminders,
-} from 'src/app/state/reminders/reminders.selector';
 import { ReminderModel } from 'src/app/shared/model/reminder-model';
 import { ReminderType } from 'src/app/shared/enums/reminder-type';
 import { AccessDirective } from 'src/app/shared/utils/access.directive';
 import { user } from 'src/app/state/auth/auth.selector';
+import { LineChartComponent } from 'src/app/summary/ui/line-chart/line-chart.component';
 
 @Component({
   selector: 'app-home',
@@ -45,6 +48,7 @@ import { user } from 'src/app/state/auth/auth.selector';
     ExpensePerCategoryComponent,
     SummaryMainChartComponent,
     AccessDirective,
+    LineChartComponent,
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
@@ -87,18 +91,43 @@ export class HomeComponent implements OnInit {
     })
   );
 
-  ngOnInit() {
-    this.store.dispatch(
-      loadExpenses({
-        params: {
-          dateFrom: this.dateRange.startDate,
-          dateTo: this.dateRange.endDate,
-          pageNumber: 0,
-          totalRows: 9999, //this.rowsPerPage,
+  //#region chart data
+  chartAspectRatio = 0.8;
+  currentMonthDayOfInterval = eachDayOfInterval({
+    start: startOfMonth(this.date),
+    end: endOfMonth(this.date),
+  });
+
+  labels = this.currentMonthDayOfInterval.map((date) => format(date, 'd'));
+  chartDataSet$ = this.store.select(dailyCategorizedExpenses).pipe(
+    map((expenses) => {
+      const data = this.currentMonthDayOfInterval.map((d) => {
+        const filtered = expenses.filter((e) =>
+          isSameDay(d, new Date(e.expenseDate))
+        );
+        const total = filtered.reduce(
+          (total, current) => total + current.total,
+          0
+        );
+        return total;
+      });
+      return [
+        {
+          data,
+          borderWidth: 2,
+          minBarLength: 2,
+          backgroundColor: 'rgba(177, 157, 247, 0.5)',
+          borderColor: 'rgba(177, 157, 247, 0.9)',
+          fill: true,
+          tension: 0.2,
         },
-      })
-    );
-  }
+      ];
+    })
+  );
+
+  //#endregion
+
+  ngOnInit() {}
 
   editEntry(data: ExpenseResponseModel) {
     const expense = {

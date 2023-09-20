@@ -13,7 +13,14 @@ import {
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, Subject, map, takeUntil } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  combineLatest,
+  map,
+  takeUntil,
+} from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { TabViewModule } from 'primeng/tabview';
 import { SignUpComponent } from 'src/app/login/feature/sign-up/sign-up.component';
@@ -27,7 +34,7 @@ import {
   login,
   loginWithEmailAndPassword,
 } from 'src/app/state/auth/auth.action';
-import { error, loginStatus } from 'src/app/state/auth/auth.selector';
+import { error, loginStatus, provider } from 'src/app/state/auth/auth.selector';
 
 @Component({
   selector: 'app-login',
@@ -55,7 +62,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
   private afAuth = inject(AngularFireAuth);
   private router = inject(Router);
-  private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   private store = inject(Store);
 
@@ -66,7 +72,13 @@ export class LoginComponent implements OnInit, OnDestroy {
     map((v) => v.get('socialLogin') == 'true')
   );
 
+  isSocialLoginSelected$ = new BehaviorSubject<boolean>(false);
   loginStatus$ = this.store.select(loginStatus);
+  status$ = combineLatest([
+    this.store.select(loginStatus),
+    this.store.select(provider),
+  ]).pipe(map(([status, provider]) => ({ status, provider })));
+
   errorMessage$ = this.store.select(error).pipe(
     map((e) =>
       !e
@@ -100,6 +112,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (status === 'success') {
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
         this.router.navigateByUrl(returnUrl);
+      } else if (status === 'error') {
+        this.isSocialLoginSelected$.next(false);
       }
     });
   }
@@ -125,7 +139,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     const result = await this.afAuth.signInWithPopup(new GoogleAuthProvider());
     const idToken = await result?.user?.getIdToken();
     if (idToken) {
-      this.store.dispatch(login({ idToken: idToken }));
+      this.store.dispatch(login({ idToken: idToken, provider: 'Google' }));
     }
   }
 

@@ -27,10 +27,8 @@ import {
   selectFormattedReminders,
 } from 'src/app/state/reminders/reminders.selector';
 import { deleteReminder } from 'src/app/state/reminders/reminders.action';
-import {
-  CalendarComponent,
-  ItemType,
-} from 'src/app/shared/feature/calendar/calendar.component';
+import { CalendarComponent } from 'src/app/shared/feature/calendar/calendar.component';
+import { CalendarItem } from 'src/app/shared/model/calendar-item';
 
 @Component({
   selector: 'app-reminder-page',
@@ -168,7 +166,7 @@ export class ReminderPageComponent implements OnInit, OnDestroy {
         )
         .map((r) => r.date);
 
-      const reminderItem: ItemType = {
+      const reminderItem: CalendarItem = {
         type: 'Reminders',
         items: dates.map((date) => ({
           date,

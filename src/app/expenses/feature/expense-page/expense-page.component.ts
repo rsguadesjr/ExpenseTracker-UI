@@ -16,7 +16,6 @@ import { FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   inject,
   OnDestroy,
@@ -59,14 +58,12 @@ import {
   filterExpenses,
   loadExpenses,
 } from 'src/app/state/expenses/expenses.action';
-import {
-  CalendarComponent,
-  ItemType,
-} from 'src/app/shared/feature/calendar/calendar.component';
+import { CalendarComponent } from 'src/app/shared/feature/calendar/calendar.component';
 import { ReminderType } from 'src/app/shared/enums/reminder-type';
 import { selectFormattedReminders } from 'src/app/state/reminders/reminders.selector';
 import { DropdownModule } from 'primeng/dropdown';
 import { ExpenseRequestModel } from '../../model/expense-request.model';
+import { CalendarItem } from 'src/app/shared/model/calendar-item';
 
 @Component({
   selector: 'app-expense-list-page',
@@ -100,7 +97,6 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   private dialogService = inject(DialogService);
   private confirmationService = inject(ConfirmationService);
   private decimalPipe = inject(DecimalPipe);
-  private cdr = inject(ChangeDetectorRef);
   private store = inject(Store);
 
   rowsPerPage: number = 10;
@@ -140,7 +136,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   ]).pipe(
     map(([dailyTotal, reminders]) => {
       // calendar items for daily summary
-      const dailyTotalItem: ItemType = {
+      const dailyTotalItem: CalendarItem = {
         type: 'DailyTotal',
         items: dailyTotal.map((v) => ({
           date: new Date(v.expenseDate),
@@ -155,7 +151,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
         )
         .map((r) => r.date);
 
-      const reminderItem: ItemType = {
+      const reminderItem: CalendarItem = {
         type: 'Reminders',
         items: dates.map((date) => ({
           date,
@@ -184,20 +180,8 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
     category: new FormControl(),
   });
 
-  testItems: any[] = [];
   ngOnInit() {
     this.initMonthOptions();
-
-    this.store.select(selectAllExpenses).subscribe((v) => {
-      this.testItems = [...v.slice().map((x) => Object.assign({}, x))];
-    });
-
-    // initial trigger on load - delayed
-    of()
-      .pipe(startWith(''), delay(500), take(1))
-      .subscribe(() => {
-        this.applyFilter();
-      });
 
     // set date range values for month
     this.filterForm
@@ -368,7 +352,6 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
 
   onFilterChange(data: ExpenseResponseModel[]) {
     this.store.dispatch(filterExpenses({ filteredItems: [...data] }));
-    this.cdr.detectChanges();
   }
 
   selectDate(date: Date) {

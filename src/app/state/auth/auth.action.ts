@@ -3,7 +3,7 @@ import { AuthData } from 'src/app/core/models/auth-data';
 
 export const login = createAction(
   '[Auth Page] Login',
-  props<{ idToken: string }>()
+  props<{ idToken: string; provider: 'Email' | 'Google' }>()
 );
 
 export const loginWithEmailAndPassword = createAction(

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { BehaviorSubject, Observable, map, of, tap } from 'rxjs';
@@ -12,10 +12,9 @@ import { TotalPerDate } from 'src/app/shared/model/total-per-date';
   providedIn: 'root',
 })
 export class SummaryService {
-  baseUrl: string;
+  private baseUrl: string;
 
   private dailyTotal$ = new BehaviorSubject<TotalPerDate[]>([]);
-  private cache = new Map();
 
   constructor(private http: HttpClient, private authService: AuthService) {
     this.baseUrl = environment.API_BASE_URL + 'api/Summary';
@@ -31,26 +30,24 @@ export class SummaryService {
   getTotalAmountPerCategory(
     startDate: string,
     endDate: string,
-    forceUpdate = false
+    refresh = false
   ) {
-    const cacheKey = `totalPerCategory-${startDate}-${endDate}`;
-    if (this.cache.has(cacheKey) && !forceUpdate) {
-      const value = this.cache.get(cacheKey) as TotalPerCategory[];
-      return of(value);
-    } else {
-      return this.http
-        .get<TotalPerCategory[]>(`${this.baseUrl}/GetTotalAmountPerCategory`, {
-          params: {
-            startDate,
-            endDate,
-          },
-        })
-        .pipe(
-          tap((result) => {
-            this.cache.set(cacheKey, result);
-          })
-        );
+    const headers = new HttpHeaders();
+
+    if (refresh) {
+      headers.set('x-refresh', 'true');
     }
+
+    return this.http.get<TotalPerCategory[]>(
+      `${this.baseUrl}/GetTotalAmountPerCategory`,
+      {
+        params: {
+          startDate,
+          endDate,
+        },
+        headers,
+      }
+    );
   }
 
   getSummaryByRange(startDate: string, endDate: string) {
@@ -71,27 +68,30 @@ export class SummaryService {
   fetchDailyTotalByDateRange(
     startDate: string,
     endDate: string,
-    forceUpdate = false
+    refresh = false
   ): void {
-    // cache key will be the start date and end date - this will be checked if the same parameter is being used so
-    // the cached value will be returned instead of repetitive api requests
-    const cacheKey = `dailyTotal-${startDate}-${endDate}`;
-    if (this.cache.has(cacheKey) && !forceUpdate) {
-      const value = this.cache.get(cacheKey) as TotalPerDate[];
-      this.dailyTotal$.next(value);
-    } else {
-      this.http
-        .get<TotalPerDate[]>(`${this.baseUrl}/GetDailyTotalByDateRange`, {
-          params: {
-            startDate,
-            endDate,
-          },
-        })
-        .subscribe((result) => {
-          this.cache.set(cacheKey, result);
-          this.dailyTotal$.next(result);
-        });
+    let headers = new HttpHeaders();
+
+    if (refresh) {
+      headers = headers.set('x-refresh', 'true');
     }
+
+    console.log('[SummaryService] fetchDailyTotalByDateRange', {
+      headers,
+      refresh,
+    });
+
+    this.http
+      .get<TotalPerDate[]>(`${this.baseUrl}/GetDailyTotalByDateRange`, {
+        params: {
+          startDate,
+          endDate,
+        },
+        headers,
+      })
+      .subscribe((result) => {
+        this.dailyTotal$.next(result);
+      });
   }
 
   getDailyTotalByDateRange(): Observable<TotalPerDate[]> {
@@ -101,32 +101,23 @@ export class SummaryService {
   getTotalAmountPerCategoryPerDate(
     startDate: string,
     endDate: string,
-    forceUpdate = false
+    refresh = false
   ): Observable<TotalAmountPerCategoryPerDate[]> {
-    const cacheKey = `totalPerCategoryPerDate-${startDate}-${endDate}`;
-    if (this.cache.has(cacheKey) && !forceUpdate) {
-      const value = this.cache.get(cacheKey) as TotalAmountPerCategoryPerDate[];
-      return of(value);
-    } else {
-      return this.http
-        .get<TotalAmountPerCategoryPerDate[]>(
-          `${this.baseUrl}/GetTotalAmountPerCategoryGroupByDate`,
-          {
-            params: {
-              startDate,
-              endDate,
-            },
-          }
-        )
-        .pipe(
-          tap((result) => {
-            this.cache.set(cacheKey, result);
-          })
-        );
-    }
-  }
+    const headers = new HttpHeaders();
 
-  clearCache() {
-    this.cache.clear();
+    if (refresh) {
+      headers.set('x-refresh', 'true');
+    }
+
+    return this.http.get<TotalAmountPerCategoryPerDate[]>(
+      `${this.baseUrl}/GetTotalAmountPerCategoryGroupByDate`,
+      {
+        params: {
+          startDate,
+          endDate,
+        },
+        headers,
+      }
+    );
   }
 }

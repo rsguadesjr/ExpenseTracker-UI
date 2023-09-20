@@ -10,6 +10,11 @@ export const loginStatus = createSelector(
   (state: AuthState) => state.loginStatus
 );
 
+export const provider = createSelector(
+  selectAuth,
+  (state: AuthState) => state.provider
+);
+
 export const error = createSelector(
   selectAuth,
   (state: AuthState) => state.error

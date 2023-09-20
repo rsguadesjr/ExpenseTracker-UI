@@ -3,7 +3,7 @@
     <div class="flex flex-column  bg-black-alpha-40 border-round p-4">
       <div class="text-2xl mb-4">Hi {{ user?.name }},</div>
       <div class="flex flex-column align-items-start">
-        <div class="text-base">This is the total spending for the month of {{ date | date: 'MMMM' }}</div>
+        <div class="text-base">This is your total spending for the month of {{ date | date: 'MMMM' }}</div>
         <div class="text-6xl">{{ totalExpenses$ | async | number: '0.0' }}</div>
       </div>
     </div>
@@ -22,8 +22,10 @@
   <div class="flex flex-column gap-4 flex-grow-1">
     <div class=" flex-grow-1 bg-black-alpha-40 border-round p-4">
       <div class="text-xl mb-4">Summary for the month of {{ date | date: 'MMMM' }}</div>
-      <app-summary-main-chart type="line" [aspectRatio]="0.8" [showLegend]="false"
-        [chartFilterData]="chartData$ | async"></app-summary-main-chart>
+      <!-- <app-summary-main-chart type="line" [aspectRatio]="0.8" [showLegend]="false"
+        [chartFilterData]="chartData$ | async"></app-summary-main-chart> -->
+      <app-line-chart [aspectRatio]="chartAspectRatio" [showLegend]="false" [labels]="labels"
+        [datasets]="(chartDataSet$ | async) || []"></app-line-chart>
     </div>
 
     <div class="flex flex-column justify-content-start  flex-grow-1 bg-black-alpha-40 border-round p-3">

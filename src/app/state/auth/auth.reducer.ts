@@ -12,20 +12,24 @@ export interface AuthState {
   user: AuthData | null;
   error: string | null;
   loginStatus: 'pending' | 'loading' | 'error' | 'success';
+  provider: 'Email' | 'Google' | null;
 }
 
 export const initialState: AuthState = {
   user: null,
   error: null,
   loginStatus: 'pending',
+  provider: null,
 };
 
 export const authReducer = createReducer(
   initialState,
 
-  on(login, (state) => ({
+  on(login, (state, { provider }) => ({
     ...state,
+    error: null,
     loginStatus: 'loading' as const,
+    provider: provider,
   })),
 
   on(loginSuccess, (state, { user }) => {
