@@ -18,7 +18,6 @@ export class CacheInterceptor implements HttpInterceptor {
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    console.log('[CacheInterceptor]', req);
     if (req.method !== 'GET') {
       return next.handle(req);
     }
@@ -27,7 +26,7 @@ export class CacheInterceptor implements HttpInterceptor {
       return this.sendRequest(req, next);
     }
 
-    const cachedResponse = this.cacheResolver.get(req.url);
+    const cachedResponse = this.cacheResolver.get(req.urlWithParams);
     return cachedResponse ? of(cachedResponse) : this.sendRequest(req, next);
   }
 
@@ -38,7 +37,7 @@ export class CacheInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       tap((event) => {
         if (event instanceof HttpResponse) {
-          this.cacheResolver.set(req.url, event, CACHE_TIME_LIMIT);
+          this.cacheResolver.set(req.urlWithParams, event, CACHE_TIME_LIMIT);
         }
       })
     );

@@ -17,19 +17,19 @@
           </div>
         </ng-container>
         <ng-container *ngIf="filterForm.value.view !== 'month'">
-          <div class="flex flex-column gap-2 p-fluid">
+          <div class="flex flex-column gap-2 p-fluid md:w-15rem">
             <label htmlFor="dateFrom">Date From</label>
             <p-calendar #dateFrom id="dateFrom" formControlName="dateFrom" dateFormat="dd-M-yy"
               [maxDate]="filterForm.get('dateTo')?.value" (onSelect)="dateTo?.showOverlay()"></p-calendar>
           </div>
-          <div class="flex flex-column gap-2 p-fluid">
+          <div class="flex flex-column gap-2 p-fluid md:w-15rem">
             <label htmlFor="dateTo">Date To</label>
             <p-calendar #dateTo id="dateTo" formControlName="dateTo" dateFormat="dd-M-yy"
               [minDate]="filterForm.get('dateFrom')?.value"></p-calendar>
           </div>
         </ng-container>
       </div>
-      <div class="flex gap-2  flex-grow-1 justify-content-between w-full">
+      <div class="flex gap-2  flex-grow-1 justify-content-between">
         <div class="flex flex-grow-1 gap-2 ">
           <p-button icon="pi {{  (filterInProgress$ | async) ? 'pi-spin pi-spinner' : 'pi-search' }}"
             pTooltip="Apply filter" styleClass="p-button-rounded " (click)="applyFilter()"></p-button>
@@ -63,8 +63,8 @@
   <!-- col -->
   <div class="w-full lg:w-4 flex flex-column md:flex-row lg:flex-column gap-4">
     <div class="w-12 md:w-6 lg:w-12 p-fluid flex flex-column gap-4">
-      <app-calendar [date]="calendarDate" [month]="(calendarMonth$ | async)!" [items]="(calendarItems$ | async) ?? []"
-        (selectDate)="selectDate($event)" (monthChange)="monthChange($event)">
+      <app-calendar [date]="calendarDate" [month]="(calendarMonth$ | async)!.month"
+        [items]="(calendarItems$ | async) ?? []" (selectDate)="selectDate($event)" (monthChange)="monthChange($event)">
       </app-calendar>
       <div class=" border-solid border-1 surface-border border-round-md p-4 bg-black-alpha-40"
         *ngIf="selectedDateReminders$ | async; let reminders">

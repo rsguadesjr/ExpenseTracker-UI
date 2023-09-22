@@ -112,7 +112,10 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   monthOptions: Option[] = [];
   calendarDate = new Date();
   selectedDate$ = new BehaviorSubject<Date>(new Date());
-  calendarMonth$ = new BehaviorSubject<Date>(new Date());
+  calendarMonth$ = new BehaviorSubject<{ month: Date; refresh: boolean }>({
+    month: new Date(),
+    refresh: false,
+  });
   filterInProgress$ = new BehaviorSubject<boolean>(false);
   expenseEntries$ = this.store.select(selectAllExpenses);
 
@@ -121,7 +124,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   savingStatus$ = this.store.select(savingStatus);
 
   reminders$ = this.calendarMonth$.pipe(
-    switchMap((month) => {
+    switchMap(({ month }) => {
       const startDate = startOfMonth(month).toISOString();
       const endDate = endOfMonth(month).toISOString();
       return this.store.select(
@@ -231,18 +234,14 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
       });
 
     this.calendarMonth$
-      .pipe(
-        startWith(new Date()),
-        debounceTime(500),
-        takeUntil(this.unsubscribe$)
-      )
-      .subscribe((date) => {
-        const startDate = startOfMonth(date).toISOString();
-        const endDate = endOfMonth(date).toISOString();
+      .pipe(debounceTime(500), takeUntil(this.unsubscribe$))
+      .subscribe(({ month, refresh }) => {
+        const startDate = startOfMonth(month).toISOString();
+        const endDate = endOfMonth(month).toISOString();
         this.summaryService.fetchDailyTotalByDateRange(
           startDate,
           endDate,
-          true
+          refresh
         );
         // this.reminderService.fetchReminders(startDate, endDate);
       });
@@ -252,7 +251,10 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
       .pipe(skip(1), takeUntil(this.unsubscribe$))
       .subscribe((status) => {
         if (status === 'success') {
-          this.calendarMonth$.next(this.calendarMonth$.value);
+          this.calendarMonth$.next({
+            ...this.calendarMonth$.value,
+            refresh: true,
+          });
         }
       });
   }
@@ -305,7 +307,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   editEntry(expense: ExpenseResponseModel) {
     this.dialogService.open(ExpenseFormComponent, {
       width: '420px',
-      header: 'Create',
+      header: 'Update',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
       styleClass: 'component-dialog',
@@ -360,7 +362,7 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   }
 
   monthChange({ year, month }: { year: number; month: number }) {
-    this.calendarMonth$.next(new Date(year, month));
+    this.calendarMonth$.next({ month: new Date(year, month), refresh: false });
   }
 
   createExpense(reminder: ReminderModel) {

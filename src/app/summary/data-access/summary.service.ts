@@ -76,11 +76,6 @@ export class SummaryService {
       headers = headers.set('x-refresh', 'true');
     }
 
-    console.log('[SummaryService] fetchDailyTotalByDateRange', {
-      headers,
-      refresh,
-    });
-
     this.http
       .get<TotalPerDate[]>(`${this.baseUrl}/GetDailyTotalByDateRange`, {
         params: {

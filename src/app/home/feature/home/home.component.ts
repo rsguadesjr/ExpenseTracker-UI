@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { combineLatest, map } from 'rxjs';
+import { map } from 'rxjs';
 import { ExpenseListComponent } from 'src/app/expenses/ui/expense-list/expense-list.component';
 import { ButtonModule } from 'primeng/button';
 import { ChartModule } from 'primeng/chart';
@@ -14,7 +14,6 @@ import {
 } from 'date-fns';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { ExpensePerCategoryComponent } from 'src/app/expenses/ui/expense-per-category/expense-per-category.component';
-import { SummaryFilter } from 'src/app/summary/model/summary-filter.model';
 import { SummaryMainChartComponent } from 'src/app/summary/ui/summary-main-chart/summary-main-chart.component';
 import { Store } from '@ngrx/store';
 import {
@@ -23,9 +22,7 @@ import {
   savingStatus,
   selectAllExpenses,
 } from 'src/app/state/expenses/expenses.selector';
-import { loadExpenses } from 'src/app/state/expenses/expenses.action';
 import { DialogService } from 'primeng/dynamicdialog';
-import { selectAllCategories } from 'src/app/state/categories/categories.selector';
 import { ExpenseResponseModel } from 'src/app/expenses/model/expense-response.model';
 import { ExpenseRequestModel } from 'src/app/expenses/model/expense-request.model';
 import { ExpenseFormComponent } from 'src/app/expenses/feature/expense-form/expense-form.component';
@@ -59,7 +56,6 @@ export class HomeComponent implements OnInit {
   date = new Date();
 
   expenses$ = this.store.select(selectAllExpenses);
-  categorizedExpenses$ = this.store.select(categorizedExpenses);
   dailyCategorizedExpenses$ = this.store.select(dailyCategorizedExpenses);
   savingInProgress$ = this.store.select(savingStatus);
   user$ = this.store.select(user);
@@ -74,25 +70,8 @@ export class HomeComponent implements OnInit {
     })
   );
 
-  chartData$ = combineLatest([
-    this.store.select(selectAllCategories),
-    this.dailyCategorizedExpenses$,
-  ]).pipe(
-    map(([categories, data]) => {
-      const filter: SummaryFilter = {
-        view: 'month',
-        startDate: startOfMonth(this.date),
-        endDate: endOfMonth(this.date),
-        breakdown: false,
-        categoryIds: categories.map((x) => x.id),
-        showBudget: false,
-      };
-      return { categories, data, filter, budgets: [] as any[] };
-    })
-  );
-
   //#region chart data
-  chartAspectRatio = 0.8;
+  chartAspectRatio = 0.9;
   currentMonthDayOfInterval = eachDayOfInterval({
     start: startOfMonth(this.date),
     end: endOfMonth(this.date),
@@ -125,6 +104,25 @@ export class HomeComponent implements OnInit {
     })
   );
 
+  categorizedAspecRatio = 1;
+  categorizedChartType = 'bar' as const;
+  categorizedExpenses$ = this.store.select(categorizedExpenses);
+  categorizedLabels$ = this.categorizedExpenses$.pipe(
+    map((expenses) => expenses.map((x) => x.category))
+  );
+  categorizedChartData$ = this.categorizedExpenses$.pipe(
+    map((expenses) => {
+      return [
+        {
+          data: expenses.map((x) => x.total),
+          fill: true,
+          backgroundColor: 'rgba(177, 157, 247, 0.5)',
+          borderColor: 'rgba(177, 157, 247, 0.9)',
+        },
+      ];
+    })
+  );
+
   //#endregion
 
   ngOnInit() {}
@@ -140,7 +138,7 @@ export class HomeComponent implements OnInit {
       tags: data.tags,
     } as ExpenseRequestModel;
 
-    this.showExpenseModal({ title: 'Create', expense, isEdit: true });
+    this.showExpenseModal({ title: 'Update', expense, isEdit: true });
   }
 
   createExpense(reminder: ReminderModel) {

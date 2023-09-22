@@ -15,6 +15,8 @@ import {
   updateExpenseSuccess,
 } from './expenses.action';
 import { ExpenseResponseModel } from 'src/app/expenses/model/expense-response.model';
+import { TotalPerCategory } from 'src/app/shared/model/total-per-category.mode';
+import { TotalAmountPerCategoryPerDate } from 'src/app/summary/model/total-amount-per-category-per-date';
 
 export interface ExpenseState {
   expenses: ExpenseResponseModel[];

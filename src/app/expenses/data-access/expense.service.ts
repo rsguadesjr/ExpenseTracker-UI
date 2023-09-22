@@ -7,14 +7,17 @@ import { ExpenseRequestModel } from '../model/expense-request.model';
 import { PaginatedList } from 'src/app/shared/model/paginated-list.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ExpenseService {
   private http = inject(HttpClient);
   private baseUrl = environment.API_BASE_URL + 'api/expenses';
 
   getExpenses(params: any): Observable<PaginatedList<ExpenseResponseModel>> {
-    return this.http.post<PaginatedList<ExpenseResponseModel>>(`${this.baseUrl}/GetExpenses`, params)
+    return this.http.post<PaginatedList<ExpenseResponseModel>>(
+      `${this.baseUrl}/GetExpenses`,
+      params
+    );
   }
 
   getExpense(id: string): Observable<ExpenseRequestModel> {
@@ -26,11 +29,13 @@ export class ExpenseService {
   }
 
   updateExpense(data: ExpenseRequestModel) {
-    return this.http.put<ExpenseResponseModel>(`${this.baseUrl}/${data.id}`, data);
+    return this.http.put<ExpenseResponseModel>(
+      `${this.baseUrl}/${data.id}`,
+      data
+    );
   }
 
   deleteExpense(id: string) {
     return this.http.delete(`${this.baseUrl}/${id}`);
   }
-
 }

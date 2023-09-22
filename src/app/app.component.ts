@@ -92,7 +92,5 @@ export class AppComponent implements OnInit {
     // this.router.navigate(['/expenses', 'new']);
   }
 
-  visibleChange(e: any) {
-    console.log('[DEBUG] visibleChange', e);
-  }
+  visibleChange(e: any) {}
 }

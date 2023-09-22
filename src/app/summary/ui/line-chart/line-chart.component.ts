@@ -20,7 +20,6 @@ export class LineChartComponent implements OnInit {
   data: { labels: string[]; datasets: any[] } = { labels: [], datasets: [] };
 
   @Input() set datasets(value: any[]) {
-    console.log('[DEBUG] datasets', value);
     this.data = { ...this.data, datasets: value };
   }
 
@@ -28,9 +27,12 @@ export class LineChartComponent implements OnInit {
     this.data = { ...this.data, labels: value };
   }
 
-  @Input() type: 'line' | 'bar' = 'line';
+  @Input() type: 'line' | 'bar' | 'pie' = 'line';
   @Input() aspectRatio: number | null = null;
   @Input() showLegend: boolean = true;
+  @Input() showXGrid = true;
+  @Input() showYGrid = true;
+  @Input() orientation: 'vertical' | 'horizontal' = 'vertical';
 
   ngOnInit() {
     const documentStyle = getComputedStyle(document.documentElement);
@@ -41,6 +43,7 @@ export class LineChartComponent implements OnInit {
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
     this.options = {
+      indexAxis: this.orientation === 'vertical' ? 'x' : 'y',
       responsive: true,
       maintainAspectRatio: false,
       aspectRatio: this.aspectRatio,
@@ -52,26 +55,7 @@ export class LineChartComponent implements OnInit {
           display: this.showLegend,
         },
       },
-      scales: {
-        x: {
-          // stacked: true,
-          ticks: {
-            color: textColorSecondary,
-          },
-          grid: {
-            color: surfaceBorder,
-          },
-        },
-        y: {
-          // stacked: true,
-          ticks: {
-            color: textColorSecondary,
-          },
-          grid: {
-            color: surfaceBorder,
-          },
-        },
-      },
+
       elements: {
         point: {
           radius: 2,
@@ -83,5 +67,37 @@ export class LineChartComponent implements OnInit {
         }
       },
     };
+
+    if (this.showXGrid) {
+      let scales = {
+        ...this.options.scales,
+        x: {
+          // stacked: true,
+          ticks: {
+            color: textColorSecondary,
+          },
+          grid: {
+            color: surfaceBorder,
+          },
+        },
+      };
+      this.options = { ...this.options, scales };
+    }
+
+    if (this.showYGrid) {
+      let scales = {
+        ...this.options.scales,
+        y: {
+          // stacked: true,
+          ticks: {
+            color: textColorSecondary,
+          },
+          grid: {
+            color: surfaceBorder,
+          },
+        },
+      };
+      this.options = { ...this.options, scales };
+    }
   }
 }

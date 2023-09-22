@@ -28,6 +28,7 @@ export const savingStatus = createSelector(
   (state: ExpenseState) => state.savingStatus
 );
 
+// TODO: do we move this to reducer or effects ???
 // categorized expense / total amount per category
 export const categorizedExpenses = createSelector(
   selectExpenses,
@@ -56,6 +57,7 @@ export const categorizedExpenses = createSelector(
   }
 );
 
+// TODO: do we move this to reducer or effects ???
 // categorized expense per date / total amount per category per date
 export const dailyCategorizedExpenses = createSelector(
   selectExpenses,

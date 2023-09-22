@@ -8,7 +8,6 @@ export class CacheResolverService {
   private cache = new Map<String, [Date, HttpResponse<any>]>();
 
   set(key: string, value: any, timeToLive: number | null = null) {
-    console.log('[CacheResolverService] set', { key, value, timeToLive });
     if (timeToLive) {
       const expireseIn = new Date();
       expireseIn.setSeconds(expireseIn.getSeconds() + timeToLive);
@@ -21,7 +20,6 @@ export class CacheResolverService {
   get(key: string) {
     const value = this.cache.get(key);
 
-    console.log('[CacheResolverService] get', { value });
     if (!value) return null;
 
     const [expireseIn, httpResponse] = value;
