@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -13,12 +21,16 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { Validators } from '@angular/forms';
 import { FormValidation } from 'src/app/shared/utils/form-validation';
-import { AuthService } from 'src/app/shared/data-access/auth.service';
-import { Subject, debounceTime, takeUntil } from 'rxjs';
+import { Subject, debounceTime, from, take, takeUntil } from 'rxjs';
 import { DialogService } from 'primeng/dynamicdialog';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, Message } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Router, RouterModule } from '@angular/router';
+import { AuthService } from 'src/app/core/data-access/auth.service';
+import { MessagesModule } from 'primeng/messages';
+import { Store } from '@ngrx/store';
+import { registerWithEmailAndPassword } from 'src/app/state/auth/auth.action';
+import { loginStatus } from 'src/app/state/auth/auth.selector';
 
 export const passwordMatchValidator: ValidatorFn = (
   controls: AbstractControl
@@ -43,20 +55,23 @@ export const passwordMatchValidator: ValidatorFn = (
     ButtonModule,
     InputTextModule,
     ConfirmDialogModule,
-    RouterModule
+    RouterModule,
+    MessagesModule,
   ],
   templateUrl: './sign-up.component.html',
   styleUrls: ['./sign-up.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SignUpComponent implements OnInit, OnDestroy {
-  private ngUnsubscribe$ = new Subject<unknown>();
+export class SignUpComponent implements OnInit {
+  private authService = inject(AuthService);
+  private store = inject(Store);
 
-  form: FormGroup;
   validationErrors: { [key: string]: string[] } = {};
   signUpInProgress = false;
+  errorMessage: Message[] = [];
+  form!: FormGroup;
+  loginStatus$ = this.store.select(loginStatus);
 
-  constructor(private authService: AuthService, private confirmationService: ConfirmationService, private router: Router) {
+  ngOnInit() {
     this.form = new FormGroup(
       {
         email: new FormControl('', [
@@ -98,74 +113,21 @@ export class SignUpComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnInit() {
-  }
-
-  ngOnDestroy(): void {
-    this.ngUnsubscribe$.next(null);
-    this.ngUnsubscribe$.complete();
-  }
-
-  signUp() {
+  async signUp() {
     this.form.markAllAsTouched();
     this.form.updateValueAndValidity;
     this.validationErrors = FormValidation.getFormValidationErrors(this.form);
 
     if (this.form.valid) {
       this.signUpInProgress = true;
-      this.authService.signUp({
-        displayName: this.form.get('displayName')?.value?.trim(),
-        email: this.form.get('email')?.value?.trim(),
-        password: this.form.get('password')?.value
-      }).pipe(
-        takeUntil(this.ngUnsubscribe$)
-      )
-      .subscribe({
-        next: (result) => {
-          this.confirmationService.confirm({
-            header: 'Sign up successful! Please proceed to login form to continue.',
-            icon: 'pi pi-check',
-            acceptLabel: 'Okay',
-            accept: () => {
-              this.router.navigateByUrl('/login');
-            },
-            rejectVisible: false,
-            reject: () => {
-              this.router.navigateByUrl('/login');
-            }});
-        },
-        error: (err) => {
-          this.signUpInProgress = false;
-        }
-      })
+      const email = this.form.get('email')?.value?.trim();
+      const password = this.form.get('password')?.value;
+      const displayName = this.form.get('displayName')?.value.trim();
+      this.store.dispatch(
+        registerWithEmailAndPassword({ data: { email, password, displayName } })
+      );
 
-      Object.keys(this.form.controls).forEach(key => {
-        this.form.get(key)?.reset('', { emitEvent: false })
-      })
+      this.signUpInProgress = false;
     }
   }
-
-
-  // getFormValidationErrors(form: FormGroup) {
-  //   const result: any = {};
-  //   const formErrors = Object.assign({}, form.errors);
-  //   if (formErrors != null) {
-  //     Object.keys(formErrors).forEach((keyError) => {
-  //       result[keyError] = [formErrors[keyError]];
-  //     });
-  //   }
-
-  //   Object.keys(form.controls).forEach((key) => {
-  //     const controlErrors = form.get(key)?.errors;
-  //     result[key] = result[key] ?? [];
-  //     if (controlErrors != null) {
-  //       Object.keys(controlErrors).forEach((keyError) => {
-  //         result[key].push(controlErrors[keyError]);
-  //       });
-  //     }
-  //   });
-
-  //   return result;
-  // }
-
 }

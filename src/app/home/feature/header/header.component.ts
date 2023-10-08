@@ -4,7 +4,6 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
-import { AuthService } from 'src/app/shared/data-access/auth.service';
 import { BadgeDirective, BadgeModule } from 'primeng/badge';
 import { map, of, switchMap } from 'rxjs';
 import { ExpenseFormComponent } from 'src/app/expenses/feature/expense-form/expense-form.component';
@@ -23,7 +22,6 @@ import { user } from 'src/app/state/auth/auth.selector';
 })
 export class HeaderComponent {
   private dialogService = inject(DialogService);
-  private authService = inject(AuthService);
   private store = inject(Store);
 
   @Output() showSideBar = new EventEmitter();
@@ -33,18 +31,12 @@ export class HeaderComponent {
   ];
 
   user$ = this.store.select(user);
-  // authenticated$ = this.authService.isAuthenticated$.pipe(
-  //   switchMap((isAuth) => {
-  //     return isAuth ? this.authService.firebaseUser$ : of(null);
-  //   })
-  // );
 
   toggleSidebar() {
     this.showSideBar.emit(true);
   }
 
   signOut() {
-    // this.authService.signOut();
     this.store.dispatch(logout());
   }
 

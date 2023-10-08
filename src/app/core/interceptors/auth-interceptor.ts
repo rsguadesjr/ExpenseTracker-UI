@@ -14,9 +14,9 @@ import {
   take,
   throwError,
 } from 'rxjs';
-import { AuthService } from '../../shared/data-access/auth.service';
 import { Store } from '@ngrx/store';
 import { loginSuccess, logout } from 'src/app/state/auth/auth.action';
+import { AuthService } from '../data-access/auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {

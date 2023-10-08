@@ -15,10 +15,12 @@ import {
 } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { AuthRequestResult } from '../model/auth-request-result';
-import { EmailPasswordRegistration } from '../model/email-password-registration';
 import { AuthData } from 'src/app/core/models/auth-data';
 import firebase from 'firebase/compat/app';
+import { AuthRequestResult } from 'src/app/shared/model/auth-request-result';
+import { EmailPasswordRegistration } from 'src/app/shared/model/email-password-registration';
+import { RegisterRequestModel } from '../models/register-request.model';
+import { RegisterResponseModel } from '../models/register-response.model';
 
 // TODO: actual token will have to come from the API,
 // after google authentication, the token will be used to login to API and the API will then send the actual token
@@ -74,8 +76,15 @@ export class AuthService {
    * @param data username and password object to be sent to api to create the account
    * @returns
    */
-  public signUp(data: EmailPasswordRegistration) {
-    return this.http.post(`${this.authUrl}/RegisterWithEmailAndPassword`, data);
+  public signUp(email: string, password: string) {
+    return this.afAuth.createUserWithEmailAndPassword(email, password);
+  }
+
+  public register(data: RegisterRequestModel) {
+    return this.http.post<RegisterResponseModel>(
+      `${this.authUrl}/RegisterWithEmailAndPassword`,
+      data
+    );
   }
 
   /**

@@ -13,11 +13,11 @@ import { TabViewModule } from 'primeng/tabview';
 import { SignUpComponent } from '../sign-up/sign-up.component';
 import { Subject } from 'rxjs';
 import { FormValidation } from 'src/app/shared/utils/form-validation';
-import { AuthService } from 'src/app/shared/data-access/auth.service';
 import { Message, MessageService } from 'primeng/api';
 import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
 import { Router, RouterModule } from '@angular/router';
+import { AuthService } from 'src/app/core/data-access/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -32,7 +32,7 @@ import { Router, RouterModule } from '@angular/router';
     TabViewModule,
     MessagesModule,
     MessageModule,
-    RouterModule
+    RouterModule,
   ],
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.scss'],
@@ -58,8 +58,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
   ngOnDestroy(): void {
     this.ngUnsubscribe$.next(null);
     this.ngUnsubscribe$.complete();
@@ -75,17 +74,28 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
       this.saveInProgress = true;
 
       try {
-
         await this.authService.resetPassword(this.form.get('email')?.value);
-        this.messages = [{ severity: 'success', summary: 'Success', detail: 'Password reset email sent' } ];
+        this.messages = [
+          {
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Password reset email sent',
+          },
+        ];
         this.form.reset();
 
         // set delay before navigating back to login page
         setTimeout(() => {
-          this.router.navigateByUrl('/login')
+          this.router.navigateByUrl('/login');
         }, 3000);
       } catch (err) {
-        this.messages = [{ severity: 'error', summary: 'Error', detail: 'An error occured while processing your request' } ];
+        this.messages = [
+          {
+            severity: 'error',
+            summary: 'Error',
+            detail: 'An error occured while processing your request',
+          },
+        ];
         this.saveInProgress = false;
       }
     }

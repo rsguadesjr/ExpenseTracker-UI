@@ -7,7 +7,6 @@ import {
 } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs';
-import { AuthService } from 'src/app/shared/data-access/auth.service';
 import { isAuthenticated } from 'src/app/state/auth/auth.selector';
 
 @Injectable()
@@ -22,6 +21,7 @@ export class AuthGuard implements CanActivate {
           this.router.navigate(['login'], {
             queryParams: { returnUrl: state.url },
           });
+          return false;
         }
         return authenticated;
       })

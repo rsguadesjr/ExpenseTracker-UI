@@ -12,11 +12,13 @@ import {
   loadExpenses,
   loadExpensesError,
   loadExpensesSuccess,
+  resetState,
   updateExpense,
   updateExpenseError,
   updateExpenseSuccess,
 } from './expenses.action';
 import { catchError, from, map, of, switchMap } from 'rxjs';
+import { logout } from '../auth/auth.action';
 
 @Injectable()
 export class ExpenseEffects {
@@ -64,15 +66,22 @@ export class ExpenseEffects {
   );
 
   deleteExpense$ = createEffect(() =>
-      this.actions$.pipe(
-        ofType(deleteExpense),
-        switchMap(({ id }) => {
-          return this.expenseService.deleteExpense(id).pipe(
-            map(() => deleteExpenseSuccess({ id })),
+    this.actions$.pipe(
+      ofType(deleteExpense),
+      switchMap(({ id }) => {
+        return this.expenseService.deleteExpense(id).pipe(
+          map(() => deleteExpenseSuccess({ id })),
 
-            catchError((error) => of(updateExpenseError({ error })))
-          );
-        })
-      )
+          catchError((error) => of(updateExpenseError({ error })))
+        );
+      })
+    )
+  );
+
+  resetState$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(logout),
+      map(() => resetState())
+    )
   );
 }

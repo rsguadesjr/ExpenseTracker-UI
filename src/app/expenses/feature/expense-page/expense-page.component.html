@@ -40,10 +40,11 @@
           (click)="addEntry()"></p-button>
       </div>
     </div>
-    <ng-container *ngIf="expenseEntries$ | async as data; else noResult">
+    <ng-container *ngIf="expenses$ | async as data; else noResult">
       <div class="flex gap-2 align-items-center py-2">
         <span>Total spent for this period: </span>
-        <span class="text-xl border-round bg-cyan-800 p-2 font-bold">{{ filteredEntries$ | async | sum: 'amount' |
+        <span class="text-xl border-round bg-cyan-800 p-2 font-bold">{{ ((filteredExpenses$ | async) || data ) | sum:
+          'amount' |
           number: '0.0'}}</span>
       </div>
       <div class="card">

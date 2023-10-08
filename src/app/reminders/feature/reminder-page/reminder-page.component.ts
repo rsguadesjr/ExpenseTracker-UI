@@ -133,7 +133,7 @@ export class ReminderPageComponent implements OnInit, OnDestroy {
     .select(
       selectFormattedReminders({
         startDate: startOfDay(this.calendarDate).toISOString(),
-        endDate: addDays(this.calendarDate, 25).toISOString(),
+        endDate: addDays(this.calendarDate, 5).toISOString(),
       })
     )
     .pipe(

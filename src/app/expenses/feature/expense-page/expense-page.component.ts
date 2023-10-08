@@ -16,6 +16,7 @@ import { FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   inject,
   OnDestroy,
@@ -48,14 +49,12 @@ import { AccessDirective } from 'src/app/shared/utils/access.directive';
 import { SummaryService } from 'src/app/summary/data-access/summary.service';
 import { Store } from '@ngrx/store';
 import {
-  categorizedExpenses,
   savingStatus,
   selectAllExpenses,
   selectFilteredExpenses,
 } from 'src/app/state/expenses/expenses.selector';
 import {
   deleteExpense,
-  filterExpenses,
   loadExpenses,
 } from 'src/app/state/expenses/expenses.action';
 import { CalendarComponent } from 'src/app/shared/feature/calendar/calendar.component';
@@ -64,6 +63,7 @@ import { selectFormattedReminders } from 'src/app/state/reminders/reminders.sele
 import { DropdownModule } from 'primeng/dropdown';
 import { ExpenseRequestModel } from '../../model/expense-request.model';
 import { CalendarItem } from 'src/app/shared/model/calendar-item';
+import { ExpenseService } from '../../data-access/expense.service';
 
 @Component({
   selector: 'app-expense-list-page',
@@ -98,6 +98,8 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   private confirmationService = inject(ConfirmationService);
   private decimalPipe = inject(DecimalPipe);
   private store = inject(Store);
+  private cdr = inject(ChangeDetectorRef);
+  private expenseService = inject(ExpenseService);
 
   rowsPerPage: number = 10;
   currentPage: number = 0;
@@ -116,11 +118,28 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
     month: new Date(),
     refresh: false,
   });
-  filterInProgress$ = new BehaviorSubject<boolean>(false);
-  expenseEntries$ = this.store.select(selectAllExpenses);
 
-  filteredEntries$ = this.store.select(selectFilteredExpenses);
-  categorizedExpenses$ = this.store.select(categorizedExpenses);
+  filteredExpenses$ = new BehaviorSubject<ExpenseResponseModel[] | null>(null);
+  filterParams$ = new BehaviorSubject<{ startDate: Date; endDate: Date }>({
+    startDate: startOfMonth(this.calendarDate),
+    endDate: endOfMonth(this.calendarDate),
+  });
+
+  filterInProgress$ = new BehaviorSubject<boolean>(false);
+  expenses$ = this.filterParams$.pipe(
+    switchMap((params) => {
+      return this.store.select(
+        selectAllExpenses({
+          startDate: params.startDate,
+          endDate: params.endDate,
+        })
+      );
+    })
+  );
+  // expenses$ = this.store.select(selectAllExpenses());
+  categorizedExpenses$ = this.expenses$.pipe(
+    map((exp) => this.expenseService.categorizedExpenses(exp))
+  );
   savingStatus$ = this.store.select(savingStatus);
 
   reminders$ = this.calendarMonth$.pipe(
@@ -285,6 +304,10 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
     };
 
     this.store.dispatch(loadExpenses({ params }));
+    this.filterParams$.next({
+      startDate: params.dateFrom,
+      endDate: params.dateTo,
+    });
   }
 
   clearFilter() {}
@@ -353,7 +376,8 @@ export class ExpensePageComponent implements OnInit, OnDestroy {
   }
 
   onFilterChange(data: ExpenseResponseModel[]) {
-    this.store.dispatch(filterExpenses({ filteredItems: [...data] }));
+    this.filteredExpenses$.next([...data]);
+    this.cdr.detectChanges();
   }
 
   selectDate(date: Date) {

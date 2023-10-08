@@ -5,6 +5,9 @@ import {
   loginSuccess,
   loginWithEmailAndPassword,
   logout,
+  registerError,
+  registerSuccess,
+  registerWithEmailAndPassword,
 } from './auth.action';
 import { AuthData } from 'src/app/core/models/auth-data';
 
@@ -32,9 +35,12 @@ export const authReducer = createReducer(
     provider: provider,
   })),
 
-  on(loginSuccess, (state, { user }) => {
-    return { ...state, error: null, loginStatus: 'success' as const, user };
-  }),
+  on(loginSuccess, (state, { user }) => ({
+    ...state,
+    error: null,
+    loginStatus: 'success' as const,
+    user,
+  })),
 
   on(loginError, (state, { error }) => ({
     ...state,
@@ -50,5 +56,22 @@ export const authReducer = createReducer(
   on(loginWithEmailAndPassword, (state) => ({
     ...state,
     loginStatus: 'loading' as const,
+  })),
+
+  on(registerWithEmailAndPassword, (state) => ({
+    ...state,
+    loginStatus: 'loading' as const,
+  })),
+
+  on(registerSuccess, (state, {}) => ({
+    ...state,
+    error: null,
+    loginStatus: 'success' as const,
+  })),
+
+  on(registerError, (state, { error }) => ({
+    ...state,
+    error,
+    loginStatus: 'error' as const,
   }))
 );

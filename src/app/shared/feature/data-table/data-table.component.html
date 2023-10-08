@@ -1,19 +1,9 @@
-<p-table #dt
-  [value]="rowData!"
-  [tableStyle]="{ 'min-width': '50rem' }"
-  [rowTrackBy]="trackBy"
-  [sortField]="sortField"
-  [sortOrder]="sortOrder"
-  [loading]="showLoading"
-  [rows]="10"
-  [paginator]="true"
-  [showCurrentPageReport]="true"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-  [rowsPerPageOptions]="[10, 20, 50]"
-  >
+<p-table #dt [value]="rowData!" [tableStyle]="{ 'min-width': '50rem' }" [rowTrackBy]="trackBy" [sortField]="sortField"
+  [sortOrder]="sortOrder" [loading]="showLoading" [rows]="10" [paginator]="true" [showCurrentPageReport]="true"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [rowsPerPageOptions]="[10, 20, 50]">
   <ng-template pTemplate="header">
     <tr>
-      <ng-container  *ngFor="let col of columns">
+      <ng-container *ngFor="let col of columns">
         <th [width]="col.width">{{ col.header}}</th>
       </ng-container>
       <th *access="['SuperAdmin', 'Admin', 'Standard']"></th>
@@ -21,7 +11,7 @@
   </ng-template>
   <ng-template pTemplate="body" let-item let-ri="rowIndex">
     <tr>
-      <ng-container *ngFor="let col of columns" >
+      <ng-container *ngFor="let col of columns">
         <ng-container *ngIf="col.html">
           <td>
             <div *ngIf="item.__data && item.__data[col.field]" [innerHtml]="item.__data[col.field]"></div>
@@ -29,12 +19,13 @@
         </ng-container>
         <ng-container *ngIf="!col.html">
           <ng-container *ngIf="col.onClick">
-            <td >
-              <p-button *access="['SuperAdmin', 'Admin', 'Standard']" [icon]="col.icon ?? ''" styleClass="p-button-text" (click)="col.onClick(item, ri)"></p-button>
+            <td>
+              <p-button *access="['SuperAdmin', 'Admin', 'Standard']" [icon]="col.icon ?? ''" styleClass="p-button-text"
+                (click)="col.onClick(item, ri)"></p-button>
             </td>
           </ng-container>
           <ng-container *ngIf="!col.onClick">
-            <td > {{ item.__data && item.__data[col.field] }} </td>
+            <td> {{ item.__data && item.__data[col.field] }} </td>
           </ng-container>
         </ng-container>
       </ng-container>

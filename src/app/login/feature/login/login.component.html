@@ -6,7 +6,6 @@
     </ng-template>
     <p-messages [value]="(errorMessage$ | async) || []" [enableService]="false" [closable]="true"></p-messages>
     <ng-container *ngIf="status$ | async; let status">
-
       <div *ngIf="status?.provider === 'Google' && status?.status === 'loading' else defaultLoginForm"
         class="flex flex-column justify-content-center align-items-center">
         <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="8" fill="var(--surface-ground)"
@@ -53,7 +52,7 @@
           <a class="no-underline cursor-pointer" routerLink="/sign-up">Sign Up</a>
         </div>
 
-        <div *ngIf="showSocialLogin$ | async" class="flex flex-column align-items-center mt-4">
+        <div *ngIf="appConfig?.allowSocialLogin" class="flex flex-column align-items-center mt-4">
           <span class="mb-4">or sign in with</span>
           <button class="action-button" (click)="signInGoogle()">
             <img src="../../../../assets/google_icon.svg" aria-hidden="true">

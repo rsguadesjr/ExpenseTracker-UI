@@ -126,7 +126,7 @@ export class ExpenseFormComponent implements OnInit, OnDestroy {
   }
 
   submit() {
-    this.form.markAsDirty();
+    this.form.markAllAsTouched();
     this.form.updateValueAndValidity();
     this.validationErrors = FormValidation.getFormValidationErrors(this.form);
     this.messages = [];

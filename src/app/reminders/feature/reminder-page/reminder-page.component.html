@@ -3,25 +3,23 @@
   <!-- col1 -->
   <div class="flex flex-column-reverse gap-4 sm:flex-row lg:flex-column">
     <div class="p-fluid border-round-md bg-black-alpha-40" style="background-color: red;">
-      <app-calendar [date]="calendarDate"
-          [month]="(calendarMonth$ | async)!"
-          [items]="(calendarItems$ | async) ?? []"
-          (monthChange)="monthChange($event)"
-    >
-    </app-calendar>
+      <app-calendar [date]="calendarDate" [month]="(calendarMonth$ | async)!" [items]="(calendarItems$ | async) ?? []"
+        (monthChange)="monthChange($event)">
+      </app-calendar>
     </div>
-    <div class="p-fluid border-round-md p-4 bg-black-alpha-40 flex-grow-1" *ngIf="upcomingReminders$ | async; let upcomingReminders">
+    <div class="p-fluid border-round-md p-4 bg-black-alpha-40 flex-grow-1"
+      *ngIf="upcomingReminders$ | async; let upcomingReminders">
       <div class="mb-2 text-align-right font-bold text-xl">Upcoming reminders in 5 days</div>
-        <div class="font-italic py-2" *ngIf="upcomingReminders.length === 0">No data</div>
-        <div class="flex w-full align-items-center gap-1 mb-1 border-round bg-white-alpha-10 p-2 mb-1"
-          *ngFor="let reminder of upcomingReminders">
-          <span class="mr-2 flex-grow-1">
-            {{ reminder.subject }}
-            <i *ngIf="reminder.remainingDays === 0"> is Today </i>
-            <i *ngIf="reminder.remainingDays === 1"> is Tomorrow</i>
-            <i *ngIf="reminder.remainingDays! > 1"> is in {{ reminder.remainingDays }} Days</i>
-          </span>
-        </div>
+      <div class="font-italic py-2" *ngIf="upcomingReminders.length === 0">No data</div>
+      <div class="flex w-full align-items-center gap-1 mb-1 border-round bg-white-alpha-10 p-2 mb-1"
+        *ngFor="let reminder of upcomingReminders">
+        <span class="mr-2 flex-grow-1">
+          {{ reminder.subject }}
+          <i *ngIf="reminder.remainingDays === 0"> is Today </i>
+          <i *ngIf="reminder.remainingDays === 1"> is Tomorrow</i>
+          <i *ngIf="reminder.remainingDays! > 1"> is in {{ reminder.remainingDays }} Days</i>
+        </span>
+      </div>
     </div>
   </div>
   <!-- /col1 -->
@@ -29,7 +27,8 @@
   <div class="w-full flex-grow-1 surface-border border-round-md bg-black-alpha-40 px-4 py-4">
     <div class="flex justify-content-between align-items-center mb-2 ">
       <div class="text-xl font-bold">{{ month | date:'MMMM yyyy'}} Reminders</div>
-      <p-button *access="['SuperAdmin', 'Admin', 'Standard']" icon="pi pi-plus" pTooltip="Create Expense" styleClass="p-button-rounded " (click)="onCreate()"></p-button>
+      <p-button *access="['SuperAdmin', 'Admin', 'Standard']" icon="pi pi-plus" pTooltip="Create Expense"
+        styleClass="p-button-rounded " (click)="onCreate()"></p-button>
     </div>
     <app-data-table [data]="reminders$ | async" [columns]="columns" (editSelected)="onEdit($event)"
       (deleteSelected)="onDelete($event)" sortField="earliestDate" [sortOrder]="-1"></app-data-table>

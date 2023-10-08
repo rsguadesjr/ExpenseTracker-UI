@@ -3,10 +3,10 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { BehaviorSubject, Observable, map, of, tap } from 'rxjs';
 import { TotalAmountPerCategoryPerDate } from 'src/app/summary/model/total-amount-per-category-per-date';
-import { AuthService } from 'src/app/shared/data-access/auth.service';
 import { SummaryResult } from 'src/app/shared/model/summary-result.model';
 import { TotalPerCategory } from 'src/app/shared/model/total-per-category.mode';
 import { TotalPerDate } from 'src/app/shared/model/total-per-date';
+import { AuthService } from 'src/app/core/data-access/auth.service';
 
 @Injectable({
   providedIn: 'root',

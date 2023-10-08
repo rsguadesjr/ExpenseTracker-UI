@@ -11,9 +11,10 @@
       <i class="pi pi-bell " pBadge value="2" severity="danger"></i>
     </a> -->
     <div class="action-icons">
-      <p-button icon="pi pi-user" styleClass="p-button-rounded p-button-info" (click)="menu.toggle($event)"></p-button>
-      <a * pRipple class="cursor-pointer" (click)="menu.toggle($event)">
-        <img class="border-circle" width="40px" height="40px" [src]="''">
+      <p-button *ngIf="!user.photoUrl" icon="pi pi-user" styleClass="p-button-rounded p-button-info"
+        (click)="menu.toggle($event)"></p-button>
+      <a *ngIf="user.photoUrl" pRipple class="cursor-pointer" (click)="menu.toggle($event)">
+        <img class="border-circle" width="40px" height="40px" [src]="user.photoUrl">
       </a>
     </div>
 

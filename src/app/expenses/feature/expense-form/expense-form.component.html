@@ -1,12 +1,13 @@
 <div class="form xl:w-4 lg:w-5 md:w-7 m-auto">
   <p-card styleClass="bg-black-alpha-40 px-2">
     <form [formGroup]="form">
-    <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
+      <p-messages [(value)]="messages" [enableService]="false" [closable]="true"></p-messages>
       <div class="flex flex-column gap-2">
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-category">Category</label>
-          <p-dropdown id="form-category" formControlName="categoryId" [options]="(categories$ | async) ?? []" optionLabel="name" optionValue="id"></p-dropdown>
-          <small class="text-red-400" *ngFor="let error of validationErrors['category']">{{ error }}</small>
+          <p-dropdown id="form-category" formControlName="categoryId" [options]="(categories$ | async) ?? []"
+            optionLabel="name" optionValue="id"></p-dropdown>
+          <small class="text-red-400" *ngFor="let error of validationErrors['categoryId']">{{ error }}</small>
         </div>
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-amount">Amount</label>
@@ -20,17 +21,18 @@
         </div>
         <div class="flex flex-column gap-2">
           <label htmlFor="form-description">Description</label>
-          <input pInputText id="form-description" aria-describedby="username-help" formControlName="description"/>
+          <input pInputText id="form-description" aria-describedby="username-help" formControlName="description" />
           <small class="text-red-400" *ngFor="let error of validationErrors['description']">{{ error }}</small>
         </div>
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-source">Source</label>
-          <p-dropdown id="form-source" formControlName="sourceId" [options]="(sources$ | async) ?? []" optionLabel="name"  optionValue="id"></p-dropdown>
-          <small class="text-red-400" *ngFor="let error of validationErrors['source']">{{ error }}</small>
+          <p-dropdown id="form-source" formControlName="sourceId" [options]="(sources$ | async) ?? []"
+            optionLabel="name" optionValue="id"></p-dropdown>
+          <small class="text-red-400" *ngFor="let error of validationErrors['sourceId']">{{ error }}</small>
         </div>
         <div class="flex flex-column gap-2 p-fluid">
           <label htmlFor="form-tags">Tags</label>
-          <p-chips id="form-tags" formControlName="tags"  separator="," [addOnBlur]="true"></p-chips>
+          <p-chips id="form-tags" formControlName="tags" separator="," [addOnBlur]="true"></p-chips>
           <small class="text-red-400" *ngFor="let error of validationErrors['tags']">{{ error }}</small>
         </div>
       </div>
@@ -38,8 +40,10 @@
     <div class="flex flex-row justify-content-end gap-2 mt-4" *ngIf="savingStatus$ | async; let status">
       <button pButton pRipple label="Cancel" (click)="cancel()"></button>
 
-      <button *ngIf="status !== 'in-progress'" pButton pRipple label="Submit" class="p-button-success" (click)="submit()"></button>
-      <button *ngIf="status === 'in-progress'" pButton pRipple label="Saving..." class="p-button-success" icon="pi pi-spin pi-spinner"></button>
+      <button *ngIf="status !== 'in-progress'" pButton pRipple label="Submit" class="p-button-success"
+        (click)="submit()"></button>
+      <button *ngIf="status === 'in-progress'" pButton pRipple label="Saving..." class="p-button-success"
+        icon="pi pi-spin pi-spinner"></button>
     </div>
   </p-card>
 </div>

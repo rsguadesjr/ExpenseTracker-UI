@@ -1,5 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 import { AuthData } from 'src/app/core/models/auth-data';
+import { RegisterRequestModel } from 'src/app/core/models/register-request.model';
+import { RegisterResponseModel } from 'src/app/core/models/register-response.model';
 
 export const login = createAction(
   '[Auth Page] Login',
@@ -18,6 +20,21 @@ export const loginSuccess = createAction(
 
 export const loginError = createAction(
   '[Auth API] Login Error',
+  props<{ error: string }>()
+);
+
+export const registerWithEmailAndPassword = createAction(
+  '[Auth Page] Register with Email and Password',
+  props<{ data: RegisterRequestModel }>()
+);
+
+export const registerSuccess = createAction(
+  '[Auth API] Register Success',
+  props<{ data: RegisterResponseModel }>()
+);
+
+export const registerError = createAction(
+  '[Auth API] Register Error',
   props<{ error: string }>()
 );
 

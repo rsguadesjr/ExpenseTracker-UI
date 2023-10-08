@@ -14,7 +14,6 @@ export class AuthHelper {
       }
     }
 
-    console.log('Error', e);
     return 'An unexpected error was encountered.';
   }
 }

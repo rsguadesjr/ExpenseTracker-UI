@@ -28,47 +28,32 @@ const routes: Routes = [
       ),
   },
   // Temporary disable this route
-  // {
-  //   path: 'sign-up',
-  //   canActivate: [AuthGuardLoggedIn],
-  //   loadComponent: () =>
-  //     import('./login/feature/sign-up/sign-up.component').then(
-  //       (m) => m.SignUpComponent
-  //     ),
-  // },
-  // {
-  //   path: 'forgot-password',
-  //   canActivate: [AuthGuardLoggedIn],
-  //   loadComponent: () =>
-  //     import('./login/feature/forgot-password/forgot-password.component').then(
-  //       (m) => m.ForgotPasswordComponent
-  //     ),
-  // },
-
   {
     path: 'sign-up',
     canActivate: [AuthGuardLoggedIn],
     loadComponent: () =>
-      import('./login/feature/disabled-page/disabled-page.component').then(
-        (m) => m.DisabledPageComponent
+      import('./login/feature/sign-up/sign-up.component').then(
+        (m) => m.SignUpComponent
       ),
   },
   {
     path: 'forgot-password',
     canActivate: [AuthGuardLoggedIn],
     loadComponent: () =>
-      import('./login/feature/disabled-page/disabled-page.component').then(
-        (m) => m.DisabledPageComponent
+      import('./login/feature/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent
       ),
   },
-  {
-    path: 'summary',
-    canActivate: [AuthGuard],
-    loadChildren: () =>
-      import('./summary/feature/summary-shell/summary-shell.module').then(
-        (m) => m.SummaryShellModule
-      ),
-  },
+
+  // TODO: Update Summary Page
+  // {
+  //   path: 'summary',
+  //   canActivate: [AuthGuard],
+  //   loadChildren: () =>
+  //     import('./summary/feature/summary-shell/summary-shell.module').then(
+  //       (m) => m.SummaryShellModule
+  //     ),
+  // },
   {
     path: 'account',
     canActivate: [AuthGuard],

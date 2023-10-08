@@ -25,7 +25,7 @@ import { ExpenseResponseModel } from '../../model/expense-response.model';
     TagModule,
     AutoCompleteModule,
     SortPipe,
-    AccessDirective
+    AccessDirective,
   ],
   templateUrl: './expense-table-view.component.html',
   styleUrls: ['./expense-table-view.component.scss'],
@@ -34,33 +34,43 @@ export class ExpenseTableViewComponent {
   items$ = new BehaviorSubject<ExpenseResponseModel[]>([]);
   @Input() set items(value: ExpenseResponseModel[]) {
     if (value) {
-      this.items$.next(value.map(v => Object.assign(v)));
+      this.items$.next(value.map((v) => Object.assign(v)));
     }
   }
 
-  categories$ = this.items$.pipe(map(v => {
-    return v.filter(
-      (exp, i) =>
-        exp.category != null &&
-        v.findIndex((e) => e.category.id === exp.category.id) === i
-    ).map(exp => exp.category);
-  }))
+  categories$ = this.items$.pipe(
+    map((v) => {
+      return v
+        .filter(
+          (exp, i) =>
+            exp.category != null &&
+            v.findIndex((e) => e.category.id === exp.category.id) === i
+        )
+        .map((exp) => exp.category);
+    })
+  );
 
-  sources$ = this.items$.pipe(map(v => {
-    return v.filter(
-      (exp, i) =>
-        exp.source != null &&
-        v.findIndex((e) => e.source.id === exp.source.id) === i
-    ).map(exp => exp.source);
-  }))
+  sources$ = this.items$.pipe(
+    map((v) => {
+      return v
+        .filter(
+          (exp, i) =>
+            exp.source != null &&
+            v.findIndex((e) => e.source.id === exp.source.id) === i
+        )
+        .map((exp) => exp.source);
+    })
+  );
 
-  tags$ = this.items$.pipe(map(v => {
-    const value = v.reduce((acc: string[], obj: ExpenseResponseModel) => {
-      acc = [...acc, ...obj.tags!];
-      return acc;
-    }, [])
-    return Array.from(new Set(value)).map(x => ({ name: x } as Option));
-  }))
+  tags$ = this.items$.pipe(
+    map((v) => {
+      const value = v.reduce((acc: string[], obj: ExpenseResponseModel) => {
+        acc = [...acc, ...obj.tags!];
+        return acc;
+      }, []);
+      return Array.from(new Set(value)).map((x) => ({ name: x } as Option));
+    })
+  );
 
   @Output() selected = new EventEmitter<ExpenseResponseModel>();
   @Output() delete = new EventEmitter<ExpenseResponseModel>();
@@ -76,27 +86,29 @@ export class ExpenseTableViewComponent {
 
   constructor(private filterService: FilterService) {
     const customFilterName = 'dataArrayFilter';
-    this.filterService.register(customFilterName, (value: any | any[], filter: Option[]): boolean => {
-      if (filter == null || filter.length == 0) {
-        return true;
-      }
+    this.filterService.register(
+      customFilterName,
+      (value: any | any[], filter: Option[]): boolean => {
+        if (filter == null || filter.length == 0) {
+          return true;
+        }
 
-      if (Array.isArray(value)) {
-        return value.some((r: any) => {
-          const lookup = r?.name ?? r;
-          return filter.map(x => x.name).includes(lookup)
-        });
+        if (Array.isArray(value)) {
+          return value.some((r: any) => {
+            const lookup = r?.name ?? r;
+            return filter.map((x) => x.name).includes(lookup);
+          });
+        } else {
+          return filter.some((x) => {
+            const lookup = value?.name ?? value;
+            return x.name == lookup;
+          });
+        }
       }
-      else {
-        return filter.some(x => {
-          const lookup = value?.name ?? value;
-          return x.name == lookup;
-        });
-      }
-    });
+    );
   }
 
-  onFilter({ filteredValue } : { filteredValue: ExpenseResponseModel[] }) {
+  onFilter({ filteredValue }: { filteredValue: ExpenseResponseModel[] }) {
     this.onFilterChange.emit(filteredValue);
   }
 }

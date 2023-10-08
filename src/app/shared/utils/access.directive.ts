@@ -1,5 +1,5 @@
 import { Directive, Input, TemplateRef, ViewContainerRef } from '@angular/core';
-import { AuthService } from '../data-access/auth.service';
+import { AuthService } from 'src/app/core/data-access/auth.service';
 
 @Directive({
   selector: '[access]',

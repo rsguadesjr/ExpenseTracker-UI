@@ -1,22 +1,14 @@
-import { AuthService } from './shared/data-access/auth.service';
 import { Component, OnInit, inject } from '@angular/core';
-import {
-  ActivatedRoute,
-  NavigationEnd,
-  ParamMap,
-  Router,
-} from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MenuItem } from 'primeng/api/menuitem';
-import { Message } from 'primeng/api';
-import { ValidationMessageService } from './shared/utils/validation-message.service';
-import { BehaviorSubject, filter, map, take, takeUntil } from 'rxjs';
+import { map } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { loadReminders } from './state/reminders/reminders.action';
 import { loadCategories } from './state/categories/categories.action';
 import { loadSources } from './state/sources/sources.action';
 import { loadBudgets } from './state/budgets/budgets.action';
 import { autoLogin } from './state/auth/auth.action';
-import { isAuthenticated, token } from './state/auth/auth.selector';
+import { isAuthenticated } from './state/auth/auth.selector';
 import { loadExpenses } from './state/expenses/expenses.action';
 import { endOfMonth, startOfMonth } from 'date-fns';
 
@@ -28,7 +20,6 @@ import { endOfMonth, startOfMonth } from 'date-fns';
 export class AppComponent implements OnInit {
   private store = inject(Store);
   private router = inject(Router);
-  private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   private date = new Date();
 

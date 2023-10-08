@@ -1,7 +1,5 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
-import { AuthService } from 'src/app/shared/data-access/auth.service';
 import {
   autoLogin,
   login,
@@ -9,19 +7,21 @@ import {
   loginSuccess,
   loginWithEmailAndPassword,
   logout,
-  refreshAuth,
+  registerError,
+  registerSuccess,
+  registerWithEmailAndPassword,
 } from './auth.action';
-import { catchError, from, map, of, switchMap, tap, throwError } from 'rxjs';
+import { catchError, from, map, of, switchMap } from 'rxjs';
 import { AuthHelper } from 'src/app/core/utils/auth-helper';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthData } from 'src/app/core/models/auth-data';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AuthService } from 'src/app/core/data-access/auth.service';
 
 @Injectable()
 export class AuthEffects {
   private action$ = inject(Actions);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   login$ = createEffect(() =>
     this.action$.pipe(
@@ -29,6 +29,8 @@ export class AuthEffects {
       switchMap(({ idToken, provider }) => {
         return this.authService.login(idToken).pipe(
           map((result) => {
+            if (result.isEmailVeriried) {
+            }
             if (result.isAuthorized) {
               this.authService.setAuthData(result.token);
               const user = this.authService.getAuthData();
@@ -75,6 +77,26 @@ export class AuthEffects {
     )
   );
 
+  registerWithEmailAndPassword$ = createEffect(() =>
+    this.action$.pipe(
+      ofType(registerWithEmailAndPassword),
+      switchMap(({ data }) => {
+        return this.authService.register(data).pipe(
+          map((result) => {
+            if (result.isSuccess) {
+              return registerSuccess({ data: result });
+            }
+            return registerError({
+              error: 'Unauthorized Access. Please contact admin for access.',
+            });
+          }),
+
+          catchError((error) => of(registerError({ error })))
+        );
+      })
+    )
+  );
+
   autoLogin$ = createEffect(() =>
     this.action$.pipe(
       ofType(autoLogin),
@@ -85,6 +107,21 @@ export class AuthEffects {
         return of();
       })
     )
+  );
+
+  loginRedirect$ = createEffect(
+    () =>
+      this.action$.pipe(
+        ofType(loginSuccess),
+        map(() => {
+          if (this.router.url.includes('/login')) {
+            const returnUrl =
+              this.route.snapshot.queryParams['returnUrl'] || '/';
+            this.router.navigateByUrl(returnUrl);
+          }
+        })
+      ),
+    { dispatch: false }
   );
 
   logout$ = createEffect(
@@ -98,6 +135,17 @@ export class AuthEffects {
           this.router.navigate(['login'], {
             queryParams: { returnUrl: state?.url },
           });
+        })
+      ),
+    { dispatch: false }
+  );
+
+  loginRedirectAfterRegister$ = createEffect(
+    () =>
+      this.action$.pipe(
+        ofType(registerSuccess),
+        map(() => {
+          this.router.navigateByUrl('/login');
         })
       ),
     { dispatch: false }

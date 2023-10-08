@@ -1,5 +1,6 @@
 <div class="auth-container">
   <p-card styleClass="bg-black-alpha-40 p-2" header="Sign up">
+    <p-messages [value]="errorMessage" [enableService]="false" [closable]="true"></p-messages>
     <form [formGroup]="form" class="flex flex-column gap-4">
       <div class="flex flex-column gap-2">
         <label htmlFor="email">Email</label>
@@ -28,14 +29,19 @@
           <small class="text-red-400" *ngFor="let error of validationErrors['passwordCompare']">{{ error }}</small>
         </ng-template>
       </div>
-      <div >
-        <p-button label="Sign Up" styleClass="w-full" [disabled]="signUpInProgress" (click)="signUp()"></p-button>
+      <div *ngIf="loginStatus$ | async; let status">
+        <!-- <p-button label="Sign Up" styleClass="w-full" [disabled]="signUpInProgress" (click)="signUp()"></p-button> -->
+
+        <button *ngIf="status !== 'loading'" pButton pRipple label="Sign-up" class="p-button-success w-full"
+          (click)="signUp()"></button>
+        <button *ngIf="status === 'loading'" pButton pRipple label="Saving..." class="p-button-success w-full"
+          icon="pi pi-spin pi-spinner"></button>
       </div>
     </form>
 
 
     <div class="flex mt-4">
-      <a class="no-underline cursor-pointer" routerLink="/login" >Already registered? Sign in</a>
+      <a class="no-underline cursor-pointer" routerLink="/login">Already registered? Sign in</a>
     </div>
 
     <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>

@@ -53,14 +53,17 @@ export const loadExpenses = createAction(
 );
 export const loadExpensesSuccess = createAction(
   '[Expense API] Load Expense Success',
-  props<{ data: any[] }>()
+  props<{ data: ExpenseResponseModel[] }>()
 );
 export const loadExpensesError = createAction(
   '[Expense API] Load Expenses Error',
   props<{ error: string }>()
 );
-export const filterExpenses = createAction(
-  '[Expense Page] Filter Expenses',
-  props<{ filteredItems: ExpenseResponseModel[] }>()
-);
 /* #endregion */
+
+export const updateFilter = createAction(
+  '[Expense Page] Update Filter',
+  props<{ params: { startDate: Date; endDate: Date } }>()
+);
+
+export const resetState = createAction('[Expense Effect] Reset State');

@@ -1,4 +1,3 @@
-import { AuthService } from './../../../shared/data-access/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -35,6 +34,8 @@ import {
   loginWithEmailAndPassword,
 } from 'src/app/state/auth/auth.action';
 import { error, loginStatus, provider } from 'src/app/state/auth/auth.selector';
+import { ConfigurationService } from 'src/app/core/data-access/configuration.service';
+import { AppUserManagementSettings } from 'src/app/shared/model/app-user-management-settings';
 
 @Component({
   selector: 'app-login',
@@ -64,6 +65,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private store = inject(Store);
+  private configurationService = inject(ConfigurationService);
 
   validationErrors: { [key: string]: string[] } = {};
   messages: Message[] = [];
@@ -106,16 +108,33 @@ export class LoginComponent implements OnInit, OnDestroy {
     ]),
   });
 
+  appConfig$ = this.configurationService
+    .getConfigurations()
+    .pipe(map((x) => x.appUserManagementSettings));
+
+  appConfig?: AppUserManagementSettings;
+
   ngOnInit() {
     // Navigate to url after login success
     this.loginStatus$.pipe(takeUntil(this.unsubscribe$)).subscribe((status) => {
-      if (status === 'success') {
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-        this.router.navigateByUrl(returnUrl);
-      } else if (status === 'error') {
+      // if (status === 'success') {
+      //   const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+      //   this.router.navigateByUrl(returnUrl);
+      // } else
+      if (status === 'error') {
         this.isSocialLoginSelected$.next(false);
       }
     });
+
+    this.configurationService
+      .getConfigurations()
+      .pipe(
+        map((x) => x.appUserManagementSettings),
+        takeUntil(this.unsubscribe$)
+      )
+      .subscribe((value) => {
+        this.appConfig = value;
+      });
   }
 
   ngOnDestroy() {
