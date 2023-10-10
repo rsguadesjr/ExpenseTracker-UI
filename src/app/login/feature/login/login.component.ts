@@ -112,8 +112,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     .getConfigurations()
     .pipe(map((x) => x.appUserManagementSettings));
 
-  appConfig?: AppUserManagementSettings;
-
   ngOnInit() {
     // Navigate to url after login success
     this.loginStatus$.pipe(takeUntil(this.unsubscribe$)).subscribe((status) => {
@@ -125,16 +123,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.isSocialLoginSelected$.next(false);
       }
     });
-
-    this.configurationService
-      .getConfigurations()
-      .pipe(
-        map((x) => x.appUserManagementSettings),
-        takeUntil(this.unsubscribe$)
-      )
-      .subscribe((value) => {
-        this.appConfig = value;
-      });
   }
 
   ngOnDestroy() {

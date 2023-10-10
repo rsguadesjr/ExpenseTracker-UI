@@ -2,27 +2,32 @@
   <ng-template pTemplate="header">Header Content</ng-template>
   <ng-template pTemplate="content">
     <div class="flex flex-column pt-4 gap-4">
-      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['']" (click)="toggleVisibility(false)">
+      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['']"
+        (click)="toggleVisibility(false)">
         <i class="pi pi-home text-lg"></i>
         <span class="font-medium text-lg">Home</span>
       </a>
-      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['expenses']"  (click)="toggleVisibility(false)">
+      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center"
+        [routerLink]="['expenses']" (click)="toggleVisibility(false)">
         <i class="pi pi-list text-lg"></i>
         <span class="font-medium text-lg">Expenses</span>
       </a>
-      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['reminders']"  (click)="toggleVisibility(false)">
+      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center"
+        [routerLink]="['reminders']" (click)="toggleVisibility(false)">
         <i class="pi pi-calendar text-lg"></i>
         <span class="font-medium text-lg">Reminders</span>
       </a>
-      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['summary']"  (click)="toggleVisibility(false)">
+      <!-- <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['summary']"  (click)="toggleVisibility(false)">
         <i class="pi pi-chart-bar text-lg"></i>
         <span class="font-medium text-lg">Summary</span>
-      </a>
-      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['settings']"  (click)="toggleVisibility(false)">
+      </a> -->
+      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center"
+        [routerLink]="['settings']" (click)="toggleVisibility(false)">
         <i class="pi pi-wrench text-lg"></i>
         <span class="font-medium text-lg">Settings</span>
       </a>
-      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center" [routerLink]="['account']"  (click)="toggleVisibility(false)">
+      <a class="cursor-pointer no-underline p-2 text-color-secondary flex gap-2 align-items-center"
+        [routerLink]="['account']" (click)="toggleVisibility(false)">
         <i class="pi pi-user text-lg"></i>
         <span class="font-medium text-lg">Account</span>
       </a>
