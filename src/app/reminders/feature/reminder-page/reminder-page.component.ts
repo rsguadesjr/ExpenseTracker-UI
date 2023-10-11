@@ -95,14 +95,14 @@ export class ReminderPageComponent implements OnInit, OnDestroy {
       field: 'isActive',
       formatValue: (value) => (value.isActive ? 'Active' : 'Inactive'),
     },
-    {
-      header: '',
-      field: 'actions',
-      type: 'button',
-      icon: 'pi pi-plus',
-      width: '60px',
-      onClick: (value) => this.createExpense(value),
-    },
+    // {
+    //   header: '',
+    //   field: 'actions',
+    //   type: 'button',
+    //   icon: 'pi pi-plus',
+    //   width: '60px',
+    //   onClick: (value) => this.createExpense(value),
+    // },
   ];
 
   calendarDate = new Date();
